@@ -15,5 +15,6 @@
 @import url("./table.css");
 @import url("./splitpanes.css");
 @import url("./reader.css");
+@import url("/static/vendor/pdfjs/web/pdf_viewer.css");
 @import url("./workspace.css");
 @import url("./responsive.css");

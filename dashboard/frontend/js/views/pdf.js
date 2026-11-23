@@ -1,7 +1,8 @@
 // One reader for every PDF the dashboard serves. Callers link here instead of embedding the file.
+// Uses the shared Notes-quality PDF.js viewer (pdf-browser), not a separate slim stack.
 
 import { empty, h, setTitle } from "../ui.js";
-import { mount } from "../pdf-viewer.js";
+import { mountPDF } from "../pdf-browser.js";
 
 const BYTE_PREFIXES = ["/references/", "/raw/"];
 
@@ -57,8 +58,8 @@ export async function render({ query }) {
   setTitle(title, "PDF");
   const back = safeBack(query.get("back") || "") || (src ? fallbackBack(src) : "/references");
   const shell = h("div", { class: "pdf-shell", role: "region", "aria-label": `${title} PDF` });
-  if (src) mount(shell, src);
-  return h("div", { class: "pdf-reader" },
+  if (src) mountPDF(shell, { url: src, title });
+  return h("div", { class: "pdf-page" },
     h("div", { class: "pdf-reader-bar" },
       h("a", { href: back }, "← Back"),
       h("span", { class: "pdf-reader-title" }, title)),

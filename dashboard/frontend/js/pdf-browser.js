@@ -1,10 +1,10 @@
 // One PDF.js reader for every Notes surface. PDF bytes remain in memory only.
 import {escape, lifecycle, localURL, viewState, fa} from './content-core.js';
-import * as pdfjs from '/static/vendor/notes-pdfjs/build/pdf.mjs';
-import {PDFViewer, EventBus, PDFLinkService, PDFFindController} from '/static/vendor/notes-pdfjs/web/pdf_viewer.mjs';
+import * as pdfjs from '/static/vendor/pdfjs/build/pdf.mjs';
+import {PDFViewer, EventBus, PDFLinkService, PDFFindController} from '/static/vendor/pdfjs/web/pdf_viewer.mjs';
 import {textIndex} from './latex-sync.js';
 import {bindGestureZoom} from '/static/js/gesture-zoom.js';
-pdfjs.GlobalWorkerOptions.workerSrc='/static/vendor/notes-pdfjs/build/pdf.worker.mjs';
+pdfjs.GlobalWorkerOptions.workerSrc='/static/vendor/pdfjs/build/pdf.worker.mjs';
 export function cleanPDFText(text){return String(text).normalize('NFKC').replace(/(\p{L})-\s*\n\s*(\p{L})/gu,'$1$2').replace(/\s+/g,' ').trim();}
 export function pdfSelectionContext(root,selected,viewer,current){
  if(!selected||selected.isCollapsed||!selected.rangeCount||!root.contains(selected.anchorNode)||!root.contains(selected.focusNode))return null;
@@ -61,7 +61,7 @@ export function mountPDF(host,{url,title='PDF',stateKey='',initialPage=1,onSelec
   viewer.updateScale({scaleFactor,origin:[clientX,clientY],drawingDelay:120});
   paint();
  }
- viewer=new PDFViewer({abortSignal:abort.signal,container:scroll,viewer:sheets,eventBus:bus,linkService:links,findController,textLayerMode:1,annotationMode:pdfjs.AnnotationMode.ENABLE,annotationEditorMode:pdfjs.AnnotationEditorType.DISABLE,enableScripting:false,enableDetailCanvas:true,imagesRightClickMinSize:100,maxCanvasPixels:16*1024*1024,imageResourcesPath:'/static/vendor/notes-pdfjs/web/images/',supportsPinchToZoom:true});links.setViewer(viewer);
+ viewer=new PDFViewer({abortSignal:abort.signal,container:scroll,viewer:sheets,eventBus:bus,linkService:links,findController,textLayerMode:1,annotationMode:pdfjs.AnnotationMode.ENABLE,annotationEditorMode:pdfjs.AnnotationEditorType.DISABLE,enableScripting:false,enableDetailCanvas:true,imagesRightClickMinSize:100,maxCanvasPixels:16*1024*1024,imageResourcesPath:'/static/vendor/pdfjs/web/images/',supportsPinchToZoom:true});links.setViewer(viewer);
  bus.on('pagesinit',()=>{initializing=false;fit();go(restorePage);status.hidden=true;readyResolve(pdf);});
  bus.on('pagechanging',event=>{if(initializing)return;current=event.pageNumber;sizePage();paint();});
  bus.on('updateviewarea',event=>{const position=event.location;readingLocation={page:position.pageNumber,left:position.left,top:position.top};});
@@ -87,7 +87,7 @@ export function mountPDF(host,{url,title='PDF',stateKey='',initialPage=1,onSelec
  const destroy=lifecycle(host,()=>{disposed=true;searchSequence++;pendingPosition=null;root.removeEventListener('pointerup',clickPosition);abort.abort();observer.disconnect();cancelAnimationFrame(resizeFrame);root.removeEventListener('mouseup',selection);root.removeEventListener('keyup',selection);viewer.setDocument(null);links.setDocument(null);loading?.destroy();readyResolve(null);});
  (async()=>{
   const input=await pdfSource(source);if(disposed)return;
-  loading=pdfjs.getDocument({...input,cMapUrl:'/static/vendor/notes-pdfjs/cmaps/',cMapPacked:true,standardFontDataUrl:'/static/vendor/notes-pdfjs/standard_fonts/',wasmUrl:'/static/vendor/notes-pdfjs/wasm/',isEvalSupported:false,enableXfa:false});
+  loading=pdfjs.getDocument({...input,cMapUrl:'/static/vendor/pdfjs/cmaps/',cMapPacked:true,standardFontDataUrl:'/static/vendor/pdfjs/standard_fonts/',wasmUrl:'/static/vendor/pdfjs/wasm/',isEvalSupported:false,enableXfa:false});
   loading.onPassword=()=>{loading.destroy();const error=new Error('This PDF requires a password. Open an unlocked copy.');status.textContent=error.message;readyReject(error);};
   const document=await loading.promise;if(disposed){document.destroy();return;}pdf=document;links.setDocument(pdf);viewer.setDocument(pdf);paint();
  })().catch(error=>{if(!disposed){status.hidden=false;status.textContent='Could not open PDF: '+error.message;readyReject(error);}});
@@ -170,7 +170,7 @@ export function mountPDF(host,{url,title='PDF',stateKey='',initialPage=1,onSelec
 // Small first-page covers share the reader's PDF.js runtime and worker.
 // Covers are decorative; the full viewer retains selectable text and zoom.
 export async function pdfCover(url,{width=168,height=116}={}){
- const loading=pdfjs.getDocument({...await pdfSource(url),cMapUrl:'/static/vendor/notes-pdfjs/cmaps/',cMapPacked:true,standardFontDataUrl:'/static/vendor/notes-pdfjs/standard_fonts/',wasmUrl:'/static/vendor/notes-pdfjs/wasm/',isEvalSupported:false,enableXfa:false});
+ const loading=pdfjs.getDocument({...await pdfSource(url),cMapUrl:'/static/vendor/pdfjs/cmaps/',cMapPacked:true,standardFontDataUrl:'/static/vendor/pdfjs/standard_fonts/',wasmUrl:'/static/vendor/pdfjs/wasm/',isEvalSupported:false,enableXfa:false});
  loading.onPassword=()=>loading.destroy();
  const timeout=setTimeout(()=>loading.destroy(),20000);
  try{

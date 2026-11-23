@@ -123,12 +123,13 @@ a.tool-toggle:hover { color: var(--text); text-decoration: none; }
 .doc-reader .src-text { padding-left: 1em; white-space: pre; }
 .doc-reader pre.viewer.wrap .src-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .doc-layout.nav-collapsed .browse-rail-chevron { transform: rotate(-135deg); margin-left: -2px; }
-.pdf-reader { display: flex; flex-direction: column; height: calc(100vh - var(--top)); min-height: 420px; background: #2c3138; }
+.pdf-page { display: flex; flex-direction: column; height: calc(100vh - var(--top)); min-height: 420px; background: #2c3138; }
 .pdf-reader-bar { display: flex; align-items: center; gap: 16px; min-height: 40px; padding: 0 16px; background: #1c2129; color: #e7ebf0; flex-shrink: 0; }
 .pdf-reader-bar a { color: #c5d4f7; font-weight: 600; font-size: 13px; white-space: nowrap; }
 .pdf-reader-bar a:hover { color: #fff; }
 .pdf-reader-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 13px; color: #c5ccd6; }
 .pdf-shell { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.pdf-page > .pdf-shell > .pdf-reader { border-radius: 0; flex: 1; }
 .pdf-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 46px; padding: 6px 10px; background: #1c2129; color: #e7ebf0; flex-shrink: 0; border-top: 1px solid #343b46; }
 .pdf-toolbar-group { display: flex; align-items: center; gap: 3px; }
 .pdf-toolbar-zoom { margin: 0 auto; }

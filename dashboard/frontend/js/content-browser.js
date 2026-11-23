@@ -1,9 +1,9 @@
-// One Notes document browser: Letters, Mail, Tasks and workspace readers.
+// Shared document browser used by Notes (and any surface that mounts content.js).
 import {escape, lifecycle, localURL, viewState, fa} from './content-core.js';
 import {sourceChange} from './source-changes.js';
-let editorRuntime, markdownRuntime;
+import {renderMarkdown} from './markdown.js';
+let editorRuntime;
 const loadEditor = () => editorRuntime ||= import('/static/vendor/code-editor.js').catch(error => { editorRuntime = null; throw error; });
-const loadMarkdown = () => markdownRuntime ||= import('/static/vendor/notes-markdown/markdown-renderer.js').catch(error => { markdownRuntime = null; throw error; });
 
 // Center the passage, but never scroll its first visual line above the viewport.
 export function centerEditorRange(view,from,to,valid=()=>true){
@@ -81,32 +81,37 @@ function frontmatter(source) {
   const entries = match[1].split(/\r?\n/).flatMap(line => { const field = line.match(/^([A-Za-z0-9_-]+)\s*:\s*(.*)$/); return field ? [[field[1].replace(/[_-]/g,' '),field[2]]] : []; });
   return {body:source.slice(match[0].length), metadata:keyValues(entries, escape)};
 }
-export async function markdownPreview(source, {resolveResource, emoji = false, html: allowHTML = true, mentions = null, sourceMap = false} = {}) {
+export async function markdownPreview(source, {resolveResource} = {}) {
   const {body, metadata} = frontmatter(source);
-  const html = await (await loadMarkdown()).renderMarkdown(body, '', {emoji, html:allowHTML, mentions, sourceMap});
-  const template = document.createElement('template'); template.innerHTML = metadata + `<article class="doc-prose">${html}</article>`;
-  // The renderer sanitizes HTML. Notes additionally confines local resources and blocks remote images.
-  for (const link of template.content.querySelectorAll('a[href]')) {
+  // Platform markdown.js (marked + DOMPurify + global KaTeX) — same stack as wiki/labs.
+  // Same .markdown surface as wiki/labs (platform markdown.css + KaTeX).
+  const article = renderMarkdown(body, {}, {className: 'markdown'});
+  const root = document.createDocumentFragment();
+  if (metadata) {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = metadata;
+    root.append(...wrap.childNodes);
+  }
+  root.append(article);
+  // Confine local resources; block unresolved / remote images in Notes projects.
+  for (const link of root.querySelectorAll('a[href]')) {
     const href = link.getAttribute('href');
     if (href.startsWith('#')) continue;
     if (/^(https?:|mailto:)/i.test(href)) { link.target = '_blank'; link.rel = 'noopener noreferrer'; continue; }
     const resolved = resolveResource?.(href, false);
     if (resolved) link.href = localURL(resolved); else link.removeAttribute('href');
   }
-  for (const image of template.content.querySelectorAll('img')) {
+  for (const image of root.querySelectorAll('img')) {
     const resolved = resolveResource?.(image.getAttribute('src'), true);
     if (resolved) image.src = localURL(resolved);
-    else { const label = document.createElement('span'); label.className = 'notes-image-note'; label.textContent = image.alt ? `[Image: ${image.alt}]` : '[Image]'; image.replaceWith(label); }
-  }
-  // No arbitrary inline CSS from file contents. KaTeX layout uses a small numeric allowlist.
-  for (const element of template.content.querySelectorAll('[style]')) {
-    const style = element.getAttribute('style'); element.removeAttribute('style');
-    if (element.closest('.katex')) for (const declaration of style.split(';')) {
-      const [name, value] = declaration.split(':').map(part => part.trim());
-      if (/^(height|width|top|left|vertical-align|margin-(left|right|top|bottom)|padding-(left|right)|border-(bottom|top)-width|font-size|position)$/.test(name) && /^(?:-?[\d.]+(?:em|ex|px|%)|relative|absolute)$/.test(value)) element.style.setProperty(name, value);
+    else {
+      const label = document.createElement('span');
+      label.className = 'notes-image-note';
+      label.textContent = image.alt ? `[Image: ${image.alt}]` : '[Image]';
+      image.replaceWith(label);
     }
   }
-  return template.content;
+  return root;
 }
 
 export function mountContent(host, {source='', format='markdown', extension='', readOnly=true, sourceMode=false, sourceOnly=false, showModeToggle=true, sourceTitle='', sourceLabel='Show source', stateKey='', ariaLabel='Source editor', saveLabel='Save changes', dirty=false, className='', onInput=()=>{}, onSave=null, onReload=null, onModeChange=()=>{}, sourceMap=false, onRendered=()=>{}, onNavigate=null, presentation=null, resolveResource=null,recoveryContext=null} = {}) {

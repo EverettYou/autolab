@@ -13,6 +13,8 @@ def test_live_boundary_models_is_editable_tex():
     from dashboard.backend.notes import projects, read_note, source_path
 
     project = ROOT / "notes" / "Boundary Models and Phases"
+    if not project.is_dir():
+        pytest.skip("live notes project not present in this checkout")
     assert source_path(project).name == "main.tex"
     rows = {row["id"]: row for row in projects()}
     assert rows["Boundary Models and Phases"]["source"].endswith("main.tex")

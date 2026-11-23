@@ -1,6 +1,6 @@
 /* Full-bleed workspace host and project editor. */
 .workspace {
-  --reader-link: #2767a0;
+  --reader-link: var(--accent-strong);
   --reader-paper: var(--surface);
   --reader-code: var(--code-bg);
   --reader-muted: var(--muted);
@@ -29,10 +29,6 @@
 .workspace #workspace-search-bank,
 .workspace .workspace-search,
 .workspace .workspace-search-slot { display: none !important; }
-.workspace .sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
-}
 .workspace .workspace-toast {
   position: fixed; right: 16px; bottom: 16px; z-index: 40; max-width: 32rem;
   padding: 12px 16px; background: var(--surface); color: var(--text);
@@ -52,19 +48,17 @@
 .library-table.data-table>tbody td{padding:6px 10px;height:36px}
 .library-table td[data-library-cell=name] button{display:flex;align-items:center;gap:10px;min-width:0;width:100%;padding:0;border:0;background:transparent;text-align:left;font-size:13px;color:var(--text);cursor:pointer}.library-table td[data-library-cell=name] button>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.library-table td[data-library-cell=name] svg{font-size:15px;color:var(--muted)}.library-table td[data-library-cell=modified_at],.library-table td[data-library-cell=period_start]{font-size:12px;color:var(--muted)}
 .library-table .paper-type-button{padding:0;border:0;background:transparent;cursor:pointer}
-.library-status.status-inactive,.library-status.status-archived,.library-status.status-unknown{background:var(--neutral-bg);color:var(--muted)}.library-status.status-active{background:var(--accent-soft);color:var(--accent)}.library-status.status-finished{background:#e6f4ea;color:#2f6b45}.library-status.status-planning{background:#fdf1dc;color:#9a5b00}
-
-.library-errors{padding:10px 20px;font-size:12px;color:#986b3e}.library-errors p{margin:6px 0}
+.library-errors{padding:10px 20px;font-size:12px;color:var(--warn)}.library-errors p{margin:6px 0}
 .project-editor-layer{position:fixed;z-index:3;background:var(--surface);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden;container-type:inline-size}.project-editor-layer[hidden]{display:none!important}
 .project-toolbar{padding:10px 14px;gap:8px}.project-toolbar h1{flex:1;font-size:14px}.project-toolbar .primary-button{display:flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;white-space:nowrap}.project-toolbar .icon-button{font-size:15px;flex:none}
 .project-grid{--project-tree-width:210px;--source-share:1fr;--pdf-share:1fr;display:grid;grid-template-columns:var(--project-tree-width) 1px minmax(0,1fr);flex:1;min-height:0;overflow:hidden}
 .project-latex .project-grid{grid-template-columns:var(--project-tree-width) 1px minmax(0,var(--source-share)) 1px minmax(0,var(--pdf-share))}
 .project-file-tree{min-width:0;overflow:auto;padding:10px 8px;font-size:12px;scrollbar-width:thin}.project-tree-folder{padding-left:12px}.project-tree-folder>summary{padding:5px 0;cursor:pointer;white-space:nowrap;color:var(--muted);list-style:none}.project-tree-folder>summary::-webkit-details-marker{display:none}.project-tree-folder>summary>svg{font-size:13px}
 .project-tree-entries button{display:flex;align-items:center;gap:7px;width:100%;min-width:0;padding:6px 8px;border:0;background:transparent;text-align:left;color:var(--text);font-size:12px;border-radius:4px;cursor:pointer}.project-tree-entries button:hover{background:var(--surface-2)}.project-tree-entries button.selected{background:var(--accent-soft)}.project-tree-entries button>span:first-of-type{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.project-tree-entries button>svg{font-size:14px;color:var(--muted)}.project-dirty-marker{font-size:7px;color:var(--accent);margin-left:auto}
-.project-pane-resizer{background:var(--border);cursor:col-resize;touch-action:none;border:2px solid var(--surface)}.project-pane-resizer:hover{background:#b9c8bd}
+.project-pane-resizer{background:var(--border);cursor:col-resize;touch-action:none;border:2px solid var(--surface)}.project-pane-resizer:hover{background:var(--border-strong)}
 .project-source-pane,.project-pdf-pane{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
-.project-file-toolbar,.project-pdf-heading{display:flex;align-items:center;gap:8px;min-height:38px;padding:5px 10px;border-bottom:1px solid var(--border);flex:none;font-size:12px;color:var(--muted)}
-.project-file-toolbar>[data-file-name]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.project-file-toolbar .text-button{font-size:11px;white-space:nowrap}.project-file-toolbar .icon-button,.project-pdf-heading .icon-button{font-size:13px;width:24px;height:24px}.project-pdf-heading .app-select{min-width:0;flex:1}.project-pdf-heading .app-select-trigger{min-width:0;max-width:100%;}.project-pdf-status{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40%}
+.project-file-toolbar{display:flex;align-items:center;gap:8px;min-height:38px;padding:5px 10px;border-bottom:1px solid var(--border);flex:none;font-size:12px;color:var(--muted)}
+.project-file-toolbar>[data-file-name]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.project-file-toolbar .text-button{font-size:11px;white-space:nowrap}.project-file-toolbar .icon-button{font-size:13px;width:24px;height:24px}.project-pdf-status{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40%}
 .project-documents{min-height:0;flex:1;position:relative}.project-document{height:100%;min-height:0;overflow:hidden}.project-document[hidden]{display:none!important}.project-document .view-toolbar{min-height:31px}.project-document .content-canvas{padding:20px}.project-document .is-source .content-canvas{padding:0}.project-document .pdf-reader,.project-pdf-host>.pdf-reader{border-radius:0}
 .project-pdf-host{flex:1;min-height:0;background:#303030;color:#eee}.project-pdf-host>.empty{color:#ddd;padding:50px 24px;font-size:12px}
 .project-image{height:100%;overflow:auto;padding:20px;display:flex;align-items:flex-start;justify-content:center}.project-image img{max-width:100%;height:auto}
@@ -79,11 +73,11 @@
 .project-pdf-current[hidden]{display:none!important}
 .project-file-placeholder{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--muted);padding:24px;text-align:center}
 .project-file-placeholder>svg,.project-file-placeholder>.app-icon{font-size:54px}.project-file-placeholder>span{font-size:14px}.project-file-placeholder>small{font-size:12px}
-.project-error{display:flex;align-items:flex-start;gap:12px;max-height:180px;padding:10px 16px 10px 20px;color:#9b302b;background:#fff8f5;border-bottom:1px solid var(--border);font:12px/1.5 var(--mono);flex:none}
+.project-error{display:flex;align-items:flex-start;gap:12px;max-height:180px;padding:10px 16px 10px 20px;color:var(--bad);background:var(--bad-bg);border-bottom:1px solid var(--border);font:12px/1.5 var(--mono);flex:none}
 .project-error[hidden]{display:none!important}
 .project-error-message{flex:1;min-width:0;white-space:pre-wrap;overflow:auto}
-.project-error-dismiss{flex:none;margin-top:1px;color:#9b302b;font:11px/1.4 var(--font)}
-.project-error-dismiss:hover{color:#7a241f}
+.project-error-dismiss{flex:none;margin-top:1px;color:var(--bad);font:11px/1.4 var(--font)}
+.project-error-dismiss:hover{color:var(--bad-fill-hover)}
 .project-editor-layer.hide-tree .project-file-tree,.project-editor-layer.hide-tree [data-resize-tree]{display:none}.project-editor-layer.hide-tree .project-grid{grid-template-columns:minmax(0,1fr)}.project-editor-layer.project-latex.hide-tree .project-grid{grid-template-columns:minmax(0,var(--source-share)) 1px minmax(0,var(--pdf-share))}
 .project-latex[data-layout=source] .project-pdf-pane,.project-latex[data-layout=source] [data-resize-source],.project-latex[data-layout=pdf] .project-source-pane,.project-latex[data-layout=pdf] [data-resize-source]{display:none}.project-latex[data-layout=source] .project-grid,.project-latex[data-layout=pdf] .project-grid{grid-template-columns:var(--project-tree-width) 1px minmax(0,1fr)}.project-latex.hide-tree[data-layout=source] .project-grid,.project-latex.hide-tree[data-layout=pdf] .project-grid{grid-template-columns:minmax(0,1fr)}
 @container(max-width:800px){.project-toolbar{flex-wrap:wrap}.project-toolbar h1{min-width:50%}.project-grid{--project-tree-width:150px}.project-pdf-status{display:none}}
@@ -91,7 +85,6 @@
 .project-file-tree{display:flex;flex-direction:column;padding:0;overflow:hidden}
 .project-tree-toolbar{padding:10px 10px 8px;border-bottom:1px solid var(--border);flex:none}
 .project-tree-toolbar>label{display:block;font-size:11px;color:var(--muted)}
-.project-tree-toolbar .app-select{display:block;margin-top:5px;min-width:0}.project-tree-toolbar .app-select-trigger{display:flex;width:100%;min-width:0;}
 /* Flat main-file picker: text + chevron, no chrome; menu floats below the trigger. */
 .project-main-picker{display:flex;align-items:baseline;gap:6px;min-width:0}
 .project-main-picker-caption{flex:none;font-size:12px;color:var(--muted);line-height:1.4}
@@ -147,7 +140,7 @@
 .project-document .view-toolbar:has(.source-title)>button{flex:none}
 
 /* Paper type and status share one badge geometry while retaining their palettes. */
-.library-table :is(.paper-type-badge,.library-status){display:inline-block;padding:1px 7px;border-radius:10px;font:400 12px/1.5 var(--font);white-space:nowrap}
+.library-table .paper-type-badge{display:inline-block;padding:1px 7px;border-radius:10px;font:400 12px/1.5 var(--font);white-space:nowrap}
 /* Exclusive source/PDF layout buttons keep the mounted editors and readers. */
 .project-layout-toggle{display:flex;align-items:center;gap:2px;flex:none}
 .project-toolbar .project-layout-toggle>.icon-button{display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:7px;background:transparent;color:var(--muted);font-size:17px}
@@ -199,24 +192,6 @@
   vertical-align: -0.125em;
   flex: none;
   overflow: visible;
-}
-.workspace .library-status.status-active {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-.workspace .library-status.status-finished {
-  background: #e6f4ea;
-  color: #2f6b45;
-}
-html[data-theme="dark"] .workspace .library-status.status-finished {
-  background: #24362c;
-  color: #8fcaa3;
-}
-.workspace .library-status.status-inactive,
-.workspace .library-status.status-archived,
-.workspace .library-status.status-unknown {
-  background: var(--neutral-bg);
-  color: var(--muted);
 }
 .workspace .project-pane-resizer:hover { background: color-mix(in srgb, var(--accent) 35%, var(--border)); }
 .workspace .project-library { background: var(--surface); }

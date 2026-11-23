@@ -161,7 +161,7 @@ export async function render({ query }) {
   const back = safeBack(query.get("back") || "") || (src ? fallbackBack(src) : "/files");
   const shell = h("div", { class: "pdf-shell", role: "region", "aria-label": `${title} image` });
   if (src) mount(shell, src);
-  return h("div", { class: "pdf-reader" },
+  return h("div", { class: "pdf-page" },
     h("div", { class: "pdf-reader-bar" },
       h("a", { href: back }, "← Back"),
       h("span", { class: "pdf-reader-title" }, title)),

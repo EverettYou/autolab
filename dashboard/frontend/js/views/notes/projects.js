@@ -3,6 +3,7 @@
 const isProjectTeX = entry => Boolean(entry?.path && /(?:\.tex|\/main\.txt)$/i.test(entry.path));
 const ProjectUI={layers:new Map(),lists:new Map(),request:0};
 const libraryStatusNames={active:'Active',inactive:'Inactive',finished:'Finished',planning:'Planning',archived:'Archived',unknown:'Unclassified'};
+const libraryStatusTone={active:'info',inactive:'muted',finished:'done',planning:'warn',archived:'muted',unknown:'muted'};
 function libraryColumnDirection(key,columns=[]){const direction=columns.find(column=>column.id===key)?.direction;return direction==='asc'?1:direction==='desc'?-1:['modified_at','period_start'].includes(key)?-1:1;}
 function projectPreferences(workspace){
  let saved={};try{saved=JSON.parse(localStorage.getItem('notes-library:'+workspace.id)||'{}');}catch{}
@@ -24,7 +25,7 @@ function syncProjectLayers(){
   }
  }
 }
-function libraryBadge(status){return `<span class="task-status library-status status-${esc(status)}">${esc(libraryStatusNames[status]||status)}</span>`;}
+function libraryBadge(status){return `<span class="badge tone-${libraryStatusTone[status]||'neutral'}">${esc(libraryStatusNames[status]||status)}</span>`;}
 function libraryURL(route,source,project,extra={}){return '/api/workspaces/'+route+'?'+params({source,project,...extra});}
 function libraryError(host,error){host.innerHTML=`<div class="empty" role="alert">${esc(error.message)}</div>`;}
 function invalidateProjectList(workspace){const list=ProjectUI.lists.get(workspace.id);if(list){list.generation=(list.generation||0)+1;list.data=null;list.pending=null;list.loadedAt=0;list.error=null;}}
