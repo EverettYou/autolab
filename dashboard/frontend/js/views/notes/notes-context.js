@@ -1,4 +1,5 @@
 // Shared Notes workspace state + API helpers (no dependency on projects.js).
+import { api as platformGet, post as platformPost, ApiError } from '../../api.js';
 import { toast } from '../../workbench-chrome.js';
 
 export const $ = id => document.getElementById(id);
@@ -24,17 +25,24 @@ W.states[workspace.id] = state;
 
 export const liveError = error => toast(error.message);
 
+/** Notes-compatible client: api(url) GET, api(url, body) POST — routes through platform api/post. */
 export async function api(url, body, { timeoutMs = 20000 } = {}) {
-  const options = { signal: AbortSignal.timeout(timeoutMs), headers: { Accept: 'application/json' } };
-  if (body !== undefined) {
-    options.method = 'POST';
-    options.headers['Content-Type'] = 'application/json';
-    options.body = JSON.stringify(body);
+  const signal = AbortSignal.timeout(timeoutMs);
+  try {
+    if (body !== undefined) {
+      const path = String(url).replace(/^\/api\//, '').split('?')[0];
+      return await platformPost(path, body, { signal });
+    }
+    const parsed = new URL(String(url), location.origin);
+    const path = parsed.pathname.replace(/^\/api\//, '');
+    const query = Object.fromEntries(parsed.searchParams.entries());
+    return await platformGet(path, query, { signal });
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw Object.assign(new Error(error.message), { status: error.status });
+    }
+    throw error;
   }
-  const response = await fetch(url, options);
-  const data = await response.json();
-  if (!response.ok) throw Object.assign(new Error(data.error || 'Request failed'), { status: response.status });
-  return data;
 }
 
 export function workspaceURL(route, source, path) {

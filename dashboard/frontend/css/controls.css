@@ -21,11 +21,16 @@ a.chip-link { background: var(--accent-soft); color: var(--accent-strong); }
   background: var(--surface); color: var(--text); font-weight: 520; cursor: pointer; white-space: nowrap;
 }
 .btn:hover { background: var(--surface-2); text-decoration: none; color: var(--text); }
-.btn-primary { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent); }
-.btn-primary:hover { background: var(--accent-fill-hover); color: var(--on-accent); }
+.btn-primary,
+.primary-button {
+  background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent);
+}
+.btn-primary:hover,
+.primary-button:hover { background: var(--accent-fill-hover); color: var(--on-accent); }
 .btn-danger { background: var(--bad-fill); border-color: var(--bad-fill); color: var(--on-accent); }
 .btn-danger:hover { background: var(--bad-fill-hover); border-color: var(--bad-fill-hover); color: var(--on-accent); }
-.btn:disabled { opacity: 0.55; cursor: default; }
+.btn:disabled,
+.primary-button:disabled { opacity: 0.55; cursor: default; }
 .btn-small { height: 26px; padding: 0 9px; font-size: 12.5px; }
 .link-button { background: none; border: 0; padding: 2px 0; color: var(--accent); cursor: pointer; font-size: 13px; }
 
@@ -45,6 +50,7 @@ svg.app-icon {
   overflow: visible;
 }
 
+/* Notes workbench alias of .btn-primary — compact padding for toolbars. */
 .primary-button {
   display: inline-flex;
   align-items: center;
@@ -53,14 +59,10 @@ svg.app-icon {
   padding: 7px 12px;
   border: 0;
   border-radius: var(--radius-small);
-  background: var(--accent-fill);
-  color: var(--on-accent);
   font-size: 12px;
   font-weight: 550;
   cursor: pointer;
 }
-.primary-button:hover { background: var(--accent-fill-hover); }
-.primary-button:disabled { opacity: .55; cursor: default; }
 
 .text-button,
 .small-button {

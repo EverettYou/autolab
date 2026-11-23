@@ -1,8 +1,7 @@
 // Shared Notes/workbench toast + modal chrome (workspace toast/dialog ids).
+import { escape as esc } from './content-core.js';
 
-export const esc = value => String(value ?? '').replace(/[&<>"']/g, char => (
-  {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]
-));
+export { esc };
 
 let toastTimer;
 
