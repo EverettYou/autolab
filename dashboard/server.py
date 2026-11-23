@@ -103,6 +103,9 @@ def catalog_api(app: App, path, query):
                     lib_on = lib_flag and (root / 'lib').is_dir()
             except OSError:
                 pass
+        if notes_on:
+            from .backend import notes_vendor
+            notes_vendor.ensure(root)
         return {'notes': notes_on, 'lib': lib_on, 'threads': True}
 
     if path == 'settings':

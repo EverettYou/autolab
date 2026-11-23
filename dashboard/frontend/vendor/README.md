@@ -11,8 +11,27 @@ The dashboard works offline, so its third-party libraries are checked in here, u
 | [Mermaid](https://github.com/mermaid-js/mermaid) | 11.4.1 | `mermaid/mermaid.min.js` | MIT, Copyright (c) Mermaid contributors |
 | [PDF.js](https://github.com/mozilla/pdf.js) | 4.8.69 | `pdfjs/pdf.min.mjs`, `pdfjs/pdf.worker.min.mjs` | Apache-2.0, Copyright 2024 Mozilla Foundation (header of each file) |
 
-To upgrade one, replace its files with the release build of the new version, keep the license
-header or file, update this table, and check the wiki, discussion and PDF pages still render.
+## Notes workbench stack (optional)
+
+Used only when `features.notes: true`. Shipped packed so the default template does not keep
+~10MB of unpacked trees in every working copy:
+
+| Artifact | Role |
+| --- | --- |
+| `notes-stack.tar.gz` | Packed `notes-pdfjs/` (full PDF.js viewer) + `notes-markdown/` (notes markdown + bundled KaTeX) |
+| `notes-pdfjs/`, `notes-markdown/` | Extracted on first Notes enable (`dashboard.backend.notes_vendor.ensure`); gitignored |
+
+Always-on reference/wiki PDF viewing uses the slim `pdfjs/` pair above, not `notes-pdfjs`.
+
+To refresh the Notes pack: extract, replace upstream files, then re-run
+
+```bash
+tar -czf dashboard/frontend/vendor/notes-stack.tar.gz \
+  -C dashboard/frontend/vendor notes-pdfjs notes-markdown
+```
+
+To upgrade a core library, replace its files with the release build of the new version, keep the
+license header or file, update this table, and check the wiki, discussion and PDF pages still render.
 
 ## MIT License (marked, KaTeX)
 
@@ -28,5 +47,5 @@ substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
 NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
-OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

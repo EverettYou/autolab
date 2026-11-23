@@ -20,6 +20,8 @@ main source). Project layout detail for the UI is here; dashboard mechanics are 
 | `lib/` | Optional shared package |
 
 Enable with `features.notes: true` in `config.yml`, then add projects under this folder.
+The dashboard unpacks `dashboard/frontend/vendor/notes-stack.tar.gz` on first enable
+(Notes PDF viewer + markdown stack); see `dashboard/frontend/vendor/README.md`.
 
 ## Layout of every project
 

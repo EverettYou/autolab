@@ -74,6 +74,10 @@ dashboard/frontend/site.json.tmp
 # Search writes its page index here and rebuilds it when pages change.
 dashboard/data/
 
+# Notes workbench vendors: shipped packed as notes-stack.tar.gz; extract on enable.
+dashboard/frontend/vendor/notes-pdfjs/
+dashboard/frontend/vendor/notes-markdown/
+
 # labs/: track documents, code, and numerical evidence (results/figures/data/logs).
 # Ignore only transient files and heavy DMRG / archive blobs (see report-contract.md).
 labs/**/*.pid
