@@ -7,6 +7,8 @@ __pycache__/
 *.nbi
 *.tar
 *.tar.gz
+# Notes workbench stack (see dashboard/frontend/vendor/README.md)
+!dashboard/frontend/vendor/notes-stack.tar.gz
 *.tmp
 .DS_Store
 
