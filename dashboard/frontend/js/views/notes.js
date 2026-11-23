@@ -1,9 +1,9 @@
 // Notes section view — same role as views/wiki.js or views/labs.js.
-// Step 1 ESM: static imports replace loadScript; window.NotesHost bridge kept.
+// Step 2 ESM: shared toast/modal/icons; static imports; window.NotesHost kept.
 
 import { h, setTitle } from "../ui.js";
+import "../icons.js"; // installs window.WorkbenchIcons from the shared glyph map
 
-import "../../vendor/fontawesome/icons.js";
 import "../table.js";
 import "../splitpanes.js";
 import "../search-fields.js";

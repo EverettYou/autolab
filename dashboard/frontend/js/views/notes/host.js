@@ -1,8 +1,9 @@
 // Notes workspace host: project list + LaTeX/PDF workbench, mounted in the main dashboard.
 import { runtime as R } from './runtime.js';
+import { esc, toast, modal } from '../../workbench-chrome.js';
+import { iconHtml } from '../../icons.js';
 
 const $ = id => document.getElementById(id);
-const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const params = values => new URLSearchParams(values);
 const workspace = {
   id: 'papers',
@@ -16,33 +17,7 @@ const W = {config: {workspaces: [workspace]}, states: {}};
 const state = {source: workspace.sources[0].id, project: '', document: null, pdfReaders: []};
 W.states[workspace.id] = state;
 const liveError = error => toast(error.message);
-
-const FA = {
-  previous: 'chevron-left', next: 'chevron-right',
-  up: 'chevron-up', down: 'chevron-down',
-  folder: 'folder', 'folder-open': 'folder-open',
-  'folder-tree': 'folder-tree', 'folder-plus': 'folder-plus',
-  document: 'file', 'file-code': 'file-code',
-  'file-tex': 'file-lines', 'file-pdf': 'file-pdf',
-  'file-plus': 'file-circle-plus', source: 'file-lines',
-  pdf: 'file-pdf', play: 'play',
-  'hourglass-half': 'hourglass-half', save: 'floppy-disk',
-  'arrows-rotate': 'arrows-rotate', refresh: 'arrows-rotate',
-  'lock-keyhole': 'lock', 'circle-small': 'circle',
-  plus: 'plus', minus: 'minus',
-  close: 'xmark', check: 'check',
-  download: 'download', search: 'magnifying-glass',
-  more: 'ellipsis', sortUp: 'sort-up', sortDown: 'sort-down',
-  'cloud-check': 'cloud', code: 'code',
-  preview: 'eye', markdown: 'file-lines',
-  json: 'code', text: 'align-left',
-  pen: 'pen', trash: 'trash',
-};
-function icon(name) {
-  const glyph = Object.hasOwn(FA, name) ? FA[name] : 'file';
-  return (window.faHtml || (() => ''))(glyph, 'app-icon');
-}
-window.WorkbenchIcons = {html: icon};
+const icon = name => iconHtml(name);
 
 async function api(url, body, {timeoutMs = 20000} = {}) {
   const options = {signal: AbortSignal.timeout(timeoutMs), headers: {Accept: 'application/json'}};
@@ -76,28 +51,6 @@ function positionDashboard(layer) {
   Object.assign(layer.style, {width: width + 'px', height: height + 'px', top: top + 'px', left: left + 'px'});
 }
 function syncDashboardVisibility() { R.syncProjectLayers?.(); }
-
-let toastTimer;
-function toast(message) {
-  const output = $('workspace-toast');
-  if (!output) return;
-  output.textContent = message;
-  output.hidden = false;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { output.hidden = true; }, 4500);
-}
-function modal(title, body, actions, submit) {
-  const dialog = $('workspace-modal');
-  dialog.innerHTML = '<form><h2>' + esc(title) + '</h2>' + body +
-    '<footer><button type="button" class="text-button" data-cancel>Cancel</button>' + actions + '</footer><p role="alert"></p></form>';
-  dialog.querySelector('[data-cancel]').onclick = () => dialog.close();
-  dialog.querySelector('form').onsubmit = async event => {
-    event.preventDefault();
-    try { await submit(new FormData(event.target)); }
-    catch (error) { dialog.querySelector('[role=alert]').textContent = error.message; }
-  };
-  dialog.showModal();
-}
 
 const projectStorage = 'lab.notes.positions';
 function savedPositions() {
