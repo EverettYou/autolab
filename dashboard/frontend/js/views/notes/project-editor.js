@@ -439,8 +439,13 @@ async function showProjectPDF(item,pdf){
   // user may have kept reading during compilation and replacement loading.
   const previous=item.pdfPath===pdf.path?item.pdf:null,position=(previous&&visibleProjectPDFPosition(item))||savedProjectPDFPosition(item,pdf.path);
   const page=Number(previous?.root?.querySelector('[data-page]')?.value),zoom=parseFloat(previous?.root?.querySelector('[data-zoom]')?.value);
-  item.pdf?.destroy();host.replaceChildren(staged);staged.className='project-pdf-current';
+  item.pdf?.destroy();
+  // Keep `staged` in the tree — replaceChildren() would detach it briefly and
+  // lifecycle would tear down the reader (stuck on "Opening PDF…" / blank pane).
+  for (const child of [...host.children]) if (child !== staged) child.remove();
+  staged.className='project-pdf-current';
   // Restore in the final layout. Moving a staged scroller can reset its offsets.
+
   const bounds=reader.root.getBoundingClientRect();
   item.pendingPDFReading=position&&(!bounds.width||!bounds.height)?{path:pdf.path,position}:null;
   if(!item.pendingPDFReading&&(!position||!reader.restoreReadingPosition?.(position))){

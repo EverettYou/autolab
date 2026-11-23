@@ -58,10 +58,17 @@ export async function render({ query }) {
   setTitle(title, "PDF");
   const back = safeBack(query.get("back") || "") || (src ? fallbackBack(src) : "/references");
   const shell = h("div", { class: "pdf-shell", role: "region", "aria-label": `${title} PDF` });
-  if (src) mountPDF(shell, { url: src, title });
-  return h("div", { class: "pdf-page" },
+  const page = h("div", { class: "pdf-page" },
     h("div", { class: "pdf-reader-bar" },
       h("a", { href: back }, "← Back"),
       h("span", { class: "pdf-reader-title" }, title)),
     src ? shell : empty("This PDF address is not valid", "The reader only opens PDF files served by this dashboard."));
+  // Mount after the shell can be connected. lifecycle destroys disconnected
+  // hosts, and app.js appends this return value on a later tick.
+  if (src) {
+    queue Promise.resolve().then(() => {
+      if (shell.isConnected) mountPDF(shell, { url: src, title });
+    });
+  }
+  return page;
 }

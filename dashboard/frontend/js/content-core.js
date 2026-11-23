@@ -8,23 +8,40 @@ export function viewState(key, patch) {
   while (states.size > 200) states.delete(states.keys().next().value);
   return next;
 }
+// Only tear down after a host has been connected. Callers often mount into a
+// detached shell and append it on the next tick; destroying on that gap aborts
+// PDF.js before pagesinit (stuck on "Opening PDF…").
+const seenConnected = new WeakMap();
 export function lifecycle(host, cleanup) {
   mounted.get(host)?.();
   let disposed = false;
-  const destroy = () => { if (disposed) return; disposed = true; cleanup(); if (mounted.get(host) === destroy) mounted.delete(host); };
-    const scope = host.getRootNode?.();
+  const destroy = () => {
+    if (disposed) return;
+    disposed = true;
+    cleanup();
+    if (mounted.get(host) === destroy) mounted.delete(host);
+  };
+  const scope = host.getRootNode?.();
   let shadowObserver;
   if (typeof ShadowRoot !== 'undefined' && scope instanceof ShadowRoot) {
-    shadowObserver = new MutationObserver(() => { if (!host.isConnected) destroy(); });
-    shadowObserver.observe(scope, {childList:true, subtree:true});
+    shadowObserver = new MutationObserver(() => {
+      if (host.isConnected) seenConnected.set(host, true);
+      else if (seenConnected.get(host)) destroy();
+    });
+    shadowObserver.observe(scope, { childList: true, subtree: true });
   }
   const originalCleanup = cleanup;
   cleanup = () => { shadowObserver?.disconnect(); originalCleanup(); };
+  if (host.isConnected) seenConnected.set(host, true);
   mounted.set(host, destroy);
   return destroy;
 }
-new MutationObserver(() => { for (const [host, destroy] of mounted) if (!host.isConnected) destroy(); })
-  .observe(document.documentElement, {childList:true, subtree:true});
+new MutationObserver(() => {
+  for (const [host, destroy] of mounted) {
+    if (host.isConnected) { seenConnected.set(host, true); continue; }
+    if (seenConnected.get(host)) destroy();
+  }
+}).observe(document.documentElement, { childList: true, subtree: true });
 export function localURL(value) {
   const url = new URL(value, location.href);
   if (url.origin !== location.origin || !/^https?:$/.test(url.protocol)) throw new Error('Preview resources must belong to this dashboard.');
