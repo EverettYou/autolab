@@ -4,11 +4,13 @@
 Ownership model for paths in AutoLab:
 
 * **Sync zone** — OS conventions and procedures. Upserted on every sync (includes
-  ``.auto-research`` README contracts).
+  ``.auto-research`` README contracts and the consumer ``lab-os-sync.yml`` workflow, whose
+  source of truth lives under ``skills/autolab/workflows/`` on the template).
 * **Bootstrap-once** — empty ``.auto-research/state.json`` only when missing; never overwrite
   a live loop. ``wiki/taxonomy.yml`` once when missing.
 * **Local live data** — never synced (``state.json``, task bodies, thread message files,
-  dated labs, reference bodies, notes, lib code, domain wiki ledgers, consumer identity).
+  dated labs, reference bodies, notes, lib code, domain wiki ledgers, consumer ``config.yml`` /
+  root README).
 
 Usage (from the AutoLab checkout):
   python skills/autolab/scripts/sync_apply.py --from /path/to/autolab --to /path/to/consumer
@@ -53,6 +55,9 @@ RETIRED_FILES: tuple[str, ...] = (
 # Single files upserted every sync.
 SYNC_FILES = (
     "run.sh",
+    # Agent operating manual + tool bootstrap pointer (OS prose; not project identity)
+    "AGENTS.md",
+    "CLAUDE.md",  # rules-lint: allow
     # Floor contracts (READMEs) — OS prose, not project payloads
     "labs/README.md",
     "references/README.md",
@@ -64,7 +69,14 @@ SYNC_FILES = (
     ".auto-research/tasks/README.md",
     ".auto-research/threads/README.md",
     # wiki/taxonomy.yml is bootstrap-once (consumer extends topics/; never overwrite on sync)
+    # Consumer CI workflow is not listed here — it lives under skills/autolab/ (template-only)
+    # and is installed via install_lab_os_sync_workflow() every sync.
 )
+
+# Consumer Lab OS sync workflow: source of truth stays in this skill (never on the consumer
+# as skills/autolab/). Mapped to the consumer path on every create/sync.
+LAB_OS_SYNC_WORKFLOW_SRC = "skills/autolab/workflows/lab-os-sync.example.yml"
+LAB_OS_SYNC_WORKFLOW_DST = ".github/workflows/lab-os-sync.yml"
 # Never sync a root VERSION file. OS release is config.yml → os_version only
 # (see template_os_version / --bump-pin; fs_health_lint retires VERSION).
 assert "VERSION" not in SYNC_FILES
@@ -103,7 +115,7 @@ CONSUMER_AUTO_RESEARCH_GITIGNORE = (
 
 # Explicit non-sync. Not copied by this script.
 # - skills/autolab/ (template-only; stripped)
-# - config.yml, root README.md, AGENTS.md, tool bootstrap pointer (consumer identity)  # rules-lint: allow
+# - config.yml, root README.md (consumer identity / human landing page)  # rules-lint: allow
 # - labs/labs.json, references/references.json (live catalogs)
 # - dated labs/<YYYY-*>/, references/<id>/, notes/<manuscript>/, lib/src/, lib/tests/
 # - wiki domain ledgers (project/, concepts/, methods/, …), wiki/thesis.md, wiki/sources.yml,
@@ -232,6 +244,20 @@ def bootstrap_taxonomy(source: Path, dest: Path, *, dry_run: bool) -> list[str]:
     return changes
 
 
+def install_lab_os_sync_workflow(source: Path, dest: Path, *, dry_run: bool = False) -> list[str]:
+    """Upsert the consumer Lab OS sync workflow from this skill (not template .github/).
+
+    Source of truth: ``skills/autolab/workflows/lab-os-sync.example.yml``. Consumers never keep
+    ``skills/autolab/``, so create and every sync copy the example to
+    ``.github/workflows/lab-os-sync.yml``.
+    """
+    src = source / LAB_OS_SYNC_WORKFLOW_SRC
+    dst = dest / LAB_OS_SYNC_WORKFLOW_DST
+    if not src.is_file():
+        raise SystemExit(f"missing Lab OS sync example workflow: {src}")
+    return copy_file(src, dst, dry_run=dry_run, label=LAB_OS_SYNC_WORKFLOW_DST)
+
+
 def rewrite_consumer_auto_research_gitignore(text: str) -> str:
     """Drop whole-folder or stale .auto-research rules; append the selective consumer block."""
     lines: list[str] = []
@@ -282,6 +308,7 @@ def apply(source: Path, dest: Path, *, dry_run: bool) -> list[str]:
         if not src.is_file():
             continue
         changes.extend(copy_file(src, dest / name, dry_run=dry_run, label=name))
+    changes.extend(install_lab_os_sync_workflow(source, dest, dry_run=dry_run))
     changes.extend(ensure_auto_research_state(dest, dry_run=dry_run))
     changes.extend(bootstrap_taxonomy(source, dest, dry_run=dry_run))
     changes.extend(ensure_consumer_auto_research_gitignore(dest, dry_run=dry_run))

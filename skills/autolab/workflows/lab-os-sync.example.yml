@@ -1,5 +1,5 @@
-# Consumer-only. create_project installs this as .github/workflows/lab-os-sync.yml.
-# Not used by the AutoLab template (template CI stays under .github/workflows/).
+# Consumer-only. create_project and sync_apply install this as .github/workflows/lab-os-sync.yml
+# from skills/autolab/workflows/ (template .github/workflows/ stays template-only).
 # Lab OS source is owner/repo for actions/checkout — not a full git URL.
 name: Lab OS sync
 

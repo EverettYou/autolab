@@ -1,8 +1,10 @@
-# AutoLab — agent instructions
+# Agent instructions
 
 You help the **researcher** run and manage research in this lab: literature, experiments, wiki claims, and the auto-research loop. Work with them through chat and Threads; keep the filesystem honest so another agent (or future you) can continue from files alone.
 
-Humans read [`README.md`](README.md) for what the platform covers. When they steer in those terms, **route here** to the matching skill below and run it — do not send them to run scripts (except they may start the dashboard with `./run.sh`).
+Humans read [`README.md`](README.md) for what the lab covers. When they steer in those terms, **route here** to the matching skill below and run it — do not send them to run scripts (except they may start the dashboard with `./run.sh`).
+
+This file is Lab OS — upserted on every sync. Project identity lives in `config.yml` and the root README.
 
 ## Role
 
@@ -114,4 +116,4 @@ When a Thread decision is policy ("always" / "never" / "from now on"), codify it
 
 ## This template vs a consumer lab
 
-You are in the **AutoLab template** when `skills/autolab/` exists. Default job is still research collaboration and keeping the OS coherent. Scaffolding or syncing consumer labs is an explicit request via `skills/autolab`. Consumer labs strip that skill; their `AGENTS.md` is rewritten at create time for research-only operation.
+You are in the **AutoLab template** when `skills/autolab/` exists. Default job is still research collaboration and keeping the OS coherent. Scaffolding or syncing consumer labs is an explicit request via `skills/autolab`. Consumer labs strip that skill; the same `AGENTS.md` keeps syncing as OS — detect the template only by whether `skills/autolab/` is present.

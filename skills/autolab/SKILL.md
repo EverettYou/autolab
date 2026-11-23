@@ -61,7 +61,8 @@ What it does:
 
 - Full-copies this template (minus template-only paths)
 - Clears project-zone payloads (empty `references` / `labs` / `wiki` scaffolds)
-- Writes `config.yml`, a human `README.md`, a full `AGENTS.md` (agent operating manual), and `CLAUDE.md` as `@AGENTS.md` only  <!-- rules-lint: allow -->
+- Writes `config.yml` and a human root `README.md` (project identity). Keeps template `AGENTS.md` /
+  `CLAUDE.md` from the copy — those stay OS-synced thereafter  <!-- rules-lint: allow -->
 - **Removes `skills/autolab/`** from the new lab
 - Localizes `.auto-research/` (minimum scaffold on disk; consumer `.gitignore` ignores the whole folder)
 - Installs the **consumer** sync workflow from
@@ -92,16 +93,17 @@ Use `--dry-run` first. Opens no PR by itself; consumer CI workflows call the sam
 open a PR. **Never** `--to` this AutoLab checkout (`sync_apply` refuses if `skills/autolab`
 is present).
 Consumer workflow lives only in this skill: `workflows/lab-os-sync.example.yml`
-(`repository: EverettYou/autolab`). `create_project` copies it into the new lab’s
-`.github/workflows/lab-os-sync.yml`.
+(`repository: EverettYou/autolab`). `create_project` and every `sync_apply` upsert it to the
+lab’s `.github/workflows/lab-os-sync.yml` (template `.github/workflows/` stays template-only;
+consumers never keep `skills/autolab/`).
 
-Sync registry is `scripts/sync_apply.py` (`SYNC_TREES` / `SYNC_FILES`):
+Sync registry is `scripts/sync_apply.py` (`SYNC_TREES` / `SYNC_FILES` + workflow helper):
 
-- **Every sync:** `skills/` (except this skill), `dashboard/`, `run.sh`, `labs/_tools/`, floor READMEs (`labs/`, `references/`, `notes/`, `lib/`, `wiki/`), `wiki/system/`
+- **Every sync:** `skills/` (except this skill), `dashboard/`, `run.sh`, `AGENTS.md`, `CLAUDE.md`, `labs/_tools/`, floor READMEs (`labs/`, `references/`, `notes/`, `lib/`, `wiki/`), `wiki/system/`, consumer `.github/workflows/lab-os-sync.yml` (from this skill’s example)  <!-- rules-lint: allow -->
 - **Bootstrap-once:** `.auto-research/` if missing (READMEs from the template; `state.json` is
   always the empty seed — never the template’s live loop); `wiki/taxonomy.yml` if missing
   (consumer owns the living `topics` list thereafter — never overwrite on sync)
-- **Never sync:** project payloads (dated labs, reference bodies, domain wiki ledgers, `wiki/taxonomy.yml` after first copy, notes manuscripts, lib code, live catalogs, consumer README/config); template-only this skill. `create_project` starts consumers with empty science floors.
+- **Never sync:** project payloads (dated labs, reference bodies, domain wiki ledgers, `wiki/taxonomy.yml` after first copy, notes manuscripts, lib code, live catalogs, consumer root README/`config.yml`); template-only this skill. `create_project` starts consumers with empty science floors.
 
 `--bump-pin` updates the consumer `config.yml` `os_version` from this template's `config.yml` `os_version`.
 

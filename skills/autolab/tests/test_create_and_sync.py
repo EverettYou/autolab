@@ -75,6 +75,19 @@ class CreateProjectTests(unittest.TestCase):
         self.assertIn("!.auto-research/threads/README.md", ignore)
         self.assertNotRegex(ignore, r"(?m)^\s*\.auto-research/\s*$")
 
+    def test_create_keeps_os_agents_not_project_rewrite(self) -> None:
+        code = CREATE.main(["--name", "Review Lab", "--dest", str(self.dest)])
+        self.assertEqual(code, 0)
+        agents = (self.dest / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertEqual(agents, (TEMPLATE / "AGENTS.md").read_text(encoding="utf-8"))
+        self.assertNotIn("Review Lab — agent instructions", agents)
+        self.assertEqual(
+            (self.dest / "CLAUDE.md").read_text(encoding="utf-8"),
+            (TEMPLATE / "CLAUDE.md").read_text(encoding="utf-8"),
+        )
+        readme = (self.dest / "README.md").read_text(encoding="utf-8")
+        self.assertTrue(readme.startswith("# Review Lab\n"))
+
 
 class SyncApplyTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -118,7 +131,22 @@ class SyncApplyTests(unittest.TestCase):
         )
         for rel in ("skills", "dashboard", "wiki/system", "labs/_tools"):
             (fake / rel).mkdir(parents=True, exist_ok=True)
+        # Consumer workflow source of truth (template-only skill path; stripped from dest).
+        wf_dir = fake / "skills" / "autolab" / "workflows"
+        wf_dir.mkdir(parents=True)
+        (wf_dir / "lab-os-sync.example.yml").write_text(
+            "name: Lab OS sync\n"
+            "jobs:\n"
+            "  sync:\n"
+            "    steps:\n"
+            "      - uses: actions/checkout@v4\n"
+            "        with:\n"
+            "          repository: EverettYou/autolab\n",
+            encoding="utf-8",
+        )
         (fake / "run.sh").write_text("#!/bin/sh\n", encoding="utf-8")
+        (fake / "AGENTS.md").write_text("# agents\n", encoding="utf-8")
+        (fake / "CLAUDE.md").write_text("@AGENTS.md\n", encoding="utf-8")
         for name in ("labs", "references", "notes", "lib", "wiki"):
             (fake / name).mkdir(exist_ok=True)
             (fake / name / "README.md").write_text("#\n", encoding="utf-8")
@@ -136,6 +164,34 @@ class SyncApplyTests(unittest.TestCase):
         self.assertEqual(
             (self.consumer / ".auto-research" / "README.md").read_text(encoding="utf-8"),
             "# auto\n",
+        )
+        wf = self.consumer / ".github" / "workflows" / "lab-os-sync.yml"
+        self.assertTrue(wf.is_file())
+        self.assertIn("repository: EverettYou/autolab", wf.read_text(encoding="utf-8"))
+
+    def test_resyncs_consumer_lab_os_workflow_from_autolab_skill(self) -> None:
+        fake = self._minimal_fake_template()
+        SYNC.main(["--from", str(fake), "--to", str(self.consumer)])
+        wf = self.consumer / ".github" / "workflows" / "lab-os-sync.yml"
+        wf.write_text("# stale-consumer-workflow\n", encoding="utf-8")
+        example = fake / "skills" / "autolab" / "workflows" / "lab-os-sync.example.yml"
+        example.write_text("# workflow-v2\nrepository: EverettYou/autolab\n", encoding="utf-8")
+        SYNC.main(["--from", str(fake), "--to", str(self.consumer)])
+        self.assertEqual(wf.read_text(encoding="utf-8"), example.read_text(encoding="utf-8"))
+        self.assertFalse((self.consumer / "skills" / "autolab").exists())
+
+    def test_resyncs_agents_and_claude(self) -> None:
+        fake = self._minimal_fake_template()
+        SYNC.main(["--from", str(fake), "--to", str(self.consumer)])
+        (self.consumer / "AGENTS.md").write_text("# stale-agents\n", encoding="utf-8")
+        (self.consumer / "CLAUDE.md").write_text("# stale-claude\n", encoding="utf-8")
+        (fake / "AGENTS.md").write_text("# agents-v2\n", encoding="utf-8")
+        (fake / "CLAUDE.md").write_text("@AGENTS.md\n# pointer-v2\n", encoding="utf-8")
+        SYNC.main(["--from", str(fake), "--to", str(self.consumer)])
+        self.assertEqual((self.consumer / "AGENTS.md").read_text(encoding="utf-8"), "# agents-v2\n")
+        self.assertEqual(
+            (self.consumer / "CLAUDE.md").read_text(encoding="utf-8"),
+            "@AGENTS.md\n# pointer-v2\n",
         )
 
     def test_state_not_overwritten_but_readmes_resync(self) -> None:

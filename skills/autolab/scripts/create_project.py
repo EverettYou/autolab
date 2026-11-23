@@ -17,9 +17,10 @@ from pathlib import Path
 _SCRIPTS = Path(__file__).resolve().parent
 if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
-from sync_apply import (  # shared empty loop seed + consumer gitignore contract
+from sync_apply import (  # shared empty loop seed + consumer gitignore + workflow contract
     CONSUMER_AUTO_RESEARCH_GITIGNORE,
     EMPTY_AUTO_RESEARCH_STATE,
+    install_lab_os_sync_workflow,
     rewrite_consumer_auto_research_gitignore,
 )
 
@@ -182,21 +183,6 @@ def slugify_name(raw: str) -> str:
     return slug[:63]
 
 
-def install_lab_os_sync_workflow(source: Path, dest: Path) -> None:
-    """Copy the consumer Lab OS sync workflow from this skill into the new lab.
-
-    Source of truth: ``skills/autolab/workflows/lab-os-sync.example.yml`` (points at
-    ``EverettYou/autolab``). The AutoLab template keeps its own CI under
-    ``.github/workflows/`` and must not ship this consumer workflow on itself.
-    """
-    example = source / "skills" / "autolab" / "workflows" / "lab-os-sync.example.yml"
-    if not example.is_file():
-        raise SystemExit(f"missing Lab OS sync example workflow: {example}")
-    out_dir = dest / ".github" / "workflows"
-    out_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(example, out_dir / "lab-os-sync.yml")
-
-
 def write_config(root: Path, *, name: str, package: str | None) -> None:
     package_line = f"package: {package}" if package else "package: null"
     lib_flag = "true" if package else "false"
@@ -230,7 +216,8 @@ loop_schema: auto-research-1
 """,
         encoding="utf-8",
     )
-    # Human README + agent AGENTS.md (split audiences; see AutoLab root docs).
+    # Human README only (project identity). AGENTS.md / CLAUDE.md come from the template copy  # rules-lint: allow
+    # and keep OS-syncing via sync_apply — do not rewrite them here.
     (root / "README.md").write_text(
         f"""# {display}
 
@@ -304,96 +291,6 @@ Dashboard title / intro: `config.yml` (`title`, `intro`).
 """,
         encoding="utf-8",
     )
-    (root / "AGENTS.md").write_text(
-        f"""# {display} — agent instructions
-
-You help the **researcher** run and manage research in this lab: literature, experiments,
-wiki claims, and the auto-research loop. Work with them through chat and Threads; keep the
-filesystem honest so another agent can continue from files alone.
-
-Humans read [`README.md`](README.md) for what the lab covers. When they steer in those terms,
-**route here** to the matching skill and run it — do not send them to run scripts (except they
-may start the dashboard with `./run.sh`).
-
-## Role
-
-- Partner on **research work**. Execute what they ask; do not redesign the lab OS unless asked.
-- Prefer skills over improvising. Open `skills/<name>/SKILL.md` and follow it.
-- Decide routine choices yourself; escalate irreversible or judgment calls through Threads
-  (`skills/thread-interaction`).
-- Never park the whole loop on one blocker. A pending question or long run blocks one task,
-  not everything.
-
-## Commands
-
-```bash
-.venv/bin/python skills/auto-research/scripts/loop_state.py status
-.venv/bin/python skills/thread-interaction/scripts/thread_interaction.py list --status open
-.venv/bin/python skills/auto-research/scripts/seed_local.py
-./run.sh              # start (default)
-./run.sh status|stop|restart|logs [-f]|check|foreground
-.venv/bin/python skills/wiki-query/scripts/query_wiki.py "<topic keywords>"
-bash skills/git-workflow/scripts/land.sh <paths...>
-```
-
-Skill catalog: [`skills/README.md`](skills/README.md).
-
-## Orient every session
-
-1. Open Threads and `.auto-research/state.json` (status, deliverable, next action, tasks).
-2. Carry out researcher instructions / decisions before self-directed work.
-3. Search the wiki (`skills/wiki-query`) before a new line of inquiry.
-4. Then pick the next runnable task or deliverable step.
-
-Order: researcher instructions → active deliverable / next action → task list → self-directed work.
-
-## Where work lives
-
-| Zone | Path |
-|---|---|
-| External material | `references/` |
-| Experiments | `labs/<YYYY-*>/` |
-| Cited knowledge | `wiki/` (`wiki-query` then `wiki-ingest`) |
-| Manuscripts | `notes/` (when enabled) |
-| Shared package | `lib/` only via `promote-lib` |
-| Control plane | `.auto-research/` (scripts only) |
-| Procedures | `skills/<name>/SKILL.md` |
-
-## Workflows
-
-| Intent | Skill |
-|---|---|
-| Loop / tasks | `auto-research` |
-| Decisions | `thread-interaction` |
-| New lab | `create-lab` |
-| Lab question | `run-lab` |
-| Literature | `discover-references`, `fetch-reference`, `reproduce-reference` |
-| Wiki lookup / compile | `wiki-query`, then `wiki-ingest` |
-| Git | `git-workflow` only |
-| Host / venv | `runtime-env` |
-
-## Boundaries
-
-**Always:** follow the skill; write Threads/loop state through scripts; land on
-`research/auto-<YYYY-MM-DD>` via `git-workflow`; isolate untrusted code per `runtime-env`;
-verify the layer you changed.
-
-**Ask first:** scope changes, large compute beyond the task tier, deleting expensive results,
-acts only the researcher can perform.
-
-**Never:** redesign the OS unprompted; merge/PR to `main` or ask whether to land; commit
-secrets; put progress in Threads (use lab `REPORT.md` / loop state); edit `lib/` except through
-`promote-lib`.
-
-## Graduating standing rules
-
-When a Thread decision is lasting policy, codify it here, in the owning skill, or in
-`wiki/system/`, then close the Thread with a pointer.
-""",
-        encoding="utf-8",
-    )
-    # Consumer tool bootstrap pointer (not template skill prose).  # rules-lint: allow
-    (root / "CLAUDE.md").write_text("@AGENTS.md\n", encoding="utf-8")  # rules-lint: allow
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -424,7 +321,8 @@ def main(argv: list[str] | None = None) -> int:
     write_config(dest, name=args.name, package=args.package)
     localize_auto_research(dest)
     # Consumer sync workflow lives in this skill; template .github/workflows/ stays template-only.
-    install_lab_os_sync_workflow(source, dest)
+    # Same helper as sync_apply — upserts on every later Lab OS sync too.
+    install_lab_os_sync_workflow(source, dest, dry_run=False)
     if args.git_init:
         subprocess.run(["git", "init", "-b", "main"], cwd=dest, check=True)
         subprocess.run(["git", "add", "-A"], cwd=dest, check=True)
