@@ -17,7 +17,11 @@ from pathlib import Path
 _SCRIPTS = Path(__file__).resolve().parent
 if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
-from sync_apply import EMPTY_AUTO_RESEARCH_STATE  # shared empty loop seed
+from sync_apply import (  # shared empty loop seed + consumer gitignore contract
+    CONSUMER_AUTO_RESEARCH_GITIGNORE,
+    EMPTY_AUTO_RESEARCH_STATE,
+    rewrite_consumer_auto_research_gitignore,
+)
 
 SKIP = {".git", ".venv", ".cache", ".pytest_cache", "__pycache__", ".runtime", ".tmp", "tools"}
 # Template-only: never ship this skill into consumer labs.
@@ -123,37 +127,27 @@ def empty_project_zone(root: Path) -> None:
 
 
 def localize_auto_research(root: Path) -> None:
-    """After scaffold: keep minimum .auto-research/ on disk; stop tracking/syncing it.
+    """After scaffold: keep README contracts tracked; gitignore live loop data.
 
-    The template tracks the whole minimum scaffold. A consumer treats the folder as live local
-    data (gitignore the whole tree) — later sync_apply skips it when present.
+    READMEs stay on the consumer and continue to OS-sync. ``state.json``, task bodies, and
+    thread message files are local-only (same selective rules as ``sync_apply``).
     """
     gitignore = root / ".gitignore"
-    block = (
-        "# Local loop + Threads store: scaffold copied once, then never tracked / re-synced.\n"
-        ".auto-research/\n"
-    )
     if gitignore.is_file():
         text = gitignore.read_text(encoding="utf-8")
-        # Drop template .auto-research rules; replace with whole-folder ignore.
+        # Also drop template-tracked state.json rule — consumers keep state local.
         lines = []
         for line in text.splitlines(keepends=True):
             stripped = line.strip()
-            if stripped.startswith(".auto-research/") or stripped.startswith("!.auto-research/"):
-                continue
-            if stripped.startswith("#") and ".auto-research" in stripped:
-                continue
-            if "research queue" in stripped.lower() or "Threads (state" in stripped:
+            if stripped == ".auto-research/state.json":
                 continue
             lines.append(line)
-        text = "".join(lines)
-        if ".auto-research/" not in text:
-            if text and not text.endswith("\n"):
-                text += "\n"
-            text += "\n" + block
-        gitignore.write_text(text, encoding="utf-8")
+        gitignore.write_text(
+            rewrite_consumer_auto_research_gitignore("".join(lines)),
+            encoding="utf-8",
+        )
     else:
-        gitignore.write_text(block, encoding="utf-8")
+        gitignore.write_text(CONSUMER_AUTO_RESEARCH_GITIGNORE, encoding="utf-8")
 
     # Keep only the minimum scaffold (strip any live template loop debris from the copy).
     auto = root / ".auto-research"
@@ -173,7 +167,7 @@ def localize_auto_research(root: Path) -> None:
             stray.unlink()
     for lock in auto.glob("*.lock"):
         lock.unlink()
-    # Always ship the empty tracked seed (never the template's live queue).
+    # Empty seed on disk (gitignored on consumers; never the template's live queue).
     (auto / "state.json").write_text(EMPTY_AUTO_RESEARCH_STATE, encoding="utf-8")
 
 

@@ -3,11 +3,12 @@
 
 Ownership model for paths in AutoLab:
 
-* **Sync zone** — OS conventions and procedures. Upserted on every sync.
-* **Bootstrap-once** — ``.auto-research/`` scaffold only if the consumer has no folder yet.
-* **Project payloads** — never synced (dated labs, reference bodies, notes manuscripts, lib
-  package code, domain wiki ledgers, consumer ``config.yml`` / root README).
-  ``create_project`` clears those floors for a new lab; this script must not copy them either.
+* **Sync zone** — OS conventions and procedures. Upserted on every sync (includes
+  ``.auto-research`` README contracts).
+* **Bootstrap-once** — empty ``.auto-research/state.json`` only when missing; never overwrite
+  a live loop. ``wiki/taxonomy.yml`` once when missing.
+* **Local live data** — never synced (``state.json``, task bodies, thread message files,
+  dated labs, reference bodies, notes, lib code, domain wiki ledgers, consumer identity).
 
 Usage (from the AutoLab checkout):
   python skills/autolab/scripts/sync_apply.py --from /path/to/autolab --to /path/to/consumer
@@ -58,22 +59,19 @@ SYNC_FILES = (
     "notes/README.md",
     "lib/README.md",
     "wiki/README.md",
+    # Auto-research format contracts (live state / task bodies / thread files stay local)
+    ".auto-research/README.md",
+    ".auto-research/tasks/README.md",
+    ".auto-research/threads/README.md",
     # wiki/taxonomy.yml is bootstrap-once (consumer extends topics/; never overwrite on sync)
 )
 # Never sync a root VERSION file. OS release is config.yml → os_version only
 # (see template_os_version / --bump-pin; fs_health_lint retires VERSION).
 assert "VERSION" not in SYNC_FILES
 assert "wiki/taxonomy.yml" not in SYNC_FILES
+assert ".auto-research/state.json" not in SYNC_FILES
 
-# Scaffold files copied only when consumer lacks .auto-research/ entirely.
-# ``state.json`` is never copied from the template — see EMPTY_AUTO_RESEARCH_STATE.
-BOOTSTRAP_AUTO_RESEARCH = (
-    "README.md",
-    "tasks/README.md",
-    "threads/README.md",
-)
-
-# Same empty seed create_project writes. Sync bootstrap must not ship the template's live loop.
+# Same empty seed create_project writes. Never ship the template's live loop.
 EMPTY_AUTO_RESEARCH_STATE = (
     "{\n"
     '  "schema": "auto-research-1",\n'
@@ -90,6 +88,19 @@ EMPTY_AUTO_RESEARCH_STATE = (
     "}\n"
 )
 
+# Consumer gitignore: track/sync README contracts; keep live loop data local.
+CONSUMER_AUTO_RESEARCH_GITIGNORE = (
+    "# .auto-research/: README contracts stay tracked and OS-synced; live loop data stays local.\n"
+    ".auto-research/state.json\n"
+    ".auto-research/scheduler.json\n"
+    ".auto-research/threads.json\n"
+    ".auto-research/*.lock\n"
+    ".auto-research/tasks/*\n"
+    "!.auto-research/tasks/README.md\n"
+    ".auto-research/threads/*\n"
+    "!.auto-research/threads/README.md\n"
+)
+
 # Explicit non-sync. Not copied by this script.
 # - skills/autolab/ (template-only; stripped)
 # - config.yml, root README.md, AGENTS.md, tool bootstrap pointer (consumer identity)  # rules-lint: allow
@@ -97,7 +108,7 @@ EMPTY_AUTO_RESEARCH_STATE = (
 # - dated labs/<YYYY-*>/, references/<id>/, notes/<manuscript>/, lib/src/, lib/tests/
 # - wiki domain ledgers (project/, concepts/, methods/, …), wiki/thesis.md, wiki/sources.yml,
 #   wiki/records/, wiki/taxonomy.yml after first copy (living topics list)
-# - .auto-research/ after first bootstrap (live loop + Threads)
+# - .auto-research/state.json, task bodies, thread message files (live loop)
 
 # Never touch these names anywhere under a synced tree
 SKIP_NAMES = {
@@ -180,33 +191,28 @@ def copy_file(src: Path, dst: Path, *, dry_run: bool, label: str | None = None) 
     return [f"copy {name}"]
 
 
-def bootstrap_auto_research(source: Path, dest: Path, *, dry_run: bool) -> list[str]:
-    """Install the .auto-research scaffold once; no-op if the consumer already has the folder.
-
-    READMEs come from the template. ``state.json`` is always the empty seed — never the
-    template's live loop (deliverables / tasks), matching ``create_project``.
-    """
-    auto_src = source / ".auto-research"
+def ensure_auto_research_state(dest: Path, *, dry_run: bool) -> list[str]:
+    """Create dirs + empty ``state.json`` only when missing — never overwrite a live loop."""
     auto_dst = dest / ".auto-research"
-    if not auto_src.is_dir():
-        return []
-    if auto_dst.exists():
-        return []  # already initialized — never re-sync
-    changes: list[str] = ["bootstrap .auto-research/ (init-once scaffold)"]
-    if dry_run:
+    state = auto_dst / "state.json"
+    changes: list[str] = []
+    if not auto_dst.exists():
+        changes.append("mkdir .auto-research/ (tasks + threads)")
+        if not dry_run:
+            auto_dst.mkdir(parents=True, exist_ok=True)
+            (auto_dst / "tasks").mkdir(exist_ok=True)
+            (auto_dst / "threads").mkdir(exist_ok=True)
+    elif not dry_run:
+        (auto_dst / "tasks").mkdir(exist_ok=True)
+        (auto_dst / "threads").mkdir(exist_ok=True)
+    if state.is_file():
         return changes
-    auto_dst.mkdir(parents=True, exist_ok=True)
-    (auto_dst / "tasks").mkdir(exist_ok=True)
-    (auto_dst / "threads").mkdir(exist_ok=True)
-    for rel in BOOTSTRAP_AUTO_RESEARCH:
-        src = auto_src / rel
-        if src.is_file():
-            target = auto_dst / rel
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src, target)
-            changes.append(f"copy .auto-research/{rel}")
-    (auto_dst / "state.json").write_text(EMPTY_AUTO_RESEARCH_STATE, encoding="utf-8")
     changes.append("write .auto-research/state.json (empty seed)")
+    if not dry_run:
+        auto_dst.mkdir(parents=True, exist_ok=True)
+        (auto_dst / "tasks").mkdir(exist_ok=True)
+        (auto_dst / "threads").mkdir(exist_ok=True)
+        state.write_text(EMPTY_AUTO_RESEARCH_STATE, encoding="utf-8")
     return changes
 
 
@@ -226,27 +232,41 @@ def bootstrap_taxonomy(source: Path, dest: Path, *, dry_run: bool) -> list[str]:
     return changes
 
 
+def rewrite_consumer_auto_research_gitignore(text: str) -> str:
+    """Drop whole-folder or stale .auto-research rules; append the selective consumer block."""
+    lines: list[str] = []
+    for line in text.splitlines(keepends=True):
+        stripped = line.strip()
+        if stripped.startswith(".auto-research/") or stripped.startswith("!.auto-research/"):
+            continue
+        if stripped.startswith("#") and ".auto-research" in stripped:
+            continue
+        if "research queue" in stripped.lower() or "threads (state" in stripped.lower():
+            continue
+        if "scaffold copied once" in stripped.lower():
+            continue
+        if "readme contracts stay tracked" in stripped.lower():
+            continue
+        lines.append(line)
+    body = "".join(lines).rstrip() + "\n\n"
+    return body + CONSUMER_AUTO_RESEARCH_GITIGNORE
+
+
 def ensure_consumer_auto_research_gitignore(dest: Path, *, dry_run: bool) -> list[str]:
-    """Ignore the whole `.auto-research/` folder on consumers (live checkout data)."""
+    """Track/sync README contracts; gitignore live state, task bodies, and thread files."""
     gitignore = dest / ".gitignore"
-    block = (
-        "# Local loop + Threads store: scaffold copied once, then never tracked / re-synced.\n"
-        ".auto-research/\n"
-    )
     if gitignore.is_file():
         text = gitignore.read_text(encoding="utf-8")
-        if re.search(r"(?m)^\s*\.auto-research/\s*$", text):
+        updated = rewrite_consumer_auto_research_gitignore(text)
+        if updated == text:
             return []
-        changes = ["gitignore: ignore .auto-research/ (consumer live data)"]
-        if dry_run:
-            return changes
-        if text and not text.endswith("\n"):
-            text += "\n"
-        gitignore.write_text(text + "\n" + block, encoding="utf-8")
+        changes = ["gitignore: .auto-research README tracked; live loop data local"]
+        if not dry_run:
+            gitignore.write_text(updated, encoding="utf-8")
         return changes
-    changes = ["gitignore: create with .auto-research/ ignore"]
+    changes = ["gitignore: create with selective .auto-research rules"]
     if not dry_run:
-        gitignore.write_text(block, encoding="utf-8")
+        gitignore.write_text(CONSUMER_AUTO_RESEARCH_GITIGNORE, encoding="utf-8")
     return changes
 
 
@@ -262,7 +282,7 @@ def apply(source: Path, dest: Path, *, dry_run: bool) -> list[str]:
         if not src.is_file():
             continue
         changes.extend(copy_file(src, dest / name, dry_run=dry_run, label=name))
-    changes.extend(bootstrap_auto_research(source, dest, dry_run=dry_run))
+    changes.extend(ensure_auto_research_state(dest, dry_run=dry_run))
     changes.extend(bootstrap_taxonomy(source, dest, dry_run=dry_run))
     changes.extend(ensure_consumer_auto_research_gitignore(dest, dry_run=dry_run))
     # Consumers must not keep template-only skills

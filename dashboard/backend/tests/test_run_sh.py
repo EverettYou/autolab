@@ -134,6 +134,65 @@ def test_recovers_missing_venv_via_setup_script(tmp_path):
 
 
 @requires_repo_env
+def test_recovers_stale_editable_package_via_setup_script(tmp_path):
+    """Existing .venv with a broken editable (e.g. old platform/) must re-run setup_venv."""
+    script = scratch_root(tmp_path)
+    root = script.parent
+    (root / "config.yml").write_text(
+        "name: harness-lab\n"
+        "features:\n"
+        "  notes: false\n"
+        "  lib: true\n"
+        "package: emb\n",
+        encoding="utf-8",
+    )
+    # Replace the symlinked good .venv with a stale interpreter that cannot import emb.
+    (root / ".venv").unlink()
+    # Use this test's interpreter (never PATH python3): writing through a symlink to a
+    # system python previously clobbered Frameworks/python3.13 into a recursive wrapper.
+    host_py = os.path.realpath(sys.executable)
+    venv_bin = root / ".venv" / "bin"
+    venv_bin.mkdir(parents=True)
+    # Plain file stub — not a symlink — so later setup rewrite cannot follow into host_py.
+    (venv_bin / "python").write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+    os.chmod(venv_bin / "python", 0o755)
+    # Drop the good lib symlink so the expected path is local and empty until setup runs.
+    if (root / "lib").is_symlink() or (root / "lib").exists():
+        if (root / "lib").is_dir() and not (root / "lib").is_symlink():
+            shutil.rmtree(root / "lib")
+        else:
+            (root / "lib").unlink()
+    setup = root / "skills" / "runtime-env" / "scripts" / "setup_venv.sh"
+    setup.parent.mkdir(parents=True, exist_ok=True)
+    marker = root / "setup_ran"
+    setup.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        f'touch "{marker}"\n'
+        'ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"\n'
+        'mkdir -p "$ROOT/lib/src/emb" "$ROOT/.venv/bin"\n'
+        'printf "x = 1\\n" > "$ROOT/lib/src/emb/__init__.py"\n'
+        # Remove first so we never follow a symlink into a host interpreter.
+        'rm -f "$ROOT/.venv/bin/python"\n'
+        "cat > \"$ROOT/.venv/bin/python\" <<'WRAP'\n"
+        "#!/usr/bin/env bash\n"
+        "export PYTHONPATH=REPLACE_ME\n"
+        f'exec "{host_py}" "$@"\n'
+        "WRAP\n"
+        'sed -i.bak "s|REPLACE_ME|$ROOT/lib/src|" "$ROOT/.venv/bin/python"\n'
+        'rm -f "$ROOT/.venv/bin/python.bak"\n'
+        'chmod +x "$ROOT/.venv/bin/python"\n',
+        encoding="utf-8",
+    )
+    os.chmod(setup, 0o755)
+    # Vendor check uses the real dashboard tree via symlink; keep install_vendor happy.
+    result = run(script, "check")
+    assert marker.is_file(), result.stdout + result.stderr
+    assert "does not resolve to lib/" in result.stdout
+    assert "delegating to skills/runtime-env/scripts/setup_venv.sh" in result.stdout
+
+
+@requires_repo_env
 def test_check_passes_in_real_repo():
     result = run(SCRIPT, "check")
     assert result.returncode == 0

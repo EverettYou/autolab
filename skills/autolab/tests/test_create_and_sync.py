@@ -64,6 +64,17 @@ class CreateProjectTests(unittest.TestCase):
         self.assertIn("name: review-lab", cfg)
         self.assertIn('title: "Review Lab"', cfg)
 
+    def test_create_keeps_readme_contracts_tracked(self) -> None:
+        code = CREATE.main(["--name", "Review Lab", "--dest", str(self.dest)])
+        self.assertEqual(code, 0)
+        self.assertTrue((self.dest / ".auto-research" / "README.md").is_file())
+        self.assertTrue((self.dest / ".auto-research" / "tasks" / "README.md").is_file())
+        self.assertTrue((self.dest / ".auto-research" / "threads" / "README.md").is_file())
+        ignore = (self.dest / ".gitignore").read_text(encoding="utf-8")
+        self.assertIn(".auto-research/state.json", ignore)
+        self.assertIn("!.auto-research/threads/README.md", ignore)
+        self.assertNotRegex(ignore, r"(?m)^\s*\.auto-research/\s*$")
+
 
 class SyncApplyTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -83,8 +94,7 @@ class SyncApplyTests(unittest.TestCase):
             SYNC.main(["--from", str(TEMPLATE), "--to", str(TEMPLATE), "--dry-run"])
         self.assertIn("skills/autolab", str(ctx.exception))
 
-    def test_bootstrap_writes_empty_seed_not_live_template_state(self) -> None:
-        # Build a tiny fake template whose .auto-research/state.json is deliberately live.
+    def _minimal_fake_template(self) -> Path:
         fake = self.root / "fake-template"
         auto = fake / ".auto-research"
         (auto / "tasks").mkdir(parents=True)
@@ -106,14 +116,16 @@ class SyncApplyTests(unittest.TestCase):
             + "\n",
             encoding="utf-8",
         )
-        # Minimal sync trees so apply does not require a full AutoLab checkout.
         for rel in ("skills", "dashboard", "wiki/system", "labs/_tools"):
             (fake / rel).mkdir(parents=True, exist_ok=True)
         (fake / "run.sh").write_text("#!/bin/sh\n", encoding="utf-8")
         for name in ("labs", "references", "notes", "lib", "wiki"):
             (fake / name).mkdir(exist_ok=True)
             (fake / name / "README.md").write_text("#\n", encoding="utf-8")
+        return fake
 
+    def test_bootstrap_writes_empty_seed_not_live_template_state(self) -> None:
+        fake = self._minimal_fake_template()
         code = SYNC.main(["--from", str(fake), "--to", str(self.consumer)])
         self.assertEqual(code, 0)
         state = json.loads((self.consumer / ".auto-research" / "state.json").read_text(encoding="utf-8"))
@@ -121,15 +133,29 @@ class SyncApplyTests(unittest.TestCase):
         self.assertEqual(state.get("tasks"), [])
         self.assertEqual(state.get("updated"), "1970-01-01T00:00:00Z")
         self.assertEqual(state, json.loads(SYNC.EMPTY_AUTO_RESEARCH_STATE))
+        self.assertEqual(
+            (self.consumer / ".auto-research" / "README.md").read_text(encoding="utf-8"),
+            "# auto\n",
+        )
 
-    def test_bootstrap_is_once_only(self) -> None:
-        SYNC.main(["--from", str(TEMPLATE), "--to", str(self.consumer)])
+    def test_state_not_overwritten_but_readmes_resync(self) -> None:
+        fake = self._minimal_fake_template()
+        SYNC.main(["--from", str(fake), "--to", str(self.consumer)])
         marker = self.consumer / ".auto-research" / "state.json"
         marker.write_text('{"schema":"auto-research-1","status":"running","tasks":["keep"]}\n', encoding="utf-8")
-        SYNC.main(["--from", str(TEMPLATE), "--to", str(self.consumer)])
+        (fake / ".auto-research" / "README.md").write_text("# auto-v2\n", encoding="utf-8")
+        SYNC.main(["--from", str(fake), "--to", str(self.consumer)])
         kept = json.loads(marker.read_text(encoding="utf-8"))
         self.assertEqual(kept.get("status"), "running")
         self.assertEqual(kept.get("tasks"), ["keep"])
+        self.assertEqual(
+            (self.consumer / ".auto-research" / "README.md").read_text(encoding="utf-8"),
+            "# auto-v2\n",
+        )
+        ignore = (self.consumer / ".gitignore").read_text(encoding="utf-8")
+        self.assertIn(".auto-research/state.json", ignore)
+        self.assertIn("!.auto-research/tasks/README.md", ignore)
+        self.assertNotRegex(ignore, r"(?m)^\s*\.auto-research/\s*$")
 
     def test_strips_autolab_skill_if_present_on_consumer(self) -> None:
         stray = self.consumer / "skills" / "autolab"

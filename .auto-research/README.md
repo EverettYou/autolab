@@ -11,13 +11,13 @@ folder — all of it tracked. This README is the format contract.
 | `threads/<id>.json` | **Only** `{"messages": [...]}` for that Thread. Meta stays in `state.threads` — loop-created |
 | `threads/README.md` | Message object contract (`author` / `type` enums and fields) |
 
-### Lifecycle (scaffold once, then local)
+### Lifecycle (README contracts sync; live loop stays local)
 
 | Stage | What happens |
 | --- | --- |
-| **this template** | Track the minimum setup (this README, `tasks/` + `threads/` READMEs, `state.json`). If a path would need to be gitignored, it does not belong in the template. |
-| **Create project / first sync** | Scaffold is **copied** into the consumer, then reset to empty `tasks/` / `threads/` + paused `state.json`. |
-| **After that** | Consumer **gitignore ignores all of `.auto-research/`** (live checkout data, not a template). `sync_apply` **skips** the folder if it already exists — no later sync. |
+| **this template** | Track this README, `tasks/README.md`, `threads/README.md`, and an empty `state.json` seed. |
+| **Create project / sync** | `sync_apply` **upserts the three READMEs every sync**. Consumer gitignore keeps `state.json`, task bodies (`tasks/*` except README), and thread files (`threads/*` except README) local. |
+| **Missing `state.json`** | Written once as an empty paused seed — never overwritten if already present. |
 | **Day to day** | Agents never hand-edit; use the scripts below. `seed_local` only fills a missing `state.json` (e.g. broken checkout). |
 
 **Format lint.** Writers refuse invalid updates; for a full census (including hand-edit drift),

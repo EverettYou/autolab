@@ -1,8 +1,9 @@
 """Ensure `.auto-research/state.json` exists with the auto-research loop schema.
 
 This repository tracks an empty `state.json` as part of the minimum scaffold. This script only creates
-one when the file is missing (broken or pre-scaffold checkout). Consumer projects gitignore the
-whole `.auto-research/` folder after create (live data, not a template).
+one when the file is missing (broken or pre-scaffold checkout). Consumer projects gitignore live
+loop data (`state.json`, task bodies, thread files) but keep the README contracts tracked and
+OS-synced via ``sync_apply``.
 
 Threads layout:
 - ``state.threads`` — ordered meta (id, title, category, priority, status, related_labs,

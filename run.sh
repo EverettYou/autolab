@@ -16,8 +16,9 @@
 # Fallback: LAB_DASHBOARD_HOST / LAB_DASHBOARD_PORT. Default port is hash(name)
 # in 1024–65535 with linear probe; same name reclaims across checkouts.
 # Only .venv/bin/python is used.
-# If .venv is missing, start/check/foreground delegate to
-# skills/runtime-env/scripts/setup_venv.sh (fingerprint + install).
+# If .venv is missing, or features.lib is on but the editable package does not
+# resolve to lib/src/<package>/ (stale path, missing install), start/check/
+# foreground delegate to skills/runtime-env/scripts/setup_venv.sh.
 # If downloadable frontend vendor libs are missing, install_vendor.py fetches them.
 
 set -euo pipefail
@@ -164,6 +165,33 @@ print("└" + "─" * width + "┘")
 PY
 }
 
+# Exit 0 when features.lib is off, or when PACKAGE_NAME imports from lib/src/<package>/.
+lib_package_ok() {
+    if [ "$FEATURE_LIB" != 1 ]; then
+        return 0
+    fi
+    if [ -z "$PACKAGE_NAME" ] || [ ! -x "$PY" ]; then
+        return 1
+    fi
+    "$PY" - "$ROOT" "$PACKAGE_NAME" <<'PYEOF' >/dev/null 2>&1
+import importlib.util
+import os
+import sys
+
+root, package = sys.argv[1], sys.argv[2]
+expected = os.path.realpath(os.path.join(root, "lib", "src", package))
+try:
+    spec = importlib.util.find_spec(package)
+except (ImportError, ValueError):
+    sys.exit(1)
+if spec is None:
+    sys.exit(1)
+locations = list(spec.submodule_search_locations or [])
+found = os.path.realpath(locations[0]) if locations else ""
+sys.exit(0 if found == expected else 1)
+PYEOF
+}
+
 ensure_venv() {
     if [ -x "$PY" ]; then
         return 0
@@ -178,13 +206,21 @@ ensure_venv() {
 ensure_vendor() {
     local installer="$ROOT/dashboard/frontend/vendor/install_vendor.py"
     [ -f "$installer" ] || die "missing $installer"
-    # Prefer repo python3 for bootstrap (venv may not exist yet / may lack nothing we need).
-    if python3 "$installer" --check >/dev/null 2>&1; then
+    # Prefer repo .venv when present — PATH python3 can be a broken wrapper.
+    local boot_py=""
+    if [ -x "$PY" ]; then
+        boot_py="$PY"
+    elif command -v python3 >/dev/null 2>&1; then
+        boot_py=$(command -v python3)
+    else
+        die "no python available to run $installer"
+    fi
+    if "$boot_py" "$installer" --check >/dev/null 2>&1; then
         return 0
     fi
     say "Frontend vendor libraries missing or incomplete; installing…"
-    python3 "$installer" || die "failed to install dashboard frontend vendor libraries"
-    python3 "$installer" --check >/dev/null 2>&1 \
+    "$boot_py" "$installer" || die "failed to install dashboard frontend vendor libraries"
+    "$boot_py" "$installer" --check >/dev/null 2>&1 \
         || die "vendor still incomplete after install_vendor.py"
 }
 
@@ -202,30 +238,16 @@ check_package() {
     if [ -z "$PACKAGE_NAME" ]; then
         die "features.lib is true but config.yml has no package: <name>"
     fi
-    local pkg="$PACKAGE_NAME"
-    found=$("$PY" - "$ROOT" "$pkg" <<'PYEOF'
-import importlib.util
-import os
-import sys
-
-root, package = sys.argv[1], sys.argv[2]
-expected = os.path.realpath(os.path.join(root, "lib", "src", package))
-try:
-    spec = importlib.util.find_spec(package)
-except (ImportError, ValueError) as exc:
-    print(f"cannot locate {package}: {exc}")
-    sys.exit(1)
-if spec is None:
-    print(f"{package} is not installed in .venv (expected an editable install of lib/)")
-    sys.exit(1)
-locations = list(spec.submodule_search_locations or [])
-found = os.path.realpath(locations[0]) if locations else (spec.origin or "?")
-if found != expected:
-    print(f"{package} resolves to {found}, expected {expected}")
-    sys.exit(1)
-print(found)
-PYEOF
-    ) || die "$found"
+    if lib_package_ok; then
+        return 0
+    fi
+    # Stale .venv is common after platform/ → lib/ renames or a partial setup:
+    # interpreter exists so ensure_venv no-ops, but the editable install is wrong.
+    local setup="$ROOT/skills/runtime-env/scripts/setup_venv.sh"
+    [ -f "$setup" ] || die "editable package $PACKAGE_NAME is missing or does not resolve to lib/ and $setup is not available to recreate it."
+    say "editable package $PACKAGE_NAME is missing or does not resolve to lib/; delegating to skills/runtime-env/scripts/setup_venv.sh…"
+    bash "$setup" || die "failed to repair the repository virtualenv"
+    lib_package_ok || die "editable package $PACKAGE_NAME still missing or not resolving to lib/ after setup_venv.sh"
 }
 
 check_dirs() {
@@ -256,11 +278,12 @@ check_env() {
     check_python
     ensure_config
     check_package
+    # Seed missing state.json before check_dirs (README contracts come from git/sync).
+    seed_local
     check_dirs
     if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
         die "dashboard port must be from 1 to 65535"
     fi
-    seed_local
 }
 
 process_started() {
