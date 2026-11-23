@@ -1,8 +1,8 @@
 // Notes section view — same role as views/wiki.js or views/labs.js.
-// Step 3 ESM: projects.js is a real module; host imports it; window.NotesHost kept.
+// Step 4 ESM: platform search-field + library toolbar chrome; window.NotesHost kept.
 
 import { h, setTitle } from "../ui.js";
-import "../icons.js"; // installs window.WorkbenchIcons from the shared glyph map
+import { icon } from "../icons.js";
 
 import "../table.js";
 import "../splitpanes.js";
@@ -19,21 +19,22 @@ let booted = false;
 let project = null;
 
 function createHost() {
-  const root = document.createElement("div");
-  root.id = "workspace";
-  root.className = "workspace";
-  root.hidden = true;
-  root.innerHTML = `
-    <div id="workspace-search-bank">
-      <label class="workspace-search">
-        <span class="sr-only">Search notes</span>
-        <input id="workspace-search" type="search" placeholder="Search notes…" autocomplete="off">
-      </label>
-    </div>
-    <main class="workspace-main"><div id="workspace-content" class="content"></div></main>
-    <output class="workspace-toast" id="workspace-toast" role="status" hidden></output>
-    <dialog id="workspace-modal" class="workbench-dialog"></dialog>
-  `;
+  const input = h("input", {
+    id: "workspace-search",
+    type: "search",
+    class: "filter-input",
+    placeholder: "Filter projects…",
+    autocomplete: "off",
+    "aria-label": "Filter projects",
+  });
+  const root = h("div", { id: "workspace", class: "workspace", hidden: true },
+    h("div", { id: "workspace-search-bank" },
+      h("label", { class: "search-field workspace-search" }, icon("search", "search-glyph"), input)),
+    h("main", { class: "workspace-main" },
+      h("div", { id: "workspace-content", class: "content" })),
+    h("output", { class: "workspace-toast", id: "workspace-toast", role: "status", hidden: true }),
+    h("dialog", { id: "workspace-modal", class: "workbench-dialog" }),
+  );
   document.body.append(root);
   return root;
 }

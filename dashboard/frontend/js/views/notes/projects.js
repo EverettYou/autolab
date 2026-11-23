@@ -77,11 +77,14 @@ async function renderProjectWorkspace(workspace,state){
  if(!state.source)state.source=workspace.sources[0]?.id;
  if(state.project===undefined)state.project=(state.document||state.path||'').split('/')[0];
  if(state.project){
-  $('workspace-search').closest('label').hidden=true;
+  const searchLabel=$('workspace-search')?.closest('label');
+  if(searchLabel)searchLabel.hidden=true;
   workspaceContent().innerHTML='<section class="dashboard-placeholder" aria-label="Project editor"></section>';
   syncDashboardVisibility();await openProjectEditor(workspace,state);return;
  }
- syncProjectLayers();$('workspace-search').closest('label').hidden=true;
+ syncProjectLayers();
+ const searchLabel=$('workspace-search')?.closest('label');
+ if(searchLabel)searchLabel.hidden=false;
  const request=++ProjectUI.request,view=S.view;
  let list=ProjectUI.lists.get(workspace.id);
  if(!list){list={prefs:projectPreferences(workspace),filter:['all','active','inactive','finished','planning','archived'].includes(state.libraryFilter)?state.libraryFilter:'all',data:null};ProjectUI.lists.set(workspace.id,list);}
@@ -101,8 +104,8 @@ async function renderProjectWorkspace(workspace,state){
   entries.sort((a,b)=>{if(['modified_at','period_start'].includes(prefs.sort)&&(!a[prefs.sort]||!b[prefs.sort]))return Number(!a[prefs.sort])-Number(!b[prefs.sort]);return prefs.direction*String(a[prefs.sort]||'').localeCompare(String(b[prefs.sort]||''),'en',{numeric:true})||a.name.localeCompare(b.name);});
   const statuses=workspace.status_options||['active','inactive','finished'];
 
-  // Landing is only the project table — lab chrome already provides Notes/search.
-  workspaceContent().innerHTML=`<section class="project-library"><div class="library-table-scroll" aria-label="${esc(workspace.title)}">${data?.errors?.length?`<details class="library-errors"><summary>Some project dates are incomplete</summary>${data.errors.map(e=>`<p>${esc(e)}</p>`).join('')}</details>`:''}${!data?'<div class="empty" role="status">Reading project dates…</div>':`<table class="library-table">${DataTables.header(visible)}<tbody>${entries.map((entry,i)=>`<tr data-library-row="${i}">${visible.map(c=>c.id==='name'?`<td data-library-cell="name"><button type="button" data-library-open="${i}" title="${esc(entry.name)}">${icon('folder')}<span>${esc(entry.name)}</span></button></td>`:c.id==='type'?`<td data-library-cell="type"><button type="button" class="paper-type-button" data-paper-type="${i}" aria-label="Change type for ${esc(entry.name)}"><span class="type-chip task-status paper-type-badge type-badge category-${esc(entry.paper_type||'other')}" data-type-owner="paper" data-type-id="${esc(entry.paper_type||'other')}">${esc(typeName(entry.paper_type))}</span></button></td>`:c.id==='status'?`<td data-library-cell="status">${libraryBadge(entry.status)}</td>`:`<td data-library-cell="${esc(c.id)}">${entry[dateKey]?`<time datetime="${esc(entry[dateKey])}">${dateKey==='period_start'?esc(entry.period_label):workspaceDate(entry.modified_at)}</time>`:'—'}</td>`).join('')}</tr>`).join('')}</tbody></table>${entries.length?'':'<div class="empty">No matching projects.</div>'}`}</div></section>`;
+  // Catalog-style chrome: title + platform search-field slot above the table.
+  workspaceContent().innerHTML=`<section class="project-library"><header class="library-toolbar"><h1>${esc(workspace.title)}</h1><div class="toolbar-search workspace-search-slot" data-workspace-search></div></header><div class="library-table-scroll" aria-label="${esc(workspace.title)}">${data?.errors?.length?`<details class="library-errors"><summary>Some project dates are incomplete</summary>${data.errors.map(e=>`<p>${esc(e)}</p>`).join('')}</details>`:''}${!data?'<div class="empty" role="status">Reading project dates…</div>':`<table class="library-table">${DataTables.header(visible)}<tbody>${entries.map((entry,i)=>`<tr data-library-row="${i}">${visible.map(c=>c.id==='name'?`<td data-library-cell="name"><button type="button" data-library-open="${i}" title="${esc(entry.name)}">${icon('folder')}<span>${esc(entry.name)}</span></button></td>`:c.id==='type'?`<td data-library-cell="type"><button type="button" class="paper-type-button" data-paper-type="${i}" aria-label="Change type for ${esc(entry.name)}"><span class="type-chip task-status paper-type-badge type-badge category-${esc(entry.paper_type||'other')}" data-type-owner="paper" data-type-id="${esc(entry.paper_type||'other')}">${esc(typeName(entry.paper_type))}</span></button></td>`:c.id==='status'?`<td data-library-cell="status">${libraryBadge(entry.status)}</td>`:`<td data-library-cell="${esc(c.id)}">${entry[dateKey]?`<time datetime="${esc(entry[dateKey])}">${dateKey==='period_start'?esc(entry.period_label):workspaceDate(entry.modified_at)}</time>`:'—'}</td>`).join('')}</tr>`).join('')}</tbody></table>${entries.length?'':'<div class="empty">No matching projects.</div>'}`}</div></section>`;
   const root=document.querySelector('.project-library');
   root.querySelectorAll('[data-paper-type]').forEach(b=>b.onclick=e=>{e.stopPropagation();editPaperType(state.source,entries[Number(b.dataset.paperType)],()=>{invalidateProjectList(workspace);renderWorkspace();});});
   root.querySelectorAll('[data-library-row]').forEach(row=>row.onclick=()=>{state.project=entries[Number(row.dataset.libraryRow)].path;state.path=state.project;state.document=null;S.query='';$('workspace-search').value='';renderWorkspace();});
