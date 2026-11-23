@@ -1,0 +1,117 @@
+__pycache__/
+*_cache/
+.venv/
+.cache/
+*.pyc
+*.nbc
+*.nbi
+*.tar
+*.tar.gz
+*.tmp
+.DS_Store
+
+.mplconfig/
+*.bundle
+.runtime/
+
+# Local DMRG checkpoints
+*.mps.pkl.gz
+
+# Note-project build products only (dotted .build/: LaTeX output + plot caches).
+notes/**/.build/
+notes/**/*.aux
+notes/**/*.log
+notes/**/*.out
+notes/**/*.toc
+notes/**/*.fls
+notes/**/*.fdb_latexmk
+notes/**/*.synctex.gz
+notes/**/*.synctex(busy)
+notes/**/*.bbl
+notes/**/*.blg
+notes/**/*.bcf
+notes/**/*.run.xml
+notes/**/*.nav
+notes/**/*.snm
+notes/**/*.vrb
+
+# Python / environment (from qmllab harness)
+.env
+.env.*
+.pytest_cache/
+.tmp/
+*.py[cod]
+*.egg-info/
+
+# Secrets
+*.key
+keys/
+secrets/
+
+# References: PDFs, extracted text, repo clones (repos/) and reproduction workspaces (attempts/)
+# stay local; provenance.json, the verified reproduce/ record and references.json are versioned.
+references/*/*
+!references/*/provenance.json
+!references/*/reproduce/
+!references/*/README.md
+
+# Editor / per-tool local agent state; the shared instructions live in README.md and skills/
+.idea/
+.vscode/
+.claude/
+.cursor/
+.codex/
+
+# .auto-research/: this template tracks only the minimum scaffold (READMEs + empty state.json).
+# Live task bodies / Threads from QA or a stray loop tick stay gitignored so a later agent
+# cannot accidentally land them. Consumers: create_project rewrites to ignore the whole folder.
+.auto-research/scheduler.json
+.auto-research/*.lock
+.auto-research/tasks/*
+!.auto-research/tasks/README.md
+.auto-research/threads/*
+!.auto-research/threads/README.md
+dashboard/frontend/site.json
+dashboard/frontend/site.json.tmp
+# Search writes its page index here and rebuilds it when pages change.
+dashboard/data/
+
+# Dashboard frontend vendor: downloadable upstream libs (installed by
+# dashboard/frontend/vendor/install_vendor.py on ./run.sh). Keep in git:
+# code-editor*, fontawesome/, manifest.json, install_vendor.py, README, notices.
+dashboard/frontend/vendor/mermaid/
+dashboard/frontend/vendor/katex/
+dashboard/frontend/vendor/pdfjs/
+dashboard/frontend/vendor/marked/
+dashboard/frontend/vendor/dompurify/
+dashboard/frontend/vendor/highlight/
+dashboard/frontend/vendor/.installed
+
+# labs/: track documents, code, and numerical evidence (results/figures/data/logs).
+# Ignore only transient files and heavy DMRG / archive blobs (see report-contract.md).
+labs/**/*.pid
+labs/**/.leaderboard.lock
+labs/**/*.lock
+labs/**/__pycache__/
+labs/**/.cache/
+labs/**/*.mps.pkl.gz
+labs/**/*.tar
+labs/**/*.tar.gz
+labs/**/*.zip
+labs/**/buffers/
+labs/**/cache/
+
+# Stray checkpoints written when a trainer is launched with CWD=repo-root.
+/checkpoints/
+
+# Bulky ED / dense vector dumps (JSON/figures stay tracked; GitHub pack limit)
+labs/**/*.npz
+
+# Lab bulk policy (repo size budget ~20MB): keep REPORT/notes/scripts/figures and
+# slim results summaries. Full scan tables stay local under labs/*/data/.
+labs/**/data/
+labs/**/logs/
+# Prefer PNG in git when both exist; local SVG regenerations stay untracked.
+labs/**/figures/**/*.svg
+
+# Lab figures above the small preview budget stay local; tracked set is curated.

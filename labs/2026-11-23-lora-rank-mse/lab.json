@@ -1,0 +1,15 @@
+{
+  "id": "2026-11-23-lora-rank-mse",
+  "title": "LoRA rank vs toy adapter MSE",
+  "stage": "complete",
+  "summary": "On a fixed random matrix, does increasing truncated-SVD rank from 1 to 8 monotonically reduce reconstruction MSE (LoRA-style low-rank geometry)?",
+  "current_focus": "Done \u2014 MSE falls with rank.",
+  "next_action": "None.",
+  "created": "2026-11-23",
+  "updated": "2026-11-23",
+  "references": [
+    "lora-low-rank-adaptation"
+  ],
+  "discussion": [],
+  "parents": []
+}

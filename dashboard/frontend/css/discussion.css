@@ -1,0 +1,47 @@
+/* -- discussion ----------------------------------------------------------------------------- */
+
+.messages { display: flex; flex-direction: column; gap: 12px; }
+.messages-earlier-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 8px 0 4px; border-bottom: 1px dashed var(--border);
+}
+.messages-earlier-wrap .messages-earlier { font-size: 13px; }
+.message { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px 14px; box-shadow: var(--shadow); }
+.message-user { border-left: 3px solid var(--good); background: var(--user-bg); }
+.message-agent { border-left: 3px solid var(--accent); }
+.message-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.author { font-weight: 650; }
+.message-head .time { margin-left: auto; }
+.reply-note { margin-top: 14px; background: var(--surface-2); border: 1px dashed var(--border-strong); border-radius: var(--radius); padding: 10px 14px; }
+.reply-note summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+.reply-note p { margin: 8px 0 0; }
+.composer { margin-top: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px 16px; box-shadow: var(--shadow); }
+.composer-lead:not([hidden]) + .cards-list { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+.btn-new-thread { background: var(--good-fill); border-color: var(--good-fill); color: var(--on-accent); }
+.btn-new-thread:hover { background: var(--good-fill-hover); border-color: var(--good-fill-hover); color: var(--on-accent); }
+.btn-new-thread[aria-expanded="true"],
+.btn-new-thread[aria-expanded="true"]:hover { background: var(--good-bg); border-color: var(--good); color: var(--good); }
+.composer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 4px; }
+.composer h2, .composer-head h2 { font-size: 15px; margin: 0; }
+.composer textarea, .composer input { width: 100%; }
+.composer textarea { min-height: 120px; resize: vertical; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); font: inherit; line-height: 1.5; }
+.composer textarea:focus, .composer input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
+.composer-row { display: flex; flex-wrap: wrap; gap: 10px 14px; }
+.composer-field { display: flex; flex-direction: column; gap: 3px; min-width: 160px; flex: 1; }
+.form-actions { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.close-note { flex-basis: 100%; margin: 0; }
+.form-error { color: var(--bad); font-size: 13px; margin: 8px 0 0; }
+.command { display: flex; gap: 8px; align-items: flex-start; }
+.command pre { flex: 1; margin: 0; white-space: pre-wrap; word-break: break-all; }
+.pager { display: flex; justify-content: space-between; margin-top: 22px; font-size: 13.5px; }
+.result-pages { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 4px; margin: 22px 0 4px; }
+.result-page {
+  min-width: 32px; height: 32px; padding: 0 8px; border: 0; border-radius: 6px;
+  background: transparent; color: var(--text-2); font: inherit; font-size: 13.5px; cursor: pointer;
+}
+.result-page:hover { background: var(--surface-2); color: var(--text); }
+.result-page[aria-current="page"] { background: var(--accent-soft); color: var(--accent-strong); font-weight: 600; cursor: default; }
+.result-page:disabled { color: var(--muted); opacity: 0.45; cursor: default; }
+.result-gap { color: var(--muted); padding: 0 4px; user-select: none; }
+.cards-list { scroll-margin-top: calc(var(--top) + 12px); }
+

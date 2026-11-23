@@ -1,0 +1,63 @@
+{
+  "references": [
+    {
+      "id": "attention-is-all-you-need",
+      "kind": "paper",
+      "title": "Attention Is All You Need",
+      "arxiv_id": "1706.03762",
+      "aliases": [],
+      "has_pdf": true,
+      "repos": [],
+      "reproduction": null,
+      "attempts": [],
+      "status": "fetched",
+      "provenance": "references/attention-is-all-you-need/provenance.json"
+    },
+    {
+      "id": "bert-pretraining",
+      "kind": "paper",
+      "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+      "arxiv_id": "1810.04805",
+      "aliases": [],
+      "has_pdf": true,
+      "repos": [],
+      "reproduction": null,
+      "attempts": [],
+      "status": "fetched",
+      "provenance": "references/bert-pretraining/provenance.json"
+    },
+    {
+      "id": "lora-low-rank-adaptation",
+      "kind": [
+        "paper",
+        "repository"
+      ],
+      "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+      "arxiv_id": "2106.09685",
+      "aliases": [],
+      "has_pdf": true,
+      "repos": [
+        "LoRA"
+      ],
+      "reproduction": null,
+      "attempts": [],
+      "status": "fetched",
+      "provenance": "references/lora-low-rank-adaptation/provenance.json"
+    },
+    {
+      "id": "micrograd",
+      "kind": "repository",
+      "title": "micrograd",
+      "arxiv_id": null,
+      "aliases": [],
+      "has_pdf": false,
+      "repos": [
+        "micrograd"
+      ],
+      "reproduction": null,
+      "attempts": [],
+      "status": "fetched",
+      "provenance": "references/micrograd/provenance.json"
+    }
+  ]
+}

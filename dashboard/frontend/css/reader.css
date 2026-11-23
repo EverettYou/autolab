@@ -1,0 +1,106 @@
+/* Platform PDF viewer CSS: app.css imports /static/vendor/pdfjs/web/pdf_viewer.css. */
+:root{
+  --reader-link:var(--accent-strong);
+  --reader-paper:var(--surface);
+  --reader-code:var(--code-bg);
+  --reader-muted:var(--muted);
+  --reader-line:var(--border);
+  --reader-selection:var(--accent-soft);
+  --pdf-reader-bg:#303030;
+}
+.content-browser{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%;background:var(--reader-paper)}
+.content-browser .content-canvas > .markdown{max-width:900px;margin:0 auto;line-height:1.7}
+.view-toolbar{display:flex;align-items:center;gap:10px;min-height:36px;flex:none;padding:0 8px;color:var(--reader-muted);font-size:12px}
+.view-toolbar [role=status]{margin-right:auto;min-width:0;overflow-wrap:anywhere}.view-format{font-size:11px}
+.view-toolbar [data-content-status]{margin-right:auto;min-width:0;overflow-wrap:anywhere}.view-toolbar [data-content-status].has-action{cursor:pointer;text-decoration:underline;text-underline-offset:3px}.view-toolbar [data-content-status].has-action:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}.view-toolbar [data-content-status][aria-disabled=true]{cursor:progress}
+.view-toolbar button,.palette-actions button{border:0;border-radius:5px;padding:5px 8px;background:transparent;color:inherit;font:inherit;cursor:pointer}.view-toolbar button:hover,.palette-actions button:hover{background:var(--surface-2);color:var(--text)}
+.view-toolbar button:disabled{opacity:.4;cursor:default}
+.content-canvas{min-height:0;flex:1;overflow:auto;padding:24px 30px;overscroll-behavior:contain;overflow-wrap:anywhere}
+.content-browser.is-source .content-canvas{padding:0;overflow:hidden;display:flex;flex-direction:column}.content-canvas>.cm-editor{flex:1;min-height:0}.content-canvas .cm-editor{background:var(--reader-paper)}
+.doc-prose{line-height:1.7;max-width:900px;margin:0 auto}.doc-prose h1{font-size:22px;font-weight:600;line-height:1.4}.doc-prose h2{font-size:18px;font-weight:600;margin-top:1.7em}.doc-prose h3{font-size:15px;font-weight:600}.doc-prose p{margin:0 0 1em}.doc-prose a{color:var(--reader-link);text-decoration:underline;text-decoration-color:#2767a055;text-underline-offset:3px}.doc-prose pre{background:var(--reader-code);border:1px solid #e8ebef;border-radius:6px;padding:14px 16px;white-space:pre;overflow:auto}.doc-prose code,.text-preview{font:.92em/1.6 var(--mono)}.doc-prose :not(pre)>code{color:#6f42c1;background:#f3f0f8;padding:2px 5px;border-radius:4px}.doc-prose pre code{color:#24292f;background:transparent;padding:0}.doc-prose blockquote{margin:16px 0;padding:2px 16px;border-left:3px solid #d6dee7}.doc-prose table{table-layout:auto;border-collapse:collapse;width:100%}.doc-prose th,.doc-prose td{border:1px solid var(--reader-line);padding:7px 10px;text-align:left}.doc-prose th{position:static;background:var(--reader-code);font-size:inherit}.doc-prose img{max-width:100%}.doc-prose .katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}.notes-image-note{color:var(--reader-muted);font-size:12px}.text-preview{white-space:pre-wrap;margin:0}
+.key-values{table-layout:auto;width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px}.key-values th,.key-values td{position:static;background:transparent;text-align:left;vertical-align:top;padding:7px 0;border-bottom:1px solid #f0f0ee}.key-values th{width:1%;padding-right:14px;white-space:nowrap;color:var(--reader-muted);font:12px/1.6 var(--mono)}.key-values td{white-space:pre-wrap;overflow-wrap:anywhere}.key-values .key-values{margin:-7px 0}.json-literal{color:#60666d;font:12px/1.6 var(--mono)}.preview-error,.view-toolbar .has-error{color:#a33}
+.pdf-reader{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;background:var(--pdf-reader-bg);border-radius:6px}
+.pdf-reader-toolbar{display:flex;align-items:center;gap:8px;padding:6px 8px;color:#eee;background:var(--pdf-reader-bg);font:12px var(--font);flex:none}.pdf-reader-toolbar button{border:0;background:transparent;color:inherit;border-radius:4px;min-width:28px;height:28px;cursor:pointer;font:18px var(--font);padding:0 5px}.pdf-reader-toolbar button:hover{background:#484848}.pdf-reader-toolbar button:disabled{opacity:.4;cursor:default}.pdf-reader-toolbar input{width:44px;padding:3px 5px;background:#202020;color:#eee;border:1px solid #666;border-radius:3px;text-align:center;font:12px var(--mono);;--reader-field-gap-top:3px;--reader-field-gap-right:5px;--reader-field-gap-bottom:3px;--reader-field-gap-left:5px;}.pdf-reader-toolbar output{min-width:38px;text-align:center;color:#ccc}.pdf-reader-spacer{flex:1}
+.color-picker{width:228px;padding:12px;color:var(--text);background:var(--surface);font:12px var(--font)}.color-swatches,.notes-custom-palette{display:grid;grid-template-columns:repeat(7,20px);justify-content:space-between;gap:8px;margin-bottom:14px}.notes-custom-palette:empty{display:none}.color-swatches button,.notes-custom-palette [data-color]{width:20px;height:20px;border:1px solid #0002;border-radius:4px;cursor:pointer;padding:0}.color-picker [data-color]:hover,.color-picker [aria-pressed=true]{outline:2px solid var(--accent);outline-offset:2px}.notes-custom-palette>span{position:relative}.notes-custom-palette [data-remove]{position:absolute;right:-5px;top:-6px;border:0;border-radius:50%;background:#fff;color:var(--muted);cursor:pointer;padding:0;width:15px;height:15px;opacity:0;box-shadow:0 0 0 1px var(--border)}.notes-custom-palette>span:hover [data-remove],.notes-custom-palette [data-remove]:focus-visible{opacity:1}
+.color-spectrum{position:relative;height:130px;border:1px solid #0002;border-radius:6px;cursor:crosshair;touch-action:none}.color-spectrum>span{position:absolute;width:13px;height:13px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #0006,0 1px 4px #0004;transform:translate(-50%,-50%);pointer-events:none}.color-hue{display:block;width:100%;height:13px;margin:12px 0;appearance:none;border:1px solid #0002;border-radius:12px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);cursor:pointer}.color-hue::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border:2px solid #fff;border-radius:50%;background:transparent;box-shadow:0 0 0 1px #0006}.color-hex{display:flex;align-items:center;gap:10px;color:var(--muted);font:11px var(--mono)}.color-hex input{margin-left:auto;width:95px;padding:5px 7px;border:1px solid var(--border);border-radius:4px;text-align:right;font:12px var(--mono);;--reader-field-gap-top:5px;--reader-field-gap-right:7px;--reader-field-gap-bottom:5px;--reader-field-gap-left:7px;}.palette-actions{display:flex;justify-content:space-between;gap:4px;margin-top:8px;font-size:11px}.color-picker [role=status]{display:block;font-size:11px;color:var(--muted);min-height:14px;margin-top:4px}.color-hex [aria-invalid=true]{border-color:#b33}
+:is(.content-browser,.pdf-reader,.color-picker) :focus-visible{outline:2px solid #8fb3e6;outline-offset:2px}
+.file-shared-preview{height:clamp(440px,69vh,950px);min-width:0}.file-reading-area:has(.file-shared-preview){padding:0}.file-intake-editor{height:220px}.file-intake-editor .view-toolbar [role=status]{display:none}.file-intake-editor .view-format{margin-right:auto}.message-pdf-shared{height:570px;margin-top:12px}.message-pdf-shared[hidden]{display:none}.message-attachment.expanded:has(.message-pdf-shared:not([hidden])) .message-media-image{display:none}
+@media(max-width:650px){.content-canvas{padding:18px 14px}.view-format{display:inline-flex}.pdf-reader-toolbar{gap:4px}.message-pdf-shared{height:440px}}
+
+/* Shared document toolbars use one button size and optically matched icons. */
+.content-browser .view-toolbar button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;color:var(--muted);font-size:17px;flex:none}
+.content-browser .view-toolbar button>.app-icon,.content-browser .view-toolbar button>svg.svg-inline--fa{font-size:17px;width:20px;height:17px}
+/* The reload glyph fills its viewBox; the save glyph has inset artwork. */
+.content-browser .view-toolbar button[data-reload]>.app-icon,.content-browser .view-toolbar button[data-reload]>svg.svg-inline--fa{font-size:15px;height:15px}
+.content-browser .view-toolbar button:disabled{opacity:.4;cursor:default}
+.content-browser .view-toolbar button:disabled:hover{background:transparent;color:var(--muted)}
+.content-browser .view-toolbar button:not(:disabled):hover{color:var(--accent);background:var(--surface-2)}
+
+/* Skill launchers are large tiles, independent of navigation/reader toolbar icons. */
+.skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px;max-width:720px}
+.skill-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;position:relative;min-width:0;min-height:124px;padding:18px 8px;border:0;border-radius:8px;background:transparent;color:var(--text);font:500 14px/1.4 var(--font);text-align:center;cursor:pointer}
+.skill-tile:hover{background:var(--surface-2)}
+.skill-tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.skill-tile>:is(.app-icon,.fa-regular,svg.svg-inline--fa){flex:none;width:32px;height:32px;font-size:29px;line-height:1;color:var(--accent)}
+@media(max-width:480px){.skill-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.skill-tile{min-height:112px}}
+
+/* One Storage view, including native Letters' shadow root. */
+.storage-panel{max-width:780px}
+.storage-panel h2{margin:0 0 14px;font-size:18px;font-weight:600}
+.storage-panel .storage-panel-intro,.storage-panel .storage-panel-note,.storage-panel .storage-panel-status{margin:0 0 22px;font-size:13px;line-height:1.6;color:var(--muted,#738078)}
+.storage-panel .storage-panel-card{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px 0;border-bottom:1px solid var(--line,#e6ebe6)}
+.storage-panel .storage-panel-card h3{margin:0 0 8px;font-size:14px;font-weight:600;color:inherit}
+.storage-panel .storage-panel-card p{margin:0 0 6px;line-height:1.5}
+.storage-panel .storage-panel-card small{display:block;max-width:440px;font-size:12px;line-height:1.6;color:var(--muted,#738078)}
+.storage-panel .storage-panel-card button{flex-shrink:0;padding:8px 0;background:transparent;border:0;color:var(--accent,var(--accent));font:inherit;font-size:12px;cursor:pointer}
+.storage-panel .storage-panel-card button:disabled{opacity:.5;cursor:default}
+.storage-panel .storage-panel-note{margin-top:22px}
+.storage-panel .storage-panel-status{color:var(--accent,var(--accent))}
+@media(max-width:700px){.storage-panel .storage-panel-card{align-items:flex-start;flex-direction:column;gap:12px}}
+
+/* PDF.js owns page geometry, high-DPI repainting, text and annotation layers. */
+.pdf-reader-viewport{position:relative;flex:1;min-height:0;overflow:hidden}
+.pdf-reader-viewport>.pdf-reader-scroll{position:absolute;inset:0;padding:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
+.pdf-reader-pages.pdfViewer{width:100%;padding:12px 0;--page-margin:0 auto 14px;--page-border:0;--spreadHorizontalWrapped-margin-LR:0;--scale-factor:1}
+.pdf-reader .pdfViewer .page{background:#fff;color:#000}
+.pdf-reader .textLayer{user-select:text;-webkit-user-select:text}
+.pdf-reader-status{position:absolute;inset:12px;pointer-events:none;color:#eee;font:13px var(--font)}
+.pdf-reader-status[hidden]{display:none}
+.pdf-reader-toolbar [data-zoom]{width:58px}
+.pdf-reader{flex:1;width:100%;min-width:0}
+.pdf-reader.pdf-reader-page-height{flex:none;height:auto;container-type:inline-size}
+/* Reserve a Letter-sized page before PDF.js supplies the actual page geometry. */
+.pdf-reader-page-height>.pdf-reader-viewport{flex:none;height:var(--pdf-reader-page-height,calc((100cqw - 40px)*22/17*var(--pdf-reader-initial-zoom,1) + 24px))}
+
+
+
+/* JSON uses full-width rows rather than recursively narrowing table cells. */
+.json-tree{font-size:13px;line-height:1.65;min-width:360px;width:100%;max-width:none;box-sizing:border-box}
+.json-tree .json-branch{margin:0;border:0;padding:0;min-width:0}
+.json-tree summary{display:list-item;list-style-position:inside;cursor:pointer;padding-block:7px;border-bottom:1px solid var(--reader-line,#efefed);overflow-wrap:anywhere;color:var(--reader-muted,#60666d)}
+.json-tree summary:hover{background:var(--reader-hover,#f7f8f7)}
+.json-tree summary:focus-visible{outline:1px solid var(--reader-muted,#aaa);outline-offset:-1px;border-radius:4px}
+.json-key{font:12px/1.65 var(--mono);color:var(--reader-muted,#60666d);overflow-wrap:anywhere}
+.json-count{font:12px/1.65 var(--font);color:var(--reader-muted,#777);margin-left:10px}
+.json-children{padding:0;margin:0;min-width:0}
+.json-field{padding-block:9px;border-bottom:1px solid var(--reader-line,#efefed);min-width:0}
+.json-string{display:block;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;max-width:100%}
+.json-tree .json-level-0{padding-left:0}
+.json-tree .json-level-1{padding-left:10px}
+.json-tree .json-level-2{padding-left:20px}
+.json-tree .json-level-3{padding-left:30px}
+.json-tree .json-level-4{padding-left:40px}
+
+.content-browser .view-format{display:inline-flex;align-items:center;gap:5px;flex:none;cursor:default;font-size:15px;color:var(--reader-muted)}
+
+.content-browser .view-format>:is(.app-icon,svg.svg-inline--fa):first-child{font-size:17px;width:20px;height:17px;flex:none}
+
+/* One round, icon-only send button for every chat composer (Messages, Task chat). */
+button.notes-send-button{display:inline-flex;align-items:center;justify-content:center;flex:none;box-sizing:border-box;width:30px;height:30px;min-height:0;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--accent) 85%,#000);color:#fff;cursor:pointer}
+button.notes-send-button:disabled{opacity:1;background:color-mix(in srgb,var(--accent) 88%,var(--surface));cursor:default}
+button.notes-send-button:hover:not(:disabled){filter:brightness(.92)}
+button.notes-send-button>:is(.app-icon,svg.svg-inline--fa){font-size:14px;width:14px;height:14px}
+
+.storage-panel-page{padding:28px 32px;overflow:auto;height:100%}.storage-panel .storage-panel-section-title{margin-top:32px}.storage-panel [data-storage-section]{min-width:180px}
+@media(max-width:700px){.storage-panel-page{padding:20px}}
+.storage-panel-breakdown{margin:28px 0 12px}.storage-panel-total{display:flex;align-items:baseline;justify-content:space-between;gap:16px}.storage-panel-total h3{font-size:15px;margin:0}.storage-panel-total>strong{font-size:24px;font-variant-numeric:tabular-nums}.storage-panel-breakdown>.storage-panel-intro{margin:8px 0 18px}.storage-panel-bar{display:flex;height:32px;width:100%;overflow:hidden;border-radius:7px;background:var(--border);margin-bottom:20px}.storage-panel-segment{display:block;height:100%;flex-grow:0;flex-shrink:0}.storage-panel-table-scroll{overflow-x:auto}.storage-panel-table{width:100%;border-collapse:collapse;font-size:12px}.storage-panel-table th,.storage-panel-table td{padding:12px 8px;border-bottom:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums;vertical-align:top;white-space:nowrap}.storage-panel-table th:first-child{text-align:left;white-space:normal;width:55%}.storage-panel-table tbody th{font-weight:500}.storage-panel-table tbody th>span:last-child{display:block;margin-left:20px}.storage-panel-dot{display:block;float:left;width:10px;height:10px;margin-top:3px;border-radius:3px}.storage-panel-table small{display:block;font-size:11px;font-weight:400;line-height:1.5;color:var(--muted);margin-top:4px;white-space:normal}.storage-panel-table tfoot{font-weight:600}.storage-panel-breakdown>.storage-panel-note{font-size:11px;margin:14px 0 24px}

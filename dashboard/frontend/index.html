@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="/static/js/theme-boot.js"></script>
+  <title>Lab</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script src="/static/vendor/marked/marked.umd.js" defer></script>
+  <script src="/static/vendor/dompurify/purify.min.js" defer></script>
+  <script src="/static/vendor/katex/katex.min.js" defer></script>
+  <script src="/static/vendor/mermaid/mermaid.min.js" defer></script>
+  <script src="/static/vendor/highlight/highlight.min.js" defer></script>
+  <script type="module" src="/static/js/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#app">Skip to content</a>
+  <header class="topbar" id="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/" aria-label="Lab overview">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="7"/><circle cx="11" cy="11" r="3"/><circle cx="21" cy="11" r="3"/><circle cx="11" cy="21" r="3"/><circle cx="21" cy="21" r="3"/></svg>
+        <span class="brand-title">Lab</span>
+      </a>
+      <button type="button" class="topbar-icon-button nav-toggle" id="nav-toggle" aria-label="Open sections menu" aria-expanded="false" aria-controls="nav"></button>
+      <nav class="nav" id="nav" aria-label="Sections">
+        <a href="/references" data-section="references">References</a>
+        <a href="/labs" data-section="labs">Labs</a>
+        <a href="/wiki" data-section="wiki">Wiki</a>
+        <a href="/notes" data-section="notes" data-optional="notes" hidden>Notes</a>
+        <a href="/apidocs" data-section="apidocs" data-optional="lib" hidden>API</a>
+        <a href="/threads" data-section="threads">Threads</a>
+      </nav>
+      <div class="topbar-end">
+        <button type="button" class="topbar-icon-button search-toggle" id="search-toggle" aria-label="Open search" aria-expanded="false" aria-controls="search-form"></button>
+        <form class="search" id="search-form" role="search" action="/search">
+          <input id="search-input" name="q" type="search" placeholder="Search references, labs, wiki, threads…" autocomplete="off" aria-label="Search the repository">
+          <div class="search-pop" id="search-pop" hidden></div>
+        </form>
+        <div class="theme" id="theme-control"></div>
+        <div class="system-menu" id="system-menu">
+          <button type="button" class="theme-button system-menu-button" id="system-menu-button" aria-label="System" aria-haspopup="menu" aria-expanded="false" aria-controls="system-menu-panel" title="System"><svg viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg></button>
+          <div class="system-menu-panel" id="system-menu-panel" role="menu" hidden>
+            <a href="/files" role="menuitem" data-system="files">Files</a>
+            <a href="/skills" role="menuitem" data-system="skills">Skills</a>
+            <a href="/settings" role="menuitem" data-system="settings">Settings</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="app" class="app" tabindex="-1"><div class="loading" role="status">Loading</div></main>
+  <noscript><p class="noscript">The lab dashboard needs JavaScript.</p></noscript>
+</body>
+</html>

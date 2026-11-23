@@ -1,0 +1,15 @@
+# Template for references/<id>/attempts/<slug>/Dockerfile — copy and customize per attempt.
+# Keep reproductions isolated: external code lives under /attempt, never on the host.
+FROM em-boundary-base:latest
+
+WORKDIR /attempt
+COPY . /attempt
+
+# Attempt-specific dependencies (pin versions). Network is available during build only.
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# Reproduction entry point. Write detailed output ONLY to the mounted output dir.
+# Build + run with skills/reproduce-reference/scripts/run_attempt.sh <id> <slug>; it wraps this image
+# with a host-side wall-clock cap (--network none) and writes the attempt's result.json.
+# The host mounts references/<id>/attempts/<slug>/output at /workspace/output — e.g.:
+# CMD ["python", "reproduce.py", "--out", "/workspace/output/metrics.json"]

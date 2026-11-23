@@ -1,0 +1,12 @@
+{
+  "schema": "auto-research-1",
+  "status": "paused",
+  "updated": "1970-01-01T00:00:00Z",
+  "active_deliverable": null,
+  "next_action": "Start the loop only on your own branch after the researcher sets an active deliverable.",
+  "last_action": null,
+  "last_supervisor_at": null,
+  "idle": null,
+  "tasks": [],
+  "threads": []
+}

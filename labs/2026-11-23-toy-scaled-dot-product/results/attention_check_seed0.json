@@ -1,0 +1,11 @@
+{
+  "relative_error_max": 0.0,
+  "pass": true,
+  "shape": [
+    2,
+    4,
+    8,
+    16
+  ],
+  "seed": 0
+}

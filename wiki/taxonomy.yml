@@ -1,0 +1,43 @@
+scope: project
+# Non-empty only for a nested wiki whose sources live under its own folder.
+allowed_source_prefixes: []
+# Only dated records may be cited as raw wiki sources.
+citable_wiki_prefixes:
+  - wiki/records/
+record_folders:
+  - records
+# Paths that must not reappear in compiled prose. Template default: none.
+retired_path_prefixes: []
+# One page type per folder. Compiled pages need 1–3 topics from the list below
+# (records and folder index.md exempt). Folder meanings: wiki/README.md.
+page_types:
+  concept: {folder: concepts}
+  method: {folder: methods}
+  comparison: {folder: comparisons}
+  implementation: {folder: implementations}
+  question: {folder: questions}
+  literature: {folder: literature}
+  algorithm: {folder: algorithms}
+  model: {folder: models}
+  technique: {folder: techniques}
+  deadend: {folder: deadends}
+  project: {folder: project}
+  system: {folder: system}
+  package: {folder: package}
+  thesis: {folder: "."}
+statuses:
+  - provisional
+  - active
+  - settled
+  - open
+  - closed
+  - superseded
+# Living vocabulary (bootstrap-once on consumers; not re-synced).
+# Seeds OS terms for wiki/system/. Ingest adds subjects via ensure_topics.py.
+# Do not reuse page_type names as topics.
+topics:
+  - Research Pipeline
+  - Knowledge Systems
+  - Lab OS Architecture
+  - Lab Practice
+  - Manuscripts

@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "description": "Pinned frontend vendor downloads for the AutoLab dashboard. Installed by install_vendor.py.",
+  "packages": {
+    "mermaid": {
+      "version": "11.4.1",
+      "kind": "files",
+      "files": [
+        {
+          "url": "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
+          "sha256": "a43bc1afd446f9c4cc66ac5dd45d02e8d65e26fc5344ec0ef787f88d6ddb6f9e",
+          "path": "mermaid/mermaid.min.js"
+        }
+      ],
+      "markers": [
+        "mermaid/mermaid.min.js"
+      ]
+    },
+    "marked": {
+      "version": "15.0.7",
+      "kind": "files",
+      "files": [
+        {
+          "url": "https://cdn.jsdelivr.net/npm/marked@15.0.7/lib/marked.umd.js",
+          "sha256": "ae501969d4c7f1b433d80db12aea7e4228291e18fa8121e46337c73cb09c8683",
+          "path": "marked/marked.umd.js"
+        }
+      ],
+      "markers": [
+        "marked/marked.umd.js"
+      ]
+    },
+    "dompurify": {
+      "version": "3.2.3",
+      "kind": "files",
+      "files": [
+        {
+          "url": "https://cdn.jsdelivr.net/npm/dompurify@3.2.3/dist/purify.min.js",
+          "sha256": "68769fa503bf609ec914fdbeba73eb1ea6fb4491292d0d0e691ea75aad570217",
+          "path": "dompurify/purify.min.js"
+        }
+      ],
+      "markers": [
+        "dompurify/purify.min.js"
+      ]
+    },
+    "highlight": {
+      "version": "11.11.1",
+      "kind": "files",
+      "files": [
+        {
+          "url": "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.11.1/highlight.min.js",
+          "sha256": "c4a399dd6f488bc97a3546e3476747b3e714c99c57b9473154c6fb8d259b9381",
+          "path": "highlight/highlight.min.js"
+        }
+      ],
+      "markers": [
+        "highlight/highlight.min.js"
+      ]
+    },
+    "katex": {
+      "version": "0.16.11",
+      "kind": "npm_tarball",
+      "url": "https://registry.npmjs.org/katex/-/katex-0.16.11.tgz",
+      "sha256": "8c5494c5f7d8e8bf73ff3fe64d4bd09a340e4878b7eec9bbd9ef8d8f3e24193f",
+      "map": [
+        {
+          "from": "package/dist/katex.min.js",
+          "to": "katex/katex.min.js"
+        },
+        {
+          "from": "package/dist/katex.min.css",
+          "to": "katex/katex.min.css"
+        },
+        {
+          "from": "package/dist/fonts",
+          "to": "katex/fonts"
+        },
+        {
+          "from": "package/LICENSE",
+          "to": "katex/LICENSE"
+        }
+      ],
+      "markers": [
+        "katex/katex.min.js",
+        "katex/katex.min.css",
+        "katex/fonts/KaTeX_Main-Regular.ttf"
+      ]
+    },
+    "pdfjs": {
+      "version": "6.4.299",
+      "kind": "npm_tarball",
+      "url": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+      "sha256": "86269b40170eb41740ea05ad2102d71d33de4f122b34eb2f478be0ea7779c415",
+      "map": [
+        {
+          "from": "package/build",
+          "to": "pdfjs/build"
+        },
+        {
+          "from": "package/web",
+          "to": "pdfjs/web"
+        },
+        {
+          "from": "package/cmaps",
+          "to": "pdfjs/cmaps"
+        },
+        {
+          "from": "package/standard_fonts",
+          "to": "pdfjs/standard_fonts"
+        },
+        {
+          "from": "package/wasm",
+          "to": "pdfjs/wasm"
+        },
+        {
+          "from": "package/LICENSE",
+          "to": "pdfjs/LICENSE"
+        }
+      ],
+      "markers": [
+        "pdfjs/build/pdf.mjs",
+        "pdfjs/build/pdf.worker.mjs",
+        "pdfjs/web/pdf_viewer.mjs",
+        "pdfjs/web/pdf_viewer.css"
+      ]
+    }
+  }
+}

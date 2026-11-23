@@ -1,0 +1,19 @@
+name: Tag AutoLab version
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - config.yml
+    branches: [main]
+
+jobs:
+  note:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show os_version
+        run: |
+          ver=$(python3 -c "import re; t=open('config.yml').read(); m=re.search(r'(?m)^\\s*os_version:\\s*[\"\\']?([^\"\\'\\n]+)', t); print(m.group(1).strip() if m else '')")
+          echo "AutoLab os_version=${ver}"
+          echo "Consumers should run skills/autolab/scripts/sync_apply.py --bump-pin (or their lab-os-sync workflow) and open a PR."

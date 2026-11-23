@@ -1,0 +1,25 @@
+{
+  "search": {
+    "api_key": "",
+    "embedding_model": "text-embedding-3-small",
+    "search_model": "gpt-4o"
+  },
+  "pages": {
+    "references": 20,
+    "labs": 20,
+    "threads": 20
+  },
+  "home": {
+    "wiki_folders": 6,
+    "lab_rows": 4,
+    "lab_title_lines": 2,
+    "graph_height": "460px",
+    "queue_height": "204px"
+  },
+  "search_hits": {
+    "navbar": 5,
+    "page": 50
+  },
+  "wiki_folder_page": 40,
+  "json_table_height": "304px"
+}

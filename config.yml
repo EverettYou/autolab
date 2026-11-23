@@ -1,0 +1,12 @@
+# Lab repository config (project zone — not named after any template).
+# Identity: ``name`` is the stable slug; ``title`` / ``intro`` are display chrome (never synced).
+# create_project resets consumers to notes:false and lib only when --package is passed.
+os_version: "0.1.3"
+name: autolab
+title: AutoLab
+intro: "Shared lab OS: references, labs, and wiki are the default triad; notes and lib are optional. Threads under .auto-research drive the agent loop."
+features:
+  notes: true
+  lib: true
+package: toyattn
+loop_schema: auto-research-1
