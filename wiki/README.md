@@ -9,18 +9,18 @@ package work, plus the dated records those lessons came from. Raw material stays
 [`skills/wiki-ingest`](../skills/wiki-ingest/SKILL.md); look up via
 [`skills/wiki-query`](../skills/wiki-query/SKILL.md). Start browsing at [index.md](index.md).
 
-## Role vs the rest of the repo
+## Role
 
 | Place | Holds |
 | --- | --- |
 | `wiki/` ledger pages | Durable, cited claims and routers |
-| `wiki/project/` | Researcher-facing Lab OS manual (sync zone) |
+| `wiki/system/` | Lab OS manual (sync zone) |
+| `wiki/project/` | This lab's research-program pages (not synced) |
+| `taxonomy.yml` → `topics` | Living vocabulary (bootstrap-once; ingest may add) |
 | `wiki/package/` | Manual of `lib/` when `features.lib` is on |
 | `wiki/records/` | Dated write-ups + `records/log.md` |
-| `references/<id>/` | External sources (cite; don’t copy) |
-| `labs/<id>/` | Experiments (ingest from `REPORT.md` when claims hold) |
-| `notes/<Project>/` | Manuscripts (cite `main.pdf`; don’t paste TeX) |
-| `.auto-research/` | Threads / loop decisions — not wiki pages |
+
+Other floors (`references/`, `labs/`, `notes/`, Threads): see **vs other floors** below.
 
 ## Navigation: classifier tree, not a hub
 
@@ -36,23 +36,26 @@ package work, plus the dated records those lessons came from. Raw material stays
 ## What lives where
 
 Ledger folders below are **created when the first page is ingested**. Do not pre-create empty
-domain trees in the template.
+domain trees in the template. **Naming:** folder `concepts/` → `page_type: concept`;
+`literature/`, `project/`, `system/`, `package/` keep the same stem; `deadends/` → `deadend`.
+Types are defined in `taxonomy.yml`.
 
-| Folder | Holds | `page_type` | Topic list |
-| --- | --- | --- | --- |
-| `concepts/` | Cross-cutting ideas compiled from several sources | `concept` | `topics` |
-| `methods/` | Methods at the scientific level for this project | `method` | `topics` |
-| `comparisons/` | Regime-tagged head-to-head results | `comparison` | `topics` |
-| `questions/` | Research questions and what would settle them | `question` | `topics` |
-| `implementations/` | Maps of a code base, package component, or external repo | `implementation` | `topics` or `project_topics` |
-| `papers/` | Routers from one reference to compiled pages and labs | `paper` | none |
-| `algorithms/` | One algorithm or routine | `algorithm` | `topics` |
-| `models/` | One model family or model-side finding | `model` | `topics` |
-| `techniques/` | Reusable practices and operational gotchas | `technique` | `topics` or `project_topics` |
-| `dead-ends/` | Settled negatives | `dead-end` | `topics` |
-| `project/` | Lab OS / product manual | `project` | `project_topics` |
-| `package/` | Shared-code manual under `lib/` | `package` | `project_topics` |
-| `records/` | Dated write-ups; also `records/log.md` | exempt | exempt |
+| Folder | Holds |
+| --- | --- |
+| `concepts/` | Cross-cutting ideas compiled from several sources |
+| `methods/` | Methods at the scientific level for this project |
+| `comparisons/` | Regime-tagged head-to-head results |
+| `questions/` | Research questions and what would settle them |
+| `implementations/` | Maps of a code base, package component, or external repo |
+| `literature/` | Literature reviews over a **cluster** of references |
+| `algorithms/` | One algorithm or routine |
+| `models/` | One model family or model-side finding |
+| `techniques/` | Reusable practices and operational gotchas |
+| `deadends/` | Settled negatives |
+| `project/` | Research-program pages for this lab |
+| `system/` | Lab OS manual (sync zone) |
+| `package/` | Shared-code manual under `lib/` |
+| `records/` | Dated write-ups; also `records/log.md` (exempt from compiled-page / topics) |
 
 Root files: `README.md` (this contract), `index.md` (classifier), `thesis.md` (synthesis),
 `sources.yml` (provenance ledger), `taxonomy.yml` (controlled vocabulary).
@@ -60,7 +63,8 @@ Root files: `README.md` (this contract), `index.md` (classifier), `thesis.md` (s
 ## Knowledge flow
 
 - **References → wiki.** After reproduction, `references/<id>/reproduce/` is evidence. Ingest into
-  ledger pages or `dead-ends/` as appropriate.
+  ledger pages, `literature/` reviews (clusters of papers), or `deadends/` as appropriate. Do not
+  mirror a single paper as a wiki page; use optional `references/<id>/README.md` only for archive notes.
 - **Labs → wiki.** Ingest once `REPORT.md` has methods, findings, uncertainty, and a wiki handoff.
 - **Notes → wiki.** Cite `notes/<project>/main.pdf`; do not paste manuscripts.
 - **Decisions.** Researcher decisions go through Threads in `.auto-research/`, not into wiki pages.
@@ -71,7 +75,10 @@ Every Markdown page outside `records/` is a compiled page, except this root `REA
 `index.md`, `records/log.md`, and folder `index.md` sub-indexes.
 
 Frontmatter (YAML): `title`, `page_type`, `status`, `updated`, `source_refs`, `idea_ids`, and
-`topics` / `project_topics` as required by `taxonomy.yml`.
+`topics` (required on every compiled page, including `thesis.md`). Topics must be listed under
+`taxonomy.yml` → `topics`; that list **grows** — when ingest needs a new subject, add it with
+`skills/wiki-ingest/scripts/ensure_topics.py` before tagging the page. Records and folder
+`index.md` guides are exempt.
 
 Directly under the H1: **Summary**, **Sources**, **Last updated**. End with `## Related pages`.
 When you add a leaf page, list it in that folder's `index.md`. When you create a new top-level

@@ -473,6 +473,6 @@ window.addEventListener('workbench-before-update',e=>{if([...ProjectUI.layers.va
 
 export {
   syncProjectLayers, projectEditorLocation, openProjectEditor, projectNotice, updateProjectBuildState,
-  paintProjectMainBadge, closeMainTeXPicker, selectProjectFile, showProjectSource, showProjectPDF,
-  rememberProjectEditor, updateProjectDirty,
+  paintProjectMainBadge, closeMainTeXPicker, renderMainTeXSelector, selectProjectFile, showProjectSource,
+  showProjectPDF, rememberProjectEditor, updateProjectDirty,
 };

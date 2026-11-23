@@ -52,4 +52,4 @@ Handoff checklist (then set `phase: run`):
 - [ ] no `result.json` yet
 
 Dead end: two failed refinements, two failed reviews on the same gap, or an audit that cannot
-specify the core solver. Set `phase: rejected` and write the dead-end page (see the skill).
+specify the core solver. Set `phase: rejected` and write the deadend page (see the skill).

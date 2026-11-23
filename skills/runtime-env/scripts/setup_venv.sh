@@ -3,6 +3,8 @@
 # Idempotent. On machines with a curated preinstalled ML stack (e.g. EdenCode), it inherits the
 # baseline via --system-site-packages and installs only what the image does not already satisfy.
 #
+# Installer preference: ``uv`` when on PATH; otherwise standard ``python3 -m venv`` + ``pip``.
+#
 # Single source of truth for *what* is required when features.lib is on: lib/pyproject.toml.
 # Single source of truth for *versions of anything already on the image*: the container itself.
 #
@@ -21,11 +23,144 @@ PY="$VENV/bin/python"
 # shellcheck source=lib/profile_signals.sh
 source "$_SCRIPT_DIR/lib/profile_signals.sh"
 
-if ! command -v uv >/dev/null 2>&1; then
-  echo "uv not found. This script targets machines with uv (e.g. EdenCode dev container)." >&2
-  echo "On a bare machine, see skills/runtime-env/machines/ for alternatives." >&2
+HAVE_UV=0
+if command -v uv >/dev/null 2>&1; then
+  HAVE_UV=1
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "[setup_venv] python3 not found on PATH" >&2
   exit 1
 fi
+
+# Pick a host interpreter for the stdlib venv path. Prefer SETUP_VENV_PYTHON; otherwise the
+# newest python3.X on PATH that satisfies lib/pyproject.toml requires-python (macOS /usr/bin
+# python3 is often too old). uv path keeps using ``python3`` so curated images stay pinned.
+resolve_host_python() {
+  if [ -n "${SETUP_VENV_PYTHON:-}" ]; then
+    if [ ! -x "$SETUP_VENV_PYTHON" ]; then
+      echo "[setup_venv] SETUP_VENV_PYTHON is not executable: $SETUP_VENV_PYTHON" >&2
+      exit 1
+    fi
+    printf '%s' "$SETUP_VENV_PYTHON"
+    return
+  fi
+  python3 - "$LIB/pyproject.toml" <<'PY'
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+pyproject = Path(sys.argv[1])
+text = pyproject.read_text(encoding="utf-8")
+m = re.search(r'(?m)^\s*requires-python\s*=\s*"([^"]+)"\s*$', text)
+spec = m.group(1) if m else ">=3.11"
+
+def ok(ver: tuple[int, int]) -> bool:
+    # Tiny subset of PEP 440 used in this repo (>=X.Y, >=X.Y.Z).
+    for part in (p.strip() for p in spec.split(",")):
+        mm = re.fullmatch(r"(>=|>|<=|<|==)\s*(\d+)(?:\.(\d+))?(?:\.(\d+))?", part)
+        if not mm:
+            return ver >= (3, 11)
+        op, major, minor, patch = mm.group(1), int(mm.group(2)), int(mm.group(3) or 0), int(mm.group(4) or 0)
+        target = (major, minor)
+        # Ignore patch for interpreter picking; CPython minors are what matter.
+        if op == ">=" and not (ver >= target):
+            return False
+        if op == ">" and not (ver > target):
+            return False
+        if op == "<=" and not (ver <= target):
+            return False
+        if op == "<" and not (ver < target):
+            return False
+        if op == "==" and ver != target:
+            return False
+    return True
+
+candidates: list[str] = []
+for name in (
+    "python3.14", "python3.13", "python3.12", "python3.11", "python3",
+):
+    path = shutil.which(name)
+    if path and path not in candidates:
+        candidates.append(path)
+# Also walk common framework locations when PATH was stripped (CI / dry-run).
+for extra in (
+    "/usr/local/bin/python3",
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+    "/opt/homebrew/bin/python3",
+):
+    if os.path.isfile(extra) and os.access(extra, os.X_OK) and extra not in candidates:
+        candidates.append(extra)
+
+best = None
+best_ver = (-1, -1)
+for path in candidates:
+    try:
+        out = subprocess.check_output(
+            [path, "-c", "import sys; print(f'{sys.version_info[0]}.{sys.version_info[1]}')"],
+            text=True,
+        ).strip()
+        major, minor = (int(x) for x in out.split(".", 1))
+    except (OSError, subprocess.CalledProcessError, ValueError):
+        continue
+    ver = (major, minor)
+    if not ok(ver):
+        continue
+    if ver > best_ver:
+        best, best_ver = path, ver
+
+if best is None:
+    print(
+        f"[setup_venv] no host Python satisfies requires-python {spec!r}; "
+        "install Python 3.11+ or set SETUP_VENV_PYTHON",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+print(best)
+PY
+}
+
+# Create $VENV (uses USE_SYSTEM from the caller).
+create_venv() {
+  if [ "$HAVE_UV" = 1 ]; then
+    if [ "$USE_SYSTEM" = true ]; then
+      echo "[setup_venv] uv venv --system-site-packages $VENV  (curated baseline for $PROFILE)"
+      uv venv --python python3 --system-site-packages "$VENV"
+    else
+      echo "[setup_venv] uv venv $VENV  (isolated install for $PROFILE)"
+      uv venv --python python3 "$VENV"
+    fi
+  else
+    HOST_PYTHON="$(resolve_host_python)"
+    echo "[setup_venv] host_python=$HOST_PYTHON ($("$HOST_PYTHON" -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]}")'))"
+    if [ "$USE_SYSTEM" = true ]; then
+      echo "[setup_venv] $HOST_PYTHON -m venv --system-site-packages $VENV  (curated baseline for $PROFILE; no uv)"
+      "$HOST_PYTHON" -m venv --system-site-packages "$VENV"
+    else
+      echo "[setup_venv] $HOST_PYTHON -m venv $VENV  (isolated install for $PROFILE; no uv)"
+      "$HOST_PYTHON" -m venv "$VENV"
+    fi
+    if ! "$PY" -m pip --version >/dev/null 2>&1; then
+      echo "[setup_venv] bootstrapping pip via ensurepip"
+      "$PY" -m ensurepip --upgrade
+    fi
+    "$PY" -m pip install --upgrade pip
+  fi
+}
+
+# pip_install [pip-args…] — uv pip when available, else python -m pip.
+pip_install() {
+  if [ "$HAVE_UV" = 1 ]; then
+    uv pip install --python "$PY" "$@"
+  else
+    "$PY" -m pip install "$@"
+  fi
+}
+
 if [ ! -f "$LIB/pyproject.toml" ]; then
   echo "[setup_venv] missing lib/pyproject.toml under $ROOT" >&2
   exit 1
@@ -69,6 +204,11 @@ PROFILE="$(profile_match_id)"
 echo "[setup_venv] root=$ROOT"
 echo "[setup_venv] matched_profile=$PROFILE"
 echo "[setup_venv] features.lib=$FEATURE_LIB package=${PACKAGE_NAME:-(none)}"
+if [ "$HAVE_UV" = 1 ]; then
+  echo "[setup_venv] installer=uv ($(command -v uv))"
+else
+  echo "[setup_venv] installer=pip (uv not on PATH; using python3 -m venv + pip)"
+fi
 
 if [ -d "$VENV" ]; then
   echo "[setup_venv] removing existing $VENV"
@@ -88,28 +228,28 @@ case "$PROFILE" in
     ;;
 esac
 
-if [ "$USE_SYSTEM" = true ]; then
-  echo "[setup_venv] uv venv --system-site-packages $VENV  (curated baseline for $PROFILE)"
-  uv venv --python python3 --system-site-packages "$VENV"
-else
-  echo "[setup_venv] uv venv $VENV  (isolated install for $PROFILE)"
-  uv venv --python python3 "$VENV"
-fi
+create_venv
 
 # Always need pytest/dev tooling available for skills; when lib is off, install pytest only.
 if [ "$INSTALL_LIB" != 1 ]; then
   echo "[setup_venv] features.lib off — installing dashboard/skills deps (pytest) only"
-  uv pip install --python "$PY" pytest
+  pip_install pytest
 else
-  echo "[setup_venv] uv pip install -e lib --no-deps"
-  uv pip install --python "$PY" -e "$LIB" --no-deps
+  echo "[setup_venv] pip install -e lib --no-deps"
+  pip_install -e "$LIB" --no-deps
 
   if [ "$USE_SYSTEM" = true ]; then
     if ! "$PY" -c 'import packaging' >/dev/null 2>&1; then
       echo "[setup_venv] installing packaging (needed to walk lib/pyproject.toml against the baseline)"
-      uv pip install --python "$PY" packaging
+      pip_install packaging
     fi
     echo "[setup_venv] preferring container packages that already satisfy lib/pyproject.toml"
+    export SETUP_VENV_INSTALLER
+    if [ "$HAVE_UV" = 1 ]; then
+      SETUP_VENV_INSTALLER=uv
+    else
+      SETUP_VENV_INSTALLER=pip
+    fi
     if ! "$PY" - "$LIB/pyproject.toml" <<'PY'
 import os
 import subprocess
@@ -149,6 +289,15 @@ def satisfied(raw: str) -> bool:
 def log(msg: str = "") -> None:
     print(msg, flush=True)
 
+def install_no_deps(raw: str) -> None:
+    installer = os.environ.get("SETUP_VENV_INSTALLER", "uv")
+    if installer == "uv":
+        cmd = ["uv", "pip", "install", "--python", sys.executable, "--no-deps", raw]
+    else:
+        cmd = [sys.executable, "-m", "pip", "install", "--no-deps", raw]
+    log(f"[setup_venv] {' '.join(cmd[:-1])} {raw}")
+    subprocess.check_call(cmd, env=os.environ.copy())
+
 log("[setup_venv] direct deps vs container:")
 for raw in list(queue):
     req = Requirement(raw)
@@ -175,11 +324,7 @@ while queue:
         seen.add(key)
         continue
     seen.add(key)
-    log(f"[setup_venv] uv pip install --no-deps {raw}")
-    subprocess.check_call(
-        ["uv", "pip", "install", "--python", sys.executable, "--no-deps", raw],
-        env=os.environ.copy(),
-    )
+    install_no_deps(raw)
     installed_into_venv.append(raw)
     dist = metadata.distribution(req.name)
     for parent in dist.requires or []:
@@ -200,14 +345,19 @@ PY
       exit 1
     fi
   else
-    echo "[setup_venv] no curated baseline detected; uv pip install -e \"lib[dev]\""
-    uv pip install --python "$PY" -e "$LIB[dev]"
+    echo "[setup_venv] no curated baseline detected; pip install -e \"lib[dev]\""
+    pip_install -e "$LIB[dev]"
   fi
 fi
 
+# Prefer having uv inside the repo venv for later agent commands; optional on bare metal.
 if [ ! -x "$VENV/bin/uv" ]; then
-  echo "[setup_venv] ensure uv is available inside repo base venv"
-  uv pip install --python "$PY" uv
+  if [ "$HAVE_UV" = 1 ]; then
+    echo "[setup_venv] ensure uv is available inside repo base venv"
+    pip_install uv
+  else
+    echo "[setup_venv] skipping uv bootstrap inside venv (host has no uv; pip is enough)"
+  fi
 fi
 
 echo "[setup_venv] verifying stack"

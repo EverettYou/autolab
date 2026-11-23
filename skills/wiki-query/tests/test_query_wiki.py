@@ -42,8 +42,8 @@ class QueryWikiTests(unittest.TestCase):
         )
         write(
             root,
-            "dead-ends/masked-diffusion.md",
-            page("Dead end: masked diffusion", "Does not reproduce.", page_type="dead-end", status="settled")
+            "deadends/masked-diffusion.md",
+            page("Dead end: masked diffusion", "Does not reproduce.", page_type="deadend", status="settled")
             + "\n## Revisit if\n\nAuthors release code and weights.\n\n## Related pages\n",
         )
         write(
@@ -73,7 +73,7 @@ class QueryWikiTests(unittest.TestCase):
             text = MODULE.render(root, ["beam", "diffusion"])
             dead = text.split("## Dead ends", 1)[1].split("## Open questions", 1)[0]
             questions = text.split("## Open questions", 1)[1]
-            self.assertIn("wiki/dead-ends/masked-diffusion.md", dead)
+            self.assertIn("wiki/deadends/masked-diffusion.md", dead)
             self.assertIn("Authors release code and weights.", dead)
             self.assertIn("wiki/questions/open-one.md", questions)
             self.assertNotIn("wiki/questions/closed-one.md", questions)

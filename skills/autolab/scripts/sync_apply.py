@@ -7,8 +7,7 @@ Ownership model for paths in Autolab:
 * **Bootstrap-once** — ``.auto-research/`` scaffold only if the consumer has no folder yet.
 * **Project payloads** — never synced (dated labs, reference bodies, notes manuscripts, lib
   package code, domain wiki ledgers, consumer ``config.yml`` / root README).
-* **Demo / fake examples** (future) — may exist in Autolab so the dashboard can run locally;
-  they must **not** be listed below. Keep sync off for those paths.
+  ``create_project`` clears those floors for a new lab; this script must not copy them either.
 
 Usage (from the Autolab checkout):
   python skills/autolab/scripts/sync_apply.py --from /path/to/autolab --to /path/to/consumer
@@ -25,16 +24,20 @@ from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Sync registry — everything Autolab owns as OS today goes here.
-# Do not add fake labs / fake notes / fake lib demos here.
+# Do not add project payloads here (dated labs, reference bodies, notes, lib code stay local).
 # ---------------------------------------------------------------------------
 
 # Wholesale directory trees (relative to template root).
 SYNC_TREES = (
     "skills",
     "dashboard",
-    "wiki/project",  # Lab OS architecture manual (not domain science)
+    "wiki/system",  # Lab OS architecture manual (not domain science)
     "labs/_tools",
 )
+
+# Removed from consumers on sync (renames / retired OS paths only).
+# Never list wiki/project or scaffold/project here — research-program ledger + its ingest templates.
+RETIRED_TREES: tuple[str, ...] = ()
 
 # Single files upserted every sync.
 SYNC_FILES = (
@@ -45,11 +48,12 @@ SYNC_FILES = (
     "notes/README.md",
     "lib/README.md",
     "wiki/README.md",
-    "wiki/taxonomy.yml",
+    # wiki/taxonomy.yml is bootstrap-once (consumer extends topics/; never overwrite on sync)
 )
 # Never sync a root VERSION file. OS release is config.yml → os_version only
 # (see template_os_version / --bump-pin; fs_health_lint retires VERSION).
 assert "VERSION" not in SYNC_FILES
+assert "wiki/taxonomy.yml" not in SYNC_FILES
 
 # Scaffold files copied only when consumer lacks .auto-research/ entirely.
 BOOTSTRAP_AUTO_RESEARCH = (
@@ -59,14 +63,14 @@ BOOTSTRAP_AUTO_RESEARCH = (
     "threads/README.md",
 )
 
-# Explicit non-sync (documentation + future demos). Not copied by this script.
+# Explicit non-sync. Not copied by this script.
 # - skills/autolab/ (template-only; stripped)
 # - config.yml, root README.md, AGENTS.md, tool bootstrap pointer (consumer identity)  # rules-lint: allow
 # - labs/labs.json, references/references.json (live catalogs)
 # - dated labs/<YYYY-*>/, references/<id>/, notes/<manuscript>/, lib/src/, lib/tests/
-# - wiki domain ledgers (concepts/, methods/, …), wiki/thesis.md, wiki/sources.yml, wiki/records/
+# - wiki domain ledgers (project/, concepts/, methods/, …), wiki/thesis.md, wiki/sources.yml,
+#   wiki/records/, wiki/taxonomy.yml after first copy (living topics list)
 # - .auto-research/ after first bootstrap (live loop + Threads)
-# - Future: any Autolab-only demo fixtures under labs/, notes/, lib/ used to populate the dashboard
 
 # Never touch these names anywhere under a synced tree
 SKIP_NAMES = {
@@ -81,6 +85,11 @@ SKIP_NAMES = {
     "scheduler.json",
 }
 
+# Downloadable dashboard vendor trees (local install via install_vendor.py; not OS source).
+VENDOR_DOWNLOAD_DIRS = frozenset(
+    {"mermaid", "katex", "pdfjs", "marked", "dompurify", "highlight"}
+)
+
 # Never sync template-only admin skill into consumers (include legacy folder name).
 TEMPLATE_ONLY_SKILL_PARTS = {"autolab", "manage-projects"}
 
@@ -90,6 +99,16 @@ def should_skip(rel: Path) -> bool:
     template checkout may be named ``autolab`` and must not trip template-only filters)."""
     parts = set(rel.parts)
     if parts & SKIP_NAMES:
+        return True
+    # dashboard/frontend/vendor/<downloadable>/… — installed on the consumer by ./run.sh
+    if (
+        len(rel.parts) >= 3
+        and rel.parts[0] == "frontend"
+        and rel.parts[1] == "vendor"
+        and rel.parts[2] in VENDOR_DOWNLOAD_DIRS
+    ):
+        return True
+    if len(rel.parts) >= 3 and rel.parts[0] == "frontend" and rel.parts[1] == "vendor" and rel.parts[2] == ".installed":
         return True
     if parts & TEMPLATE_ONLY_SKILL_PARTS:
         return True
@@ -158,6 +177,22 @@ def bootstrap_auto_research(source: Path, dest: Path, *, dry_run: bool) -> list[
     return changes
 
 
+def bootstrap_taxonomy(source: Path, dest: Path, *, dry_run: bool) -> list[str]:
+    """Copy wiki/taxonomy.yml once when the consumer has none (never overwrite living topics)."""
+    src = source / "wiki" / "taxonomy.yml"
+    dst = dest / "wiki" / "taxonomy.yml"
+    if not src.is_file():
+        return []
+    if dst.is_file():
+        return []
+    changes = ["bootstrap wiki/taxonomy.yml (init-once; consumer owns topics thereafter)"]
+    if dry_run:
+        return changes
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+    return changes
+
+
 def ensure_consumer_auto_research_gitignore(dest: Path, *, dry_run: bool) -> list[str]:
     """Ignore the whole `.auto-research/` folder on consumers (live checkout data)."""
     gitignore = dest / ".gitignore"
@@ -195,12 +230,19 @@ def apply(source: Path, dest: Path, *, dry_run: bool) -> list[str]:
             continue
         changes.extend(copy_file(src, dest / name, dry_run=dry_run, label=name))
     changes.extend(bootstrap_auto_research(source, dest, dry_run=dry_run))
+    changes.extend(bootstrap_taxonomy(source, dest, dry_run=dry_run))
     changes.extend(ensure_consumer_auto_research_gitignore(dest, dry_run=dry_run))
     # Consumers must not keep template-only skills
     for name in TEMPLATE_ONLY_SKILL_PARTS:
         stray = dest / "skills" / name
         if stray.exists():
             changes.append(f"remove skills/{name} (template-only)")
+            if not dry_run:
+                shutil.rmtree(stray) if stray.is_dir() else stray.unlink()
+    for name in RETIRED_TREES:
+        stray = dest / name
+        if stray.exists():
+            changes.append(f"remove {name} (retired)")
             if not dry_run:
                 shutil.rmtree(stray) if stray.is_dir() else stray.unlink()
     return changes

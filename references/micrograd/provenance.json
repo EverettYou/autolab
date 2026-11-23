@@ -1,0 +1,37 @@
+{
+  "id": "micrograd",
+  "kind": "repository",
+  "title": "micrograd",
+  "arxiv_id": null,
+  "authors": [
+    "Andrej Karpathy"
+  ],
+  "abstract": "A tiny Autograd engine and a small neural-net library on top, for educational purposes. Demo: repository-only reference (no paper.pdf).",
+  "categories": [],
+  "published": null,
+  "upstream_updated": null,
+  "entry_url": "https://github.com/karpathy/micrograd",
+  "pdf_url": null,
+  "pdf": null,
+  "pdf_sha256": null,
+  "pages": null,
+  "fetched_at": "2026-11-23T10:43:37+00:00",
+  "fetch_status": "registered",
+  "metadata_source": "url",
+  "title_match_score": null,
+  "aliases": [],
+  "repos": [
+    {
+      "name": "micrograd",
+      "path": "repos/micrograd",
+      "url": "https://github.com/karpathy/micrograd.git",
+      "commit": "7bc720e951fe422b8f8814aa5aa1b64121d26b4c",
+      "retrieved_at": "2026-11-23T10:50:46+00:00"
+    }
+  ],
+  "reproduction": null,
+  "attempts": [],
+  "status": "fetched",
+  "legacy_paths": [],
+  "note": "Template demo: pure repository reference; local clone restored via View Repo."
+}

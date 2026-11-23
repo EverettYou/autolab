@@ -1,0 +1,17 @@
+{
+  "id": "2026-11-23-bert-mask-baseline",
+  "title": "BERT MLM toy baseline shape",
+  "stage": "complete",
+  "summary": "Does a one-layer bag-of-embeddings MLM head on a 32-token toy corpus produce a finite cross-entropy below chance (log V)?",
+  "current_focus": "Done \u2014 toy MLM beats chance NLL.",
+  "next_action": "None.",
+  "created": "2026-11-23",
+  "updated": "2026-11-23",
+  "references": [
+    "bert-pretraining"
+  ],
+  "discussion": [],
+  "parents": [
+    "2026-11-23-toy-scaled-dot-product"
+  ]
+}

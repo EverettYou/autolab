@@ -1,6 +1,6 @@
 ---
 title: Autolab
-page_type: project
+page_type: system
 status: active
 updated: 2026-11-20
 source_refs:
@@ -8,7 +8,7 @@ source_refs:
   - AGENTS.md
   - config.yml
 idea_ids: []
-project_topics:
+topics:
   - Research Pipeline
   - Knowledge Systems
   - Lab OS Architecture
@@ -32,34 +32,45 @@ conventions and tools so agentic research stays inspectable, reproducible, and o
 
 
 ```mermaid
+---
+config:
+  themeVariables:
+    fontSize: "14px"
+  flowchart:
+    padding: 8
+    minNodeWidth: 50
+    nodeSpacing: 28
+    rankSpacing: 14
+    diagramPadding: 8
+    wrappingWidth: 140
+    titleTopMargin: 0
+    subGraphTitleMargin:
+      top: 0
+      bottom: 16
+---
 flowchart TB
+  subgraph control ["Dashboard"]
+    direction LR
+    HUM["Human"]
+    AGENT["Agent · skills/"]
+    HUM <-->|"threads"| AGENT
+  end
+
   subgraph tower ["Knowledge Distillation Tower"]
     direction TB
-
     EXT["papers · repos"]
-
-    subgraph dirty ["Dirty zone"]
-      REF["references/"]
-    end
-
+    REF["references/  (dirty)"]
     REPRO["./reproduce/"]
-
-    subgraph fuzzy ["Fuzzy zone"]
-      LAB["labs/"]
-    end
-
-    subgraph clean ["Clean zone"]
-      WIKI["wiki/"]
-      LIB["lib/"]
-    end
-
+    LAB["labs/  (fuzzy)"]
+    WIKI["wiki/  (clean)"]
+    LIB["lib/  (clean)"]
     NOTES["notes/"]
 
     EXT -->|"fetch"| REF
     REF -->|"reproduce"| REPRO
     REPRO -->|"followup"| LAB
-    REPRO -->|"injest"| WIKI
-    LAB -->|"injest"| WIKI
+    REPRO -->|"ingest"| WIKI
+    LAB -->|"ingest"| WIKI
     LAB -->|"tool build"| LIB
     LIB -->|"tool use"| LAB
     REF -.->|"cite"| NOTES
@@ -67,22 +78,15 @@ flowchart TB
     LAB -.->|"cite"| NOTES
   end
 
-  subgraph control ["dashboard/"]
-    direction TB
-    HUM["Human"]
-    AGENT["Agent<br>skills/"]
-
-    HUM <-->|"threads"| AGENT
-    HUM -.->|"monitor"| tower
-    AGENT -.->|"auto-research"| tower
-  end
+  HUM -.->|"monitor"| tower
+  AGENT -.->|"auto-research"| tower
 ```
 
 Autolab is mainly a **dashboard**: the interface where you stay in the loop with the agent
 (via Threads), monitor the run, and steer when needed. The process itself is a **knowledge
 distillation tower** — stepwise refinement from raw material (papers, repos) through dirty
 (`references/`), fuzzy (`labs/`), and clean (`wiki/`, `lib/`) zones, ending in research products:
-`notes/` and the shared package. Detail: [[project/distillation-tower|Distillation tower]].
+`notes/` and the shared package. Detail: [[system/distillation-tower|Distillation tower]].
 
 ## Why this, not another auto-research pile
 
@@ -108,16 +112,15 @@ any one model or tool**:
    trail — not the chat transcript.
 
 Agent operating instructions live in root [AGENTS.md](../../AGENTS.md); procedures live in
-`skills/*/SKILL.md`. The human entry point is [README](../../README.md). This `project/` folder
-is the **user manual**: why the pieces exist and how a researcher should think about them.
+`skills/*/SKILL.md`. The human entry point is [README](../../README.md). This `system/` folder
+is the **OS manual**: why the pieces exist and how a researcher should think about them.
 
 ## Manual chapters
 
-- [[project/distillation-tower|Distillation tower]] — filter + floors; knowledge vs code
-- [[project/dashboard-and-threads|Dashboard and Threads]] — why agentic work needs a control surface
-- [[project/shared-package|Shared package]] — optional `lib/`, what belongs there
-- [[project/honest-comparison|Honest comparison]] — how we treat numbers
-- [[project/spending-compute|Spending compute]] — smoke, ETA, escalate big burns
+- [[system/distillation-tower|Distillation tower]] — filter + floors; knowledge vs code
+- [[system/dashboard-and-threads|Dashboard and Threads]] — why agentic work needs a control surface
+- [[system/shared-package|Shared package]] — optional `lib/`, what belongs there
+- [[system/spending-compute|Spending compute]] — smoke, ETA, escalate big burns
 
 ## Related pages
 

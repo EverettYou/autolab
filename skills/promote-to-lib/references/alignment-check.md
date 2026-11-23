@@ -61,5 +61,4 @@ Rules:
 
 - Alignment is not benchmarking: do not compare against the roster or a baseline registry here.
 - Alignment is not a source audit: code fidelity to the paper is the `audit` skill's job.
-- Record the configuration fields that move the number; see
-  `wiki/project/honest-comparison.md`.
+- Record the configuration fields that move the number; tag the setting and cite the artifact.

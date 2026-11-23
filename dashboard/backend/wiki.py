@@ -21,8 +21,8 @@ WIKILINK_TARGET = re.compile(r"\[\[([^\[\]\n|#]+)(?:#[^\[\]\n|]*)?(?:\|[^\[\]\n]
 EXCERPT_MARKUP = re.compile(r"[#>*_`\[\]|]")
 MD_HREF = re.compile(r"\]\(\s*<?([^)\s>]+?\.md)(?:#[^)\s>]*)?>?(?:\s+[\"'(][^)]*)?\)")
 MENTION = re.compile(r"(?<![\w-])(references|labs)/([A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9])")
-TOP_ORDER = ("project", "concepts", "methods", "comparisons", "questions", "models",
-             "techniques", "dead-ends", "implementations", "papers", "lib", "records")
+TOP_ORDER = ("system", "project", "concepts", "methods", "comparisons", "questions", "models",
+             "techniques", "deadends", "implementations", "literature", "lib", "records")
 TOP_PAGE_ORDER = ("index", "README", "thesis")
 ATTACHMENT_EXTS = frozenset({".yml", ".yaml", ".json", ".csv", ".txt"})
 SCAN_TTL = 1.0

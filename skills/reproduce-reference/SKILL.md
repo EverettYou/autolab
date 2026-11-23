@@ -113,7 +113,7 @@ recommendation and per-claim status into `gate-state.yaml`.
 
 - Revise: copy the improvements into `last_improvements`, increment `iteration`, and return to
   IMPLEMENT (code fixes) or RUN (scale or rerun only).
-- Reject: set `phase: rejected`, write `wiki/dead-ends/<id>.md` through `wiki-ingest` (what was
+- Reject: set `phase: rejected`, write `wiki/deadends/<id>.md` through `wiki-ingest` (what was
   tried, why it failed, "Revisit if"), set the reference status with
   `references_registry.py set <id> --status failed`, and record the attempt with
   `references_registry.py dispose <id> <slug> --decision dead-end --note "<reason>"`.
@@ -148,7 +148,7 @@ To rerun a promoted reproduction, unfold it into a new workspace:
 
 ## Rules
 
-- Trust zones are in `wiki/project/distillation-tower.md`. Reproduction never writes
+- Trust zones are in `wiki/system/distillation-tower.md`. Reproduction never writes
   `lib/`; the package re-implements from the evidence through `promote-to-lib`.
 - Keep expensive artifacts: rescue weights and configs, never delete them mid-loop. Weights worth
   keeping stay in the attempt workspace (or a cited lab `checkpoints/` path) until promoted

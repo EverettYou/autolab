@@ -70,7 +70,7 @@ The commit message and `last_action` record what was fixed; there is no separate
 
 Inputs: labs whose stage became `complete` since the last synthesis (`labs/labs.json`), new
 reproduction records (`references/<id>/reproduce/`), new lab results of record, new audit
-and integration records (`wiki/records/audits/`, `wiki/records/integrations/`), `wiki/dead-ends/`,
+and integration records (`wiki/records/audits/`, `wiki/records/integrations/`), `wiki/deadends/`,
 `wiki/thesis.md`, and the latest record in `wiki/records/synthesis/`.
 
 1. **Ingest** each finished lab and accepted reproduction through `skills/wiki-ingest` ("Lab
@@ -87,7 +87,7 @@ and integration records (`wiki/records/audits/`, `wiki/records/integrations/`), 
    |---|---|
    | Current understanding | settled against provisional results, with citations to labs, records, and registry cells, so closed threads are not queued again |
    | Patterns and insights | the mechanisms behind the numbers, which become DEEPEN or BROADEN work |
-   | Lessons and constraints | negatives and invariants (link `wiki/dead-ends/`) that new items must not contradict |
+   | Lessons and constraints | negatives and invariants (link `wiki/deadends/`) that new items must not contradict |
    | Open questions | one line each, concrete enough to become a search query, a reproduction, or a lab question |
    | Decision log | carried forward from the previous record, plus today's line |
 

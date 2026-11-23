@@ -227,7 +227,7 @@ When an instruction or decision is policy beyond one task ("always", "never", "f
 not live only in a thread (`AGENTS.md` graduating rules):
 
 1. Write the rule where it belongs: `AGENTS.md` when it binds every agent session, the owning
-   `skills/<name>/SKILL.md` when it is a procedure, or a `wiki/project/` page when it is a domain
+   `skills/<name>/SKILL.md` when it is a procedure, or a `wiki/system/` page when it is a domain
    constraint with its reason and the incident behind it.
 2. Update or remove any conflicting or stale copy elsewhere, and link instead of restating.
 3. Close the thread: `Graduated — codified in <path>, section "<heading>"`, with the one-line summary.

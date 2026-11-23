@@ -17,6 +17,17 @@ from pathlib import Path
 SKIP = {".git", ".venv", ".cache", ".pytest_cache", "__pycache__", ".runtime", ".tmp", "tools"}
 # Template-only: never ship this skill into consumer labs.
 TEMPLATE_ONLY_SKILLS = {"autolab"}
+# Downloadable vendor trees — consumers install via ./run.sh (install_vendor.py).
+VENDOR_DOWNLOAD_DIRS = ("mermaid", "katex", "pdfjs", "marked", "dompurify", "highlight")
+
+
+def _dashboard_ignore(directory: str, names: list[str]) -> set[str]:
+    ignored = {n for n in names if n in SKIP or n == ".git"}
+    # When copying dashboard/frontend/vendor/, skip downloadable package dirs + stamp.
+    parts = Path(directory).parts
+    if len(parts) >= 2 and parts[-2:] == ("frontend", "vendor"):
+        ignored.update(n for n in names if n in VENDOR_DOWNLOAD_DIRS or n == ".installed")
+    return ignored
 
 
 def copy_template(source: Path, dest: Path) -> None:
@@ -34,6 +45,8 @@ def copy_template(source: Path, dest: Path) -> None:
                     target,
                     ignore=shutil.ignore_patterns(*SKIP, ".git", *TEMPLATE_ONLY_SKILLS),
                 )
+            elif item.name == "dashboard":
+                shutil.copytree(item, target, ignore=_dashboard_ignore)
             else:
                 shutil.copytree(item, target, ignore=shutil.ignore_patterns(*SKIP, ".git"))
         else:
@@ -46,6 +59,7 @@ def copy_template(source: Path, dest: Path) -> None:
 
 
 def empty_project_zone(root: Path) -> None:
+    """Clear science floors so the new lab starts with empty catalogs and optional layers."""
     labs = root / "labs"
     for path in list(labs.iterdir()):
         if path.name.startswith("20") and path.is_dir():
@@ -61,7 +75,7 @@ def empty_project_zone(root: Path) -> None:
                 path.unlink()
     (refs / "references.json").write_text('{\n  "references": []\n}\n', encoding="utf-8")
 
-    # Optional layers off by default: keep empty notes README; leave lib stub or remove content
+    # Optional floors: keep contracts (READMEs); clear any manuscripts / package bodies.
     notes = root / "notes"
     if notes.is_dir():
         for path in list(notes.iterdir()):
@@ -70,6 +84,37 @@ def empty_project_zone(root: Path) -> None:
                     shutil.rmtree(path)
                 else:
                     path.unlink()
+
+    # Shared package starts empty unless --package enables features.lib.
+    lib = root / "lib"
+    if lib.is_dir():
+        for sub in ("src", "tests"):
+            folder = lib / sub
+            if folder.is_dir():
+                shutil.rmtree(folder)
+                folder.mkdir(parents=True, exist_ok=True)
+        pyproject = lib / "pyproject.toml"
+        pyproject.write_text(
+            '[build-system]\n'
+            'requires = ["hatchling"]\n'
+            'build-backend = "hatchling.build"\n'
+            '\n'
+            '# Placeholder until a consumer enables features.lib and adds src/<package>/.\n'
+            '[project]\n'
+            'name = "lab-lib"\n'
+            'version = "0.0.0"\n'
+            'description = "Optional shared package for this lab (empty until enabled)"\n'
+            'requires-python = ">=3.11"\n'
+            'dependencies = []\n'
+            '\n'
+            '[project.optional-dependencies]\n'
+            'dev = ["pytest"]\n'
+            '\n'
+            '[tool.pytest.ini_options]\n'
+            'testpaths = ["tests"]\n'
+            'pythonpath = ["src"]\n',
+            encoding="utf-8",
+        )
 
 
 def localize_auto_research(root: Path) -> None:
@@ -180,49 +225,73 @@ loop_schema: auto-research-1
     (root / "README.md").write_text(
         f"""# {display}
 
-Lab repository built on Autolab: archive literature in `references/`, run dated experiments
-in `labs/`, compile cited knowledge in `wiki/`, and steer work through `skills/` and the
-dashboard (Threads).
+Management toolkit for this agentic research project: literature, experiments, knowledge, notes,
+code, and progress live as files; the agent does routine work; you steer and decide.
 
-Agent operating instructions: [`AGENTS.md`](AGENTS.md). Skill catalog: [`skills/README.md`](skills/README.md).
+Agents read [`AGENTS.md`](AGENTS.md). This page is for you: what the lab covers and how to use it.
 
-## Quick start
+## How you work
+
+The only command you need to run yourself:
 
 ```bash
-.venv/bin/python skills/auto-research/scripts/seed_local.py   # if state is missing
-./run.sh check
-./run.sh start    # prints host/port
-./run.sh status
-./run.sh stop
+./run.sh    # prints host/port — open the dashboard
 ```
 
-## Day to day
+The first run may create `.venv` and download pinned frontend vendor libraries (needs network
+once). From there, **dashboard + agent chat** cover the research loop. In your coding assistant
+opened on this repo:
 
-| Goal | Where |
+1. **Steer in plain language** — topic choice, literature, experiments, coding, analysis, write-ups.
+2. **Watch the dashboard** — References, Labs, Wiki, Threads, and the task queue.
+3. **Answer when asked** — decisions land in Threads; reply there or in chat.
+
+You do not need skill names or scripts. Say what you want; the agent routes via `AGENTS.md`.
+
+## What this lab helps you do
+
+| Capability | Examples |
 |---|---|
-| Browse papers, labs, wiki, Threads | Dashboard (`./run.sh start`) |
-| Steer the agent / answer decisions | Threads (dashboard or `skills/research-threads`) |
-| Run or resume autonomous work | Ask the agent, or `skills/auto-research` |
-| New dated experiment | `skills/create-lab` |
-| Literature → reproduce → lab → wiki | see `skills/README.md` |
+| Topic & progress | Aim the research loop; see what’s next / blocked; pause or resume |
+| Literature | Discover, archive, and reproduce papers under `references/` |
+| Experiments | Open dated labs; run sweeps; analyze results |
+| Coding & tools | Implement in labs; promote proven code into `lib/` |
+| Knowledge | Query what you already know; ingest findings into the wiki |
+| Notes & manuscripts | Long-form write-ups under `notes/` when enabled |
+| Decisions | Threads for scope, compute, and judgment calls |
+| Landing work | Commit/push on the research branch (you merge `main` when ready) |
 
-## Layout
+In chat, say it in plain language — for example:
 
-| Path | Role |
+| You might say | What happens |
 |---|---|
-| `config.yml` | Project ``name``, features, OS version pin |
+| “Find papers on … and archive the best ones” | Literature discovery + fetch |
+| “Reproduce the claims in reference …” | Isolated reproduce attempt |
+| “Open a lab on whether …” | Dated experiment with a closed question |
+| “Run / resume the research loop” | Autonomous ticks over the task queue |
+| “Pause the loop” / “What’s blocked?” | Loop control and status |
+| “What do we already know about …?” | Wiki lookup |
+| “Ingest this into the wiki” | Compile durable, cited claims |
+| “Promote validated code into the package” | Grow `lib/` when enabled |
+| “Land my changes” | Commit/push on the research branch (not `main`) |
+
+Decision-shaped asks → Thread (chat or dashboard).
+
+## Where science lives
+
+| Folder | Meaning |
+|---|---|
 | `references/` | External papers and provenance |
 | `labs/` | Dated experiments |
 | `wiki/` | Compiled, cited knowledge |
-| `notes/` | Optional long-form manuscripts |
-| `lib/` | Optional installable package |
-| `.auto-research/` | Loop + Threads (local; gitignored after scaffold) |
-| `skills/` | Procedures |
-| `dashboard/` | Web UI |
-| `AGENTS.md` | Instructions for coding agents |
+| `notes/` | Optional manuscripts |
+| `lib/` | Optional shared package |
+| `.auto-research/` | Loop + Threads |
+| `skills/` | Procedures the agent follows |
+| `dashboard/` | The UI you browse |
 
-Enable `notes` / `lib` via directories and `config.yml` `features`.
-Dashboard display title is `dashboard/frontend/site.json` (not config).
+Optional `notes/` / `lib/`: enable when you need them (say so in chat).
+Dashboard title: `dashboard/frontend/site.json`.
 """,
         encoding="utf-8",
     )
@@ -242,12 +311,13 @@ You help the **researcher** run and manage research in this lab: literature, exp
 wiki claims, and the auto-research loop. Work with them through chat and Threads; keep the
 filesystem honest so another agent can continue from files alone.
 
-Human project map: [`README.md`](README.md). Do not treat the README as your operating manual.
+Humans read [`README.md`](README.md) for what the lab covers. When they steer in those terms,
+**route here** to the matching skill and run it — do not send them to run scripts (except they
+may start the dashboard with `./run.sh`).
 
 ## Role
 
-- Partner on **research work**. Do not redesign the lab OS, sync model, or folder architecture
-  unless the researcher explicitly asks.
+- Partner on **research work**. Execute what they ask; do not redesign the lab OS unless asked.
 - Prefer skills over improvising. Open `skills/<name>/SKILL.md` and follow it.
 - Decide routine choices yourself; escalate irreversible or judgment calls through Threads
   (`skills/research-threads`).
@@ -260,7 +330,8 @@ Human project map: [`README.md`](README.md). Do not treat the README as your ope
 .venv/bin/python skills/auto-research/scripts/loop_state.py status
 .venv/bin/python skills/research-threads/scripts/research_threads.py list --status open
 .venv/bin/python skills/auto-research/scripts/seed_local.py
-./run.sh check && ./run.sh start
+./run.sh              # start (default)
+./run.sh status|stop|restart|logs [-f]|check|foreground
 .venv/bin/python skills/wiki-query/scripts/query_wiki.py "<topic keywords>"
 bash skills/git-workflow/scripts/land.sh <paths...>
 ```
@@ -317,7 +388,7 @@ secrets; put progress in Threads (use lab `REPORT.md` / loop state); edit `lib/`
 ## Graduating standing rules
 
 When a Thread decision is lasting policy, codify it here, in the owning skill, or in
-`wiki/project/`, then close the Thread with a pointer.
+`wiki/system/`, then close the Thread with a pointer.
 """,
         encoding="utf-8",
     )

@@ -6,7 +6,7 @@ only in each folder's `index.md`. Nesting under a category may be arbitrarily de
 
 ## Hubs
 
-- [Project manual](project/index.md) — what this project is and how the lab OS runs
+- [System manual](system/index.md) — how the lab OS runs
 - [[thesis|Project thesis]] — standing scientific synthesis
 - [Records](records/index.md) — dated write-ups
 

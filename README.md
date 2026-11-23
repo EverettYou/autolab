@@ -1,93 +1,84 @@
 # Autolab
 
-Autolab is a **lab operating system** for agent-friendly research: literature in `references/`, dated experiments in `labs/`, cited knowledge in `wiki/`, procedures in `skills/`, and a dashboard that keeps you in the loop with the agent via Threads.
+Autolab is a **management toolkit for agentic research**: literature, experiments, knowledge, notes, code, and project progress live as ordinary files you can see; an agent does the routine work; you steer and decide. Built for researchers who want to run an agentic research project without turning the repo into a black box.
 
-This repository is the **template**. Domain science does not live here — you scaffold a consumer lab, then fill it with your papers, experiments, and claims.
+This repository is the **template**. Your domain science lives in a lab you create from it — not here.
 
-Agent operating instructions live in [`AGENTS.md`](AGENTS.md). Deeper design notes live in [`wiki/project/`](wiki/project/).
+Agents read [`AGENTS.md`](AGENTS.md) (how to execute). This page is for you: what the platform covers and how to use it. Design notes: [`wiki/system/`](wiki/system/).
 
-## Quick start (this checkout)
+## How you work with it
 
-```bash
-# Seed local loop + Threads state when missing
-.venv/bin/python skills/auto-research/scripts/seed_local.py
-
-# Dashboard
-./run.sh check
-./run.sh start    # prints host/port
-./run.sh status
-./run.sh stop
-```
-
-Port comes from `config.yml` `name` (hash in 1024–65535). Override with `dashboard.port` or `<NAME>_DASHBOARD_PORT`.
-
-## Create a new lab from this template
-
-From the Autolab repo root:
+The only command you need to run yourself:
 
 ```bash
-python skills/autolab/scripts/create_project.py \
-  --name my-lab \
-  --dest ../my-lab \
-  --git-init
+./run.sh    # prints host/port — open the dashboard
 ```
 
-Optional: `--package mypkg` enables `features.lib` and sets the import name.
+The first run may create `.venv` and download pinned frontend vendor libraries (needs network once; then offline). From there, **dashboard + agent chat** cover the research loop. In your coding assistant (Cursor, Claude Code, Codex, …) opened on the lab:
 
-What you get: a consumer checkout with empty `references/` / `labs/` / wiki scaffolds, `skills/` + `dashboard/`, Threads under `.auto-research/`, and **no** `skills/autolab/` (template-admin only).
+1. **Steer in plain language** — topic choice, literature, experiments, coding, analysis, write-ups.
+2. **Watch the dashboard** — References, Labs, Wiki, Threads, and the task queue.
+3. **Answer when asked** — irreversible or judgment calls show up as Threads; reply there or in chat.
 
-Then in the new lab:
+You do not need to memorize scripts or skill names. Say what you want; the agent follows `AGENTS.md` into the right workflow.
 
-```bash
-cd ../my-lab
-.venv/bin/python skills/auto-research/scripts/seed_local.py   # if needed
-./run.sh start
-```
+## What this platform helps you do
 
-Full procedure: [`skills/autolab/SKILL.md`](skills/autolab/SKILL.md).
+End-to-end research work, managed in one place:
 
-## Sync the OS into an existing lab
-
-When Autolab ships skills or dashboard updates:
-
-```bash
-python skills/autolab/scripts/sync_apply.py \
-  --from . \
-  --to ../my-lab \
-  --bump-pin
-```
-
-Use `--dry-run` first. Sync upserts the OS floor (`skills/` except `autolab`, `dashboard/`, floor READMEs, …); it never overwrites your papers, dated labs, domain wiki, or consumer `README.md` / `config.yml` body. Details and the sync registry live in `skills/autolab`.
-
-## What you can do day to day
-
-| Goal | Where |
+| Capability | Examples |
 |---|---|
-| Browse papers, labs, wiki, Threads | Dashboard (`./run.sh start`) |
-| Steer the agent / answer decisions | Threads (dashboard or `skills/research-threads`) |
-| Run or resume autonomous work | Ask the agent, or `skills/auto-research` |
-| Add a dated experiment | `skills/create-lab` |
-| Fetch / reproduce literature | `skills/discover-references`, `fetch-reference`, `reproduce-reference` |
-| Compile findings | `skills/wiki-ingest` |
-| Promote proven code into a package | `skills/promote-to-lib` (when `features.lib`) |
-| Skill catalog | [`skills/README.md`](skills/README.md) |
+| Project setup | Scaffold a new lab from this template; sync OS updates into an existing lab |
+| Topic & progress | Aim the research loop; see what’s next / blocked; pause or resume |
+| Literature | Discover, archive, and reproduce papers under `references/` |
+| Experiments | Open dated labs; run sweeps; analyze results |
+| Coding & tools | Implement in labs; promote proven code into `lib/` |
+| Knowledge | Query what you already know; ingest findings into the wiki |
+| Notes & manuscripts | Long-form write-ups under `notes/` when enabled |
+| Decisions | Threads for scope, compute, and judgment calls |
+| Landing work | Commit/push on the research branch (you merge `main` when ready) |
 
-Default lab shape: `references` + `labs` + `wiki` plus skills, dashboard, and Threads. Enable `notes` / `lib` via directories and `config.yml` `features`.
+In chat, say it in plain language — for example:
 
-## Layout (human map)
+| You might say | What happens |
+|---|---|
+| “Scaffold a new lab called X next to this repo” | New consumer project from this template |
+| “Sync Autolab OS into ../my-lab” | Push skills + dashboard updates into that lab |
+| “Find papers on … and archive the best ones” | Literature discovery + fetch |
+| “Reproduce the claims in reference …” | Isolated reproduce attempt |
+| “Open a lab on whether …” | Dated experiment with a closed question |
+| “Run / resume the research loop” | Autonomous ticks over the task queue |
+| “Pause the loop” / “What’s blocked?” | Loop control and status |
+| “What do we already know about …?” | Wiki lookup before more work |
+| “Ingest this lab / paper into the wiki” | Compile durable, cited claims |
+| “Promote the validated code into the package” | Grow `lib/` when that feature is on |
+| “Land my changes” / “Commit and push the research branch” | Safe git workflow (no merge to `main`) |
 
-| Path | What it is |
+Decision-shaped asks (“should we drop this line of work?”, “OK to burn a GPU-day?”) belong in a Thread — say so in chat, or open one in the dashboard.
+
+## This template vs your lab
+
+| | Autolab (this repo) | Your lab (created from it) |
+|---|---|---|
+| Purpose | Ship the OS; create & sync labs | Hold *your* papers, labs, wiki |
+| Day to day | Create a lab, sync OS, try the loop | Full research management |
+| `skills/autolab/` | Present (create + sync) | Absent |
+
+A new lab starts with empty science floors and owns its own content. Later OS sync updates skills and the dashboard; it does not copy or overwrite your papers, labs, wiki, notes, or lib.
+
+Default lab shape: `references` + `labs` + `wiki`, plus skills, dashboard, and Threads. Optional `notes/` (manuscripts) and `lib/` (shared package) — enable when you need them (say so in chat).
+
+## Where your science lives
+
+| Folder | Meaning |
 |---|---|
 | `references/` | External papers and provenance |
 | `labs/` | Dated experiments |
-| `wiki/` | Compiled, cited knowledge (`wiki/project/` = OS manual) |
+| `wiki/` | Compiled, cited knowledge |
 | `notes/` | Optional long-form manuscripts |
 | `lib/` | Optional installable package |
-| `.auto-research/` | Loop state + Threads (local after scaffold) |
-| `skills/` | Procedures any agent can follow |
-| `dashboard/` | Web UI over the filesystem |
-| `config.yml` | Project `name`, features, OS version pin |
-| `AGENTS.md` | Instructions for coding agents |
-| `skills/autolab/` | Template only: create + sync (absent in consumers) |
+| `.auto-research/` | Loop + Threads (local control plane) |
+| `skills/` | Procedures the agent follows |
+| `dashboard/` | The UI you browse |
 
-How knowledge moves: papers → reproduce / labs → wiki (and optionally `lib/` / `notes/`). See [`wiki/project/what-autolab-is.md`](wiki/project/what-autolab-is.md).
+Flow: papers → reproduce / labs → wiki (and optionally `lib/` / `notes/`). More: [`wiki/system/what-autolab-is.md`](wiki/system/what-autolab-is.md).

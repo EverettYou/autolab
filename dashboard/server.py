@@ -15,7 +15,7 @@ import subprocess
 from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 from .backend.catalog import ASSET_TYPES, DOCUMENT_TYPES, FRONTEND, catalog, confined, research_file
-from .backend import threads_write, loop_control, papers, search, sections, site, skills, system_status
+from .backend import threads_write, loop_control, papers, reference_fetch, search, sections, site, skills, system_status
 from .backend.app import App
 from .backend.repo import BadRequest, DashboardError, RAW_LIMIT
 from .backend.notes import SOURCE_LIMIT, NoteConflict, compile_note, read_note, save_note
@@ -203,6 +203,15 @@ class Dashboard(BaseHTTPRequestHandler):
             if self.path == '/api/settings':
                 self.respond_json({'document': site.save_settings(data)})
                 return
+            pdf_match = re.fullmatch(r'/api/references/([^/]+)/pdf', self.path)
+            if pdf_match:
+                self.respond_json(reference_fetch.refetch_pdf(self.app, pdf_match.group(1)))
+                return
+            repo_match = re.fullmatch(r'/api/references/([^/]+)/repos/([^/]+)', self.path)
+            if repo_match:
+                self.respond_json(reference_fetch.refetch_repo(
+                    self.app, repo_match.group(1), repo_match.group(2)))
+                return
             note_id, revision = data['id'], data['revision']
             if not isinstance(note_id, str) or not isinstance(revision, str):
                 raise ValueError('Invalid note identifier or revision.')
@@ -216,8 +225,8 @@ class Dashboard(BaseHTTPRequestHandler):
                 raise FileNotFoundError(self.path)
         except NoteConflict as error:
             self.respond_json({'error': str(error)}, 409)
-        except BadRequest as error:
-            self.respond_json({'error': str(error)}, 400)
+        except DashboardError as error:
+            self.respond_json({'error': str(error)}, error.status)
         except FileNotFoundError:
             self.respond_json({'error': 'This note or input file is unavailable.'}, 404)
         except (ValueError, KeyError, TypeError) as error:

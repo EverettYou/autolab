@@ -1,10 +1,11 @@
 // Notes project file tree, rename, drop-import, and menus.
 import {
-  icon, esc, toast, api, $, libraryURL, filesToData, isProjectTeX, ActionMenu,
+  icon, esc, toast, api, $, W, libraryURL, filesToData, isProjectTeX, ActionMenu,
+  invalidateProjectList,
 } from './project-shared.js';
 import {
   projectNotice, selectProjectFile, rememberProjectEditor, paintProjectMainBadge,
-  closeMainTeXPicker, updateProjectDirty,
+  closeMainTeXPicker, updateProjectDirty, renderMainTeXSelector, updateProjectBuildState,
 } from './project-editor.js';
 
 function paintProjectTreeFocus(item){

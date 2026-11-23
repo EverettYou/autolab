@@ -97,7 +97,7 @@ def patrol(root: Path) -> tuple[list[str], list[str], list[str]]:
     if not retired:
         ok.append("no retired top-level paths")
     for name, count in tracked(root, TOOL_LOCAL).items():
-        fail.append(f"{name}/ has {count} tracked file(s): rules belong in README.md and wiki/project/, "
+        fail.append(f"{name}/ has {count} tracked file(s): rules belong in README.md and wiki/system/, "
                     "procedures in skills/; tool-local state stays untracked")
     scripts = root / "scripts"
     loose = sorted(p.name for p in scripts.glob("*") if p.suffix in {".sh", ".py"}) if scripts.is_dir() else []

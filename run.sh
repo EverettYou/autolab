@@ -18,6 +18,7 @@
 # Only .venv/bin/python is used.
 # If .venv is missing, start/check/foreground delegate to
 # skills/runtime-env/scripts/setup_venv.sh (fingerprint + install).
+# If downloadable frontend vendor libs are missing, install_vendor.py fetches them.
 
 set -euo pipefail
 cd -- "$(dirname -- "$0")"
@@ -174,8 +175,22 @@ ensure_venv() {
     [ -x "$PY" ] || die "$PY is still missing after setup_venv.sh"
 }
 
+ensure_vendor() {
+    local installer="$ROOT/dashboard/frontend/vendor/install_vendor.py"
+    [ -f "$installer" ] || die "missing $installer"
+    # Prefer repo python3 for bootstrap (venv may not exist yet / may lack nothing we need).
+    if python3 "$installer" --check >/dev/null 2>&1; then
+        return 0
+    fi
+    say "Frontend vendor libraries missing or incomplete; installing…"
+    python3 "$installer" || die "failed to install dashboard frontend vendor libraries"
+    python3 "$installer" --check >/dev/null 2>&1 \
+        || die "vendor still incomplete after install_vendor.py"
+}
+
 check_python() {
     ensure_venv
+    ensure_vendor
     "$PY" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' \
         || die "$PY is not Python 3.11 or newer."
 }

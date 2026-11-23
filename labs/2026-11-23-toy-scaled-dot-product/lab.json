@@ -1,0 +1,15 @@
+{
+  "id": "2026-11-23-toy-scaled-dot-product",
+  "title": "Toy scaled dot-product attention",
+  "stage": "complete",
+  "summary": "On fixed random Q/K/V, does a two-line NumPy implementation match the Attention Is All You Need formula within 1e-6 relative error?",
+  "current_focus": "Done \u2014 NumPy attention matches the paper formula.",
+  "next_action": "None.",
+  "created": "2026-11-23",
+  "updated": "2026-11-23",
+  "references": [
+    "attention-is-all-you-need"
+  ],
+  "discussion": [],
+  "parents": []
+}

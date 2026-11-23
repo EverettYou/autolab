@@ -14,8 +14,8 @@ browsing at [index.md](index.md).
   other hubs (for example `records/index.md`). It does **not** enumerate every leaf page.
 - **Sub-indexes** are each folder's `index.md` (exempt from the compiled-page contract). A
   sub-index lists the compiled pages and nested subfolders **in that folder only**. Nesting under a
-  category folder is unbounded (`concepts/…/…`); `page_type` still follows the **top-level** category
-  in `taxonomy.yml`.
+  category folder is unbounded; `page_type` still follows the **top-level** category in
+  `taxonomy.yml`.
 - **Leaf pages** form a network through `## Related pages` and citations. Do not force every leaf
   through the root index.
 - **`thesis.md`** is the standing **scientific synthesis** (what we currently claim), not a second
@@ -24,23 +24,26 @@ browsing at [index.md](index.md).
 ## What lives where
 
 Ledger folders below are **created when the first page is ingested**. Do not pre-create empty
-domain trees in the template.
+domain trees in the template. **Naming:** folder `concepts/` → `page_type: concept`;
+`literature/`, `project/`, `system/`, `package/` keep the same stem; `deadends/` → `deadend`.
+Types are defined in `taxonomy.yml`.
 
-| Folder | Holds | `page_type` | Topic list |
-|---|---|---|---|
-| `concepts/` | cross-cutting ideas and definitions compiled from several sources | `concept` | `topics` |
-| `methods/` | methods at the scientific level for this project | `method` | `topics` |
-| `comparisons/` | regime-tagged head-to-head results | `comparison` | `topics` |
-| `questions/` | research questions, open or closed, and what would settle them | `question` | `topics` |
-| `implementations/` | maps of one code base, a package component, or an external repository | `implementation` | `topics` or `project_topics` |
-| `papers/` | compact routers from one reference to its compiled pages and consuming labs | `paper` | none |
-| `algorithms/` | one algorithm or routine: claims, parameters, package status | `algorithm` | `topics` |
-| `models/` | one model family or model-side finding | `model` | `topics` |
-| `techniques/` | reusable practices: evaluation procedures, operational gotchas | `technique` | `topics` or `project_topics` |
-| `dead-ends/` | settled negatives: what was tried, why it failed, when to revisit | `dead-end` | `topics` |
-| `project/` | researcher-facing manual: product story, principles, how to use the OS | `project` | `project_topics` |
-| `package/` | manual of the shared code under repo `lib/` when `features.lib` is on | `package` | `project_topics` |
-| `records/` | dated write-ups; also `records/log.md` (wiki operation log) | exempt | exempt |
+| Folder | Holds |
+|---|---|
+| `concepts/` | cross-cutting ideas and definitions compiled from several sources |
+| `methods/` | methods at the scientific level for this project |
+| `comparisons/` | regime-tagged head-to-head results |
+| `questions/` | research questions, open or closed, and what would settle them |
+| `implementations/` | maps of one code base, a package component, or an external repository |
+| `literature/` | literature reviews over a cluster of references |
+| `algorithms/` | one algorithm or routine: claims, parameters, package status |
+| `models/` | one model family or model-side finding |
+| `techniques/` | reusable practices: evaluation procedures, operational gotchas |
+| `deadends/` | settled negatives: what was tried, why it failed, when to revisit |
+| `project/` | research-program pages for this lab |
+| `system/` | Lab OS manual (sync zone) |
+| `package/` | manual of the shared code under repo `lib/` when `features.lib` is on |
+| `records/` | dated write-ups; also `records/log.md` (exempt from compiled-page / topics) |
 
 Root files: `README.md` (this contract), `index.md` (classifier), `thesis.md` (synthesis),
 `sources.yml` (provenance ledger), `taxonomy.yml` (controlled vocabulary). Folder `index.md`
@@ -49,7 +52,7 @@ files are sub-indexes / guides.
 ## Knowledge flow
 
 - **References to wiki.** External material lives in `references/<id>/`. After reproduction,
-  `references/<id>/reproduce/` is evidence. Ingest into ledger pages or `dead-ends/` as appropriate.
+  `references/<id>/reproduce/` is evidence. Ingest into ledger pages or `deadends/` as appropriate.
 - **Labs to wiki.** Ingest a lab once `REPORT.md` has methods, findings, uncertainty, and a wiki handoff.
 - **Notes to wiki.** Cite `notes/<project>/main.pdf` (or `main.tex`); do not paste manuscripts.
 - **Decisions.** Researcher decisions go through Threads in `.auto-research/`, not into wiki pages.
@@ -60,7 +63,9 @@ Every Markdown page outside `records/` is a compiled page, except this root `REA
 root `index.md`, `records/log.md`, and folder `index.md` sub-indexes.
 
 Frontmatter (YAML): `title`, `page_type`, `status`, `updated`, `source_refs`, `idea_ids`, and
-`topics` / `project_topics` as required by `taxonomy.yml`.
+`topics` (required on every compiled page, including `thesis.md`). Extend `taxonomy.yml` → `topics`
+with `skills/wiki-ingest/scripts/ensure_topics.py` when a new subject appears; the list is living
+and not overwritten by OS sync. Records and folder `index.md` guides are exempt.
 
 Directly under the H1: **Summary**, **Sources**, **Last updated**. End with `## Related pages`.
 When you add a leaf page, list it in that folder's `index.md` (create the sub-index if needed). When

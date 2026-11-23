@@ -21,7 +21,9 @@ Port defaults to `hash(config.yml name)` in **1024–65535**, then linear-probes
 reclaimable by the **same project name** (any checkout). Override with
 `dashboard.port` or `<NAME>_DASHBOARD_PORT` / `LAB_DASHBOARD_PORT` (prefix from `name`). Display title is
 `frontend/site.json`, not config. Logs and process state live under `.cache/dashboard/`.
-The server binds loopback and uses vendored frontend libraries (no CDN).
+The server binds loopback and serves local frontend libraries under `frontend/vendor/`
+(no CDN at runtime). The first `./run.sh` may create `.venv` and download pinned vendor
+packages via `frontend/vendor/install_vendor.py` (needs network once; offline after that).
 
 ## What it shows
 
@@ -48,9 +50,9 @@ The System menu opens Files, Skills, and Settings. Optional floors appear only w
 | `backend/` | Catalog, search, Markdown, Threads writes, Notes compile adapter |
 | `frontend/js/` | App shell and research views |
 | `frontend/css/` | Styles |
-| `frontend/vendor/` | Local Markdown, math, diagram, and PDF libraries |
+| `frontend/vendor/` | Local Markdown, math, diagram, and PDF libraries (pins in `manifest.json`; large trees installed on demand) |
 
 Local-only (not synced as content): `frontend/site.json`, `data/` search index. Heavy lab blobs
 and checkpoints stay on disk per floor git policy; the browser lists what the catalog exposes.
 
-Day-to-day operation (Threads, queue, loop) is documented in `wiki/project/dashboard-and-threads.md`.
+Day-to-day operation (Threads, queue, loop) is documented in `wiki/system/dashboard-and-threads.md`.

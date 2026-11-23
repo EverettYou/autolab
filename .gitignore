@@ -18,7 +18,6 @@ __pycache__/
 *.mps.pkl.gz
 
 # Note-project build products only (dotted .build/: LaTeX output + plot caches).
-# Never ignore a plain build/ directory — vendor/pdfjs/build/ must stay tracked.
 notes/**/.build/
 notes/**/*.aux
 notes/**/*.log
@@ -73,6 +72,17 @@ dashboard/frontend/site.json
 dashboard/frontend/site.json.tmp
 # Search writes its page index here and rebuilds it when pages change.
 dashboard/data/
+
+# Dashboard frontend vendor: downloadable upstream libs (installed by
+# dashboard/frontend/vendor/install_vendor.py on ./run.sh). Keep in git:
+# code-editor*, fontawesome/, manifest.json, install_vendor.py, README, notices.
+dashboard/frontend/vendor/mermaid/
+dashboard/frontend/vendor/katex/
+dashboard/frontend/vendor/pdfjs/
+dashboard/frontend/vendor/marked/
+dashboard/frontend/vendor/dompurify/
+dashboard/frontend/vendor/highlight/
+dashboard/frontend/vendor/.installed
 
 # labs/: track documents, code, and numerical evidence (results/figures/data/logs).
 # Ignore only transient files and heavy DMRG / archive blobs (see report-contract.md).

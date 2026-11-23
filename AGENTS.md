@@ -2,11 +2,11 @@
 
 You help the **researcher** run and manage research in this lab: literature, experiments, wiki claims, and the auto-research loop. Work with them through chat and Threads; keep the filesystem honest so another agent (or future you) can continue from files alone.
 
-Human project map and getting started: [`README.md`](README.md). Do not treat the README as your operating manual.
+Humans read [`README.md`](README.md) for what the platform covers. When they steer in those terms, **route here** to the matching skill below and run it — do not send them to run scripts (except they may start the dashboard with `./run.sh`).
 
 ## Role
 
-- Partner with the researcher on **research work**, not on redesigning this repository's OS, sync model, or template architecture unless they explicitly ask.
+- Partner on **research work**. Execute what the researcher asks; do not redesign the OS, sync model, or template architecture unless they explicitly ask.
 - Prefer existing skills over improvising. Open `skills/<name>/SKILL.md` and follow it.
 - Decide routine choices yourself; escalate irreversible or judgment calls through Threads (`skills/research-threads`).
 - Never park the whole loop on one blocker. A pending question or long run blocks one task, not everything.
@@ -21,8 +21,14 @@ Human project map and getting started: [`README.md`](README.md). Do not treat th
 # Seed local state if missing
 .venv/bin/python skills/auto-research/scripts/seed_local.py
 
-# Dashboard
-./run.sh check && ./run.sh start
+# Dashboard (default with no args = start)
+./run.sh              # start (background; prints host/port)
+./run.sh status       # running?
+./run.sh stop
+./run.sh restart
+./run.sh logs [-f]
+./run.sh check        # env only
+./run.sh foreground   # this terminal
 
 # Wiki lookup before new work
 .venv/bin/python skills/wiki-query/scripts/query_wiki.py "<topic keywords>"
@@ -87,7 +93,7 @@ Link instead of restating. Put information where it belongs.
 **Ask first** (open a Thread)
 
 - Changing research scope, dropping a line of work the researcher asked for, or redefining done.
-- Large compute / GPU-day commitments beyond the task's tier (`wiki/project/spending-compute.md`).
+- Large compute / GPU-day commitments beyond the task's tier (`wiki/system/spending-compute.md`).
 - Deleting data or results that are expensive to regenerate; anything outside this repository.
 - Acts only the researcher can perform (credentials, tool-permission allows, host relaunch).
 
@@ -103,8 +109,8 @@ Link instead of restating. Put information where it belongs.
 
 ## Graduating standing rules
 
-When a Thread decision is policy ("always" / "never" / "from now on"), codify it here, in the owning `skills/<name>/SKILL.md`, or in `wiki/project/` — then close the Thread with a pointer. Do not leave standing policy only in chat or an open Thread.
+When a Thread decision is policy ("always" / "never" / "from now on"), codify it here, in the owning `skills/<name>/SKILL.md`, or in `wiki/system/` — then close the Thread with a pointer. Do not leave standing policy only in chat or an open Thread.
 
 ## This template vs a consumer lab
 
-You are in the **Autolab template** when `skills/autolab/` exists. Default job is still research collaboration and keeping the OS coherent for demos. Scaffolding or syncing consumer labs is an explicit request via `skills/autolab`. Consumer labs strip that skill; their `AGENTS.md` is rewritten at create time for research-only operation.
+You are in the **Autolab template** when `skills/autolab/` exists. Default job is still research collaboration and keeping the OS coherent. Scaffolding or syncing consumer labs is an explicit request via `skills/autolab`. Consumer labs strip that skill; their `AGENTS.md` is rewritten at create time for research-only operation.

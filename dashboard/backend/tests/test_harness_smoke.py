@@ -17,10 +17,10 @@ class HarnessSmokeTests(unittest.TestCase):
         sys.path.insert(0, str(ROOT))
         os.chdir(ROOT)
 
-    def test_notes_empty_when_feature_off(self) -> None:
+    def test_notes_projects_listable(self) -> None:
         from dashboard.backend.notes import projects
-        # Template ships notes/README only; no manuscript projects required.
-        self.assertIsInstance(projects(), list)
+        rows = projects()
+        self.assertIsInstance(rows, list)
 
     def test_auto_research_state_shape(self) -> None:
         state = json.loads((ROOT / ".auto-research" / "state.json").read_text(encoding="utf-8"))
@@ -44,13 +44,17 @@ class HarnessSmokeTests(unittest.TestCase):
         self.assertIn("semantic_enabled", payload)
         self.assertIn("pending", payload)
 
-    def test_apidocs_unavailable_without_package(self) -> None:
+    def test_apidocs_reflects_package_config(self) -> None:
         from dashboard.backend.app import App
         app = App()
         tree = app.apidocs.tree(False, app.root)
-        self.assertEqual(tree["package"], "(none)")
-        self.assertFalse(tree.get("available"))
-        self.assertIn("no package", (tree.get("error") or "").lower())
+        self.assertIn("package", tree)
+        self.assertIn("available", tree)
+        if tree["package"] == "(none)":
+            self.assertFalse(tree.get("available"))
+            self.assertIn("no package", (tree.get("error") or "").lower())
+        else:
+            self.assertTrue(tree.get("available"))
 
     def test_fs_health_passes(self) -> None:
         completed = subprocess.run(

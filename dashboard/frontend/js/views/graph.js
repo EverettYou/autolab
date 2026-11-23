@@ -23,7 +23,7 @@ const COLORS = {
   platform: "#65a30d",
   questions: "#7c3aed",
   comparisons: "#9a3412",
-  "dead-ends": "#dc2626",
+  "deadends": "#dc2626",
   papers: "#be185d",
   records: "#57534e",
   project: "#292524",

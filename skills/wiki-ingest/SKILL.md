@@ -1,7 +1,7 @@
 ---
 name: wiki-ingest
 description: Compile sources into the project wiki and keep it current.
-usage: Use when a reference (paper, repository, dataset) or its reproduction, a finished lab report, platform code, or a saved query synthesis should become cited wiki knowledge; when filing a dated record (discovery, design, audit, integration, synthesis); when adding an algorithm, model, technique, or dead-end page; or when initializing a wiki.
+usage: Use when a reference (paper, repository, dataset) or its reproduction, a finished lab report, platform code, or a saved query synthesis should become cited wiki knowledge; when filing a dated record (discovery, design, audit, integration, synthesis); when adding an algorithm, model, technique, or deadend page; or when initializing a wiki.
 ---
 
 # Wiki ingest
@@ -26,7 +26,7 @@ Sources are repository-relative paths outside `wiki/`:
   it cites.
 - `lib/`: optional Python package source and tests (when `features.lib` + `package` are set).
 - Measurements of record stay in labs and are cited from `REPORT.md` / the wiki.
-- `skills/<name>/` and `README.md`: procedures and project rules, for `project/` pages.
+- `skills/<name>/` and `README.md`: procedures and project rules, for `system/` pages.
 
 Dated records under `wiki/records/` may be cited as wiki sources when
 `citable_wiki_prefixes` in `wiki/taxonomy.yml` allows them (template default: records only).
@@ -51,7 +51,7 @@ for provenance, claims, and contradictions. Then classify the input:
 - Lab report: both. Ingest the narrative as text and inspect the cited scripts and results as code or data
   evidence.
 - Reproduction record (`references/<id>/reproduce/`): the evidence for what was and was not reproduced.
-  Compile it into the reference's algorithm or model page, or into a dead-end page if it was rejected.
+  Compile it into the reference's algorithm or model page, or into a deadend page if it was rejected.
 - Work write-up (discovery, design, audit, integration, synthesis): file it as a record (see Records
   below), then fold what it established into the compiled pages.
 
@@ -63,17 +63,44 @@ result in its paper because the two share a folder.
 
 Follow the folder table in `wiki/README.md`. A finding about one model goes on that model's page in
 `models/`; about one algorithm in `algorithms/`; a practice that transfers across work goes in
-`techniques/`; a settled negative is a `dead-ends/` page in the format of `wiki/dead-ends/index.md`; an
+`techniques/`; a settled negative is a `deadends/` page in the format of `wiki/deadends/index.md`; an
 idea that spans several algorithms or models is a concept; a method as such is a method; a measured
-head-to-head is a comparison; an unresolved problem is a question; how the project runs is a `project/`
-page; the manual of the lab package (when present) is `wiki/package/` and `lib/`. Query first, then
-revise an existing page before creating a new one:
+head-to-head is a comparison; an unresolved problem is a question; a **literature review over a
+cluster of references** (lineage, compare, open problems — not a single-paper summary) is a
+`literature/` page; how the lab OS runs is a `system/` page; research-program material for this lab
+(aims, constraints, program routers) is a `project/` page; the manual of the lab package (when
+present) is `wiki/package/` and `lib/`. Do **not** write per-paper wiki digests — archive notes stay
+in optional `references/<id>/README.md`; scientific claims go on domain pages that cite the
+reference. Query first, then revise an existing page before creating a new one:
 
 ```bash
 .venv/bin/python skills/wiki-query/scripts/query_wiki.py "<topic or source id>"
 ```
 
 Also walk the classifier (`wiki/index.md` → folder `index.md` sub-indexes) when the hit list is thin.
+
+## Topics grow with knowledge
+
+`wiki/taxonomy.yml` → `topics` is a **living** list, not a frozen catalog. Every compiled page
+must declare 1–3 topics from that list (records and folder `index.md` guides are exempt). Lint
+enforces the declaration so the vocabulary stays intentional and queryable — it does **not**
+mean “never invent a new subject.”
+
+When Pass 1 finds a subject that is not yet listed (new science, new method family, …):
+
+1. Add it before (or as you) write the page:
+
+   ```bash
+   .venv/bin/python skills/wiki-ingest/scripts/ensure_topics.py "<New Topic>" ["<Another>"]
+   ```
+
+2. Put that name in the page frontmatter `topics:` (1–3 values).
+3. Prefer an existing topic when it already covers the subject; add a new one when the page
+   would otherwise be miscategorized or unfindable.
+
+Template seeds only OS-facing terms for `wiki/system/`. Consumer labs accumulate science topics
+over time. `taxonomy.yml` is copied at lab create / bootstrap-once and is **not** overwritten by
+OS sync.
 
 ## Two-pass workflow
 
@@ -98,12 +125,15 @@ Keep analysis and wiki edits apart.
 
    A routine ingest with no material choice continues after the brief.
 3. Pass 2: integrate across every affected page (algorithm, model, technique, concept, method,
-   implementation, comparison, question, thesis). Keep competing claims side by side; never overwrite a
-   disagreement silently. Connect paper methods to implementations and both to lab evidence. Do not copy a
-   paper, repository file, lab report, or record into the wiki. A `papers/<id>.md` page is allowed only as
-   a compact router to the reference, its compiled pages, implementations, and consuming labs.
-4. Every page you create or revise meets the compiled-page contract in `wiki/README.md`: frontmatter, the
-   three visible fields under the H1, and a final `## Related pages`. Start new pages from
+   implementation, comparison, question, literature, thesis). Keep competing claims side by side; never
+   overwrite a disagreement silently. Connect paper methods to implementations and both to lab evidence.
+   Do not copy a paper, repository file, lab report, or record into the wiki. A `literature/<slug>.md`
+   page reviews a **group** of references (compare, lineage, shared methods, open problems); it is not a
+   dump of one PDF. Cite multiple `references/<id>/…` paths. Per-paper archive notes belong in
+   `references/<id>/README.md` if needed — never as a second wiki summary of the same paper.
+4. Ensure topics, then meet the compiled-page contract in `wiki/README.md`: if the page needs a topic
+   that is not in `wiki/taxonomy.yml`, run `ensure_topics.py` first (see above). Frontmatter, the three
+   visible fields under the H1, and a final `## Related pages`. Start new pages from
    [assets/page-template.md](assets/page-template.md). Name the page by the article-title rule there: outside
    `questions/`, the title is a noun or noun phrase a reader would use as the subject of the first sentence
    (sentence case, no leading article, no trailing punctuation, not a question or an instruction). A

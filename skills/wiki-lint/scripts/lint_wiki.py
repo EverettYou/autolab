@@ -68,16 +68,21 @@ SOURCE_KINDS = {
     "skill",
     "other",
 }
-TOPIC_REQUIREMENTS = {"topics", "project_topics", "either", "none"}
 DEFAULT_PAGE_TYPES = {
-    "concept": {"folder": "concepts", "requires": "topics"},
-    "method": {"folder": "methods", "requires": "topics"},
-    "comparison": {"folder": "comparisons", "requires": "topics"},
-    "implementation": {"folder": "implementations", "requires": "either"},
-    "question": {"folder": "questions", "requires": "none"},
-    "paper": {"folder": "papers", "requires": "none"},
-    "project": {"folder": "project", "requires": "project_topics"},
-    "thesis": {"folder": ".", "requires": "none"},
+    "concept": {"folder": "concepts"},
+    "method": {"folder": "methods"},
+    "comparison": {"folder": "comparisons"},
+    "implementation": {"folder": "implementations"},
+    "question": {"folder": "questions"},
+    "literature": {"folder": "literature"},
+    "algorithm": {"folder": "algorithms"},
+    "model": {"folder": "models"},
+    "technique": {"folder": "techniques"},
+    "deadend": {"folder": "deadends"},
+    "project": {"folder": "project"},
+    "system": {"folder": "system"},
+    "package": {"folder": "package"},
+    "thesis": {"folder": "."},
 }
 DEFAULT_STATUSES = {"provisional", "active", "settled", "open", "closed", "superseded"}
 PAGE_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
@@ -284,7 +289,6 @@ class Taxonomy:
     page_types: dict[str, dict[str, str]]
     statuses: set[str]
     topics: set[str]
-    project_topics: set[str]
     retired_path_prefixes: list[str]
     problems: list[str]
 
@@ -316,14 +320,7 @@ def load_taxonomy(wiki: Path) -> Taxonomy:
             if not isinstance(spec, dict) or not isinstance(spec.get("folder"), str):
                 problems.append(f"wiki/taxonomy.yml page_types.{page_type} needs a folder")
                 continue
-            requires = spec.get("requires", "none")
-            if requires not in TOPIC_REQUIREMENTS:
-                problems.append(
-                    f"wiki/taxonomy.yml page_types.{page_type}.requires must be one of "
-                    + ", ".join(sorted(TOPIC_REQUIREMENTS))
-                )
-                requires = "none"
-            page_types[str(page_type)] = {"folder": spec["folder"].strip("/") or ".", "requires": requires}
+            page_types[str(page_type)] = {"folder": spec["folder"].strip("/") or "."}
     else:
         page_types = {key: dict(value) for key, value in DEFAULT_PAGE_TYPES.items()}
     statuses = set(_string_list(content.get("statuses"))) or set(DEFAULT_STATUSES)
@@ -334,7 +331,6 @@ def load_taxonomy(wiki: Path) -> Taxonomy:
         page_types=page_types,
         statuses=statuses,
         topics=set(_string_list(content.get("topics"))),
-        project_topics=set(_string_list(content.get("project_topics"))),
         retired_path_prefixes=_string_list(content.get("retired_path_prefixes")),
         problems=problems,
     )
@@ -545,23 +541,12 @@ def lint(scope: Path, *, check_paths: bool = False) -> tuple[list[str], list[str
                             errors.append(f"invalid source_ref in {label}")
                         else:
                             check_source_ref(ref.strip(), label)
-                requirement = taxonomy.page_types.get(str(page_type), {}).get("requires", "none")
-                for field_name, vocabulary in (("topics", taxonomy.topics), ("project_topics", taxonomy.project_topics)):
-                    values = data.get(field_name)
-                    if values is None or values == []:
-                        continue
-                    if not isinstance(values, list) or not 1 <= len(values) <= 3 or not all(
-                        isinstance(value, str) and (not vocabulary or value in vocabulary) for value in values
-                    ):
-                        errors.append(f"{field_name} must list one to three controlled values in {label}")
-                has_topics = bool(data.get("topics"))
-                has_project_topics = bool(data.get("project_topics"))
-                if requirement == "topics" and not has_topics:
-                    errors.append(f"topic-indexed page needs one to three controlled topics in {label}")
-                elif requirement == "project_topics" and not has_project_topics:
-                    errors.append(f"{page_type} page needs one to three controlled project_topics in {label}")
-                elif requirement == "either" and not (has_topics or has_project_topics):
-                    errors.append(f"{page_type} page needs controlled topics or project_topics in {label}")
+                values = data.get("topics")
+                vocabulary = taxonomy.topics
+                if not isinstance(values, list) or not 1 <= len(values) <= 3 or not all(
+                    isinstance(value, str) and (not vocabulary or value in vocabulary) for value in values
+                ):
+                    errors.append(f"topics must list one to three controlled values in {label}")
 
             for marker in (*VISIBLE_FIELDS, RELATED_HEADING):
                 if marker not in text:

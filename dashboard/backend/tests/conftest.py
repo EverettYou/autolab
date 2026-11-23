@@ -154,7 +154,7 @@ def make_repo(root: Path, outside: Path) -> Path:
         f"labs/{LAB2}/REPORT.md": "# Report\n",
         "wiki/README.md": "# Wiki schema\n",
         "wiki/index.md": "# Test wiki\n\n- [Noise](concepts/noise.md)\n",
-        "wiki/taxonomy.yml": "page_types:\n  concept: {folder: concepts, requires: topics}\n",
+        "wiki/taxonomy.yml": "page_types:\n  concept: {folder: concepts}\ntopics:\n  - Boundary Models\n",
         "wiki/sources.yml": "version: 1\nsources: []\n",
         "wiki/concepts/noise.md": (
             "---\ntitle: Noise\npage_type: concept\nstatus: active\nupdated: 2026-01-03\n"

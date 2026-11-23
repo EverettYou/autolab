@@ -120,7 +120,7 @@ one lab, or none. Do not append to any labs-wide results ledger. Before `stage: 
   isolated runtime described by `runtime-env`.
 - Do not edit `lib/` or `references/` from a lab. Code that deserves to live in the package
   goes through `promote-to-lib`.
-- Heavy GPU training follows the compute rules in `AGENTS.md`, `wiki/project/spending-compute.md`,
+- Heavy GPU training follows the compute rules in `AGENTS.md`, `wiki/system/spending-compute.md`,
   and `wiki/models/gpu-training-protocol.md`: smoke test first, a measured step time and numeric
   ETA before any long run, flushed progress logs, and early stop on saturation.
 - Put machine-readable outputs in `results/`, each file under 1 MB, and cite them from

@@ -8,8 +8,8 @@ usage: Use when references/<id>/reproduce/ or a lab result justifies a place in 
 
 The shared package under `lib/src/<package>/` is the trusted core once enabled. Code enters it only
 through this gate: re-implemented from the evidence, tested, verified, and recorded. Never import
-or copy from `references/` or `labs/`. Rules: `wiki/project/distillation-tower.md` and
-`wiki/project/shared-package.md`. Layout: `lib/README.md`.
+or copy from `references/` or `labs/`. Rules: `wiki/system/distillation-tower.md` and
+`wiki/system/shared-package.md`. Layout: `lib/README.md`.
 
 Entering this skill (or `for: integrator`) means the project needs that package. If `lib/` is not
 enabled yet, **bootstrap it in this skill** before PLAN/BUILD — that is success for the tick, not a

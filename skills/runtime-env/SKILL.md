@@ -8,7 +8,7 @@ usage: Use before running code, classifying GPU capacity, fetching external sour
 
 This repository syncs to GitHub and may run on very different machines (a curated GPU dev
 container, a bare host with Docker, a plain container, a laptop). The boundaries in `AGENTS.md`
-and the pages `wiki/project/distillation-tower.md` and `wiki/project/spending-compute.md`
+and the pages `wiki/system/distillation-tower.md` and `wiki/system/spending-compute.md`
 state the machine-agnostic invariants; this skill resolves them into the concrete mechanism for the
 machine you are on:
 
@@ -98,9 +98,13 @@ row in the table above when you meet a new machine.
 `bash skills/runtime-env/scripts/setup_venv.sh` rebuilds `./.venv` (it wipes the old one). When
 `features.lib` and `package` are set it installs `lib/` editable and smoke-imports that package;
 otherwise it only ensures a working interpreter/venv. It fingerprints via `profile_match_id`
-first and chooses isolated vs baseline install from that profile. Run it only when the venv is
-missing or broken, never during another agent's run. `./run.sh` only invokes this script when
-`.venv` is absent — it does not re-implement profile matching or install policy.
+first and chooses isolated vs baseline install from that profile. Prefer `uv` when it is on
+PATH; otherwise fall back to `python3 -m venv` and `python -m pip` (no hard dependency on
+uv). The pip path picks a host interpreter that satisfies `lib/pyproject.toml`
+`requires-python` (override with `SETUP_VENV_PYTHON`).
+Run it only when the venv is missing or broken, never during another agent's run. `./run.sh`
+only invokes this script when `.venv` is absent — it does not re-implement profile matching or
+install policy.
 
 ### Prefer the container baseline (standing rule)
 

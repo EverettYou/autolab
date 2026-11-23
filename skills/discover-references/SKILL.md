@@ -83,7 +83,8 @@ Then search the wiki for this scope:
 
 Read the dead ends that command lists, and do not resurface one unless its Revisit if condition
 is now met. A wiki roster or coverage page is a map of gaps when the project has one; it does
-not replace the overlap. `wiki/papers/` records what is already summarized.
+not replace the overlap. `wiki/literature/` holds cluster literature reviews (what this lab has
+already synthesized across groups of papers); it is not a per-paper abstract dump.
 
 ## 3. Search (metadata only)
 

@@ -6,8 +6,7 @@ via [`skills/promote-to-lib`](../skills/promote-to-lib/SKILL.md) when an integra
 package.
 
 **This README** is the human floor contract. Code enters only through `promote-to-lib` (never copy
-from `labs/` or `references/`). This template ships empty `src/` and `tests/` until a consumer
-enables the layer.
+from `labs/` or `references/`).
 
 ## Role vs the rest of the repo
 

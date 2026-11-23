@@ -2,7 +2,7 @@
 
 The fingerprint didn't clearly match a known profile. **Be conservative: do not run untrusted
 reproduction code until the runtime is resolved.** The trust-zone rule (external code only inside
-an isolated runtime, `wiki/project/distillation-tower.md`) still binds.
+an isolated runtime, `wiki/system/distillation-tower.md`) still binds.
 
 ## What to do
 

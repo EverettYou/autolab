@@ -5,7 +5,7 @@ live in the network under those folders. (Exempt from the compiled-page contract
 
 ## Hubs
 
-- [Project manual](project/index.md) — how Autolab works
+- [System manual](system/index.md) — how Autolab works
 - [[thesis|Project thesis]] — standing scientific synthesis (replace when domain work exists)
 - [Records](records/index.md) — dated write-ups
 

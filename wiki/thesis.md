@@ -6,6 +6,8 @@ updated: 2026-11-20
 source_refs:
   - README.md
 idea_ids: []
+topics:
+  - Knowledge Systems
 ---
 
 # Project thesis
@@ -24,4 +26,4 @@ few supporting compiled pages — do not paste raw evidence or re-list the categ
 ## Related pages
 
 - [[index|Wiki index]]
-- [Project manual](project/index.md)
+- [System manual](system/index.md)

@@ -15,8 +15,8 @@ folder — all of it tracked. This README is the format contract.
 
 | Stage | What happens |
 | --- | --- |
-| **this template** | Track **everything** that is minimum setup (this README, `tasks/` + `threads/` READMEs, empty `state.json`). If a path would need to be gitignored, it does not belong in the template. |
-| **Create project / first sync** | Scaffold is **copied** into the consumer (those tracked files + empty `tasks/` / `threads/` dirs). |
+| **this template** | Track the minimum setup (this README, `tasks/` + `threads/` READMEs, `state.json`). If a path would need to be gitignored, it does not belong in the template. |
+| **Create project / first sync** | Scaffold is **copied** into the consumer, then reset to empty `tasks/` / `threads/` + paused `state.json`. |
 | **After that** | Consumer **gitignore ignores all of `.auto-research/`** (live checkout data, not a template). `sync_apply` **skips** the folder if it already exists — no later sync. |
 | **Day to day** | Agents never hand-edit; use the scripts below. `seed_local` only fills a missing `state.json` (e.g. broken checkout). |
 

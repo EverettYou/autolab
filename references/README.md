@@ -52,7 +52,7 @@ edit it by hand.
 | Path | Tracked? | When |
 | --- | --- | --- |
 | `paper.pdf` | no | Archived PDF |
-| `README.md` | yes | Short note about this reference |
+| `README.md` | yes | Optional **archive note** (why fetched, PDF quirks, links to reproduce/labs) — not a paper abstract and not a literature review (`wiki/literature/` owns cluster reviews) |
 | `repos/<name>/` | no | One checkout / dataset tree per upstream |
 | `attempts/<slug>/` | no | Untrusted reproduction workspace |
 | `reproduce/` | yes | Accepted attempt (`promote_attempt.sh` only) |

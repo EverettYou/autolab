@@ -6,6 +6,8 @@ updated: YYYY-MM-DD
 source_refs:
 - README.md
 idea_ids: []
+topics:
+- Knowledge Systems
 ---
 
 # Project thesis
@@ -20,5 +22,5 @@ State the current synthesis, strongest support, contradictions, alternatives, an
 
 ## Related pages
 
-- [Project manual](project/index.md)
+- [System manual](system/index.md)
 - [[index|Wiki index]]

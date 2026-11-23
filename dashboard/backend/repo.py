@@ -28,17 +28,29 @@ SNIFF_BYTES = 8192
 IDS_TTL = 2.0
 
 # Top-level folders excluded from the dashboard browser.
-EXCLUDED_TOP = frozenset({"lib", "documents"})
+# ``lib/`` is served: API docs link here for module source, and wiki cites package paths.
+# ``documents/`` stays private (pre-Notes manuscripts / secrets fixtures).
+EXCLUDED_TOP = frozenset({"documents"})
 EXCLUDED_PARTS = frozenset({"data", "checkpoints", "logs", "handoff-provenance", "__pycache__"})
 EXCLUDED_SUFFIXES = frozenset({".mps", ".npz", ".npy", ".h5", ".hdf5", ".pkl", ".pickle"})
 
 
+def _part_public(part: str) -> bool:
+    if part in EXCLUDED_PARTS:
+        return False
+    if Path(part).suffix.lower() in EXCLUDED_SUFFIXES or part.lower().endswith(".mps.pkl.gz"):
+        return False
+    if part.startswith("."):
+        return False
+    if part.startswith("_"):
+        # Keep package dunders readable so API "view source" links to __init__.py work.
+        stem = Path(part).stem
+        return stem.startswith("__") and stem.endswith("__")
+    return True
+
+
 def public_parts(parts):
-    return (not parts or parts[0] not in EXCLUDED_TOP) and not any(
-        part.startswith((".", "_")) or part in EXCLUDED_PARTS or
-        Path(part).suffix.lower() in EXCLUDED_SUFFIXES or part.lower().endswith(".mps.pkl.gz")
-        for part in parts
-    )
+    return (not parts or parts[0] not in EXCLUDED_TOP) and all(_part_public(part) for part in parts)
 # Noise hidden from directory listings (still reachable by an explicit path).
 HIDDEN_NAMES = frozenset({"__pycache__"})
 

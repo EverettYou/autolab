@@ -103,7 +103,7 @@ def load_pages(root: Path) -> list[Page]:
         if not isinstance(title, str) or not title.strip():
             continue
         topics = []
-        for key in ("topics", "project_topics"):
+        for key in ("topics",):
             values = data.get(key) or []
             if isinstance(values, list):
                 topics.extend(str(item) for item in values)
@@ -171,8 +171,8 @@ def render(root: Path, terms: list[str], *, limit: int = 8) -> str:
     def still_open(page: Page) -> bool:
         return page.folder == "questions" and page.status not in {"closed", "superseded"}
 
-    pages = [page for page in ranked if page.folder != "dead-ends" and not still_open(page)][:limit]
-    dead_ends = [page for page in ranked if page.folder == "dead-ends"][:limit]
+    pages = [page for page in ranked if page.folder != "deadends" and not still_open(page)][:limit]
+    dead_ends = [page for page in ranked if page.folder == "deadends"][:limit]
     open_questions = [page for page in ranked if still_open(page)][:limit]
     lines = [f"query: {' '.join(term.strip() for term in terms if term.strip())}", ""]
     lines.extend(_page_section(pages))

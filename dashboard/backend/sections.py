@@ -503,6 +503,7 @@ def references_list(app) -> dict:
         pdf_name = _pdf_name(prov, entry)
         authors = string_list(prov.get("authors"))
         arxiv = _text(entry.get("arxiv_id")) or _text(prov.get("arxiv_id"))
+        has_pdf = bool(pdf_name and (folder / pdf_name).is_file())
         items.append({
             "id": rid, "title": _text(entry.get("title")) or _text(prov.get("title")) or rid,
             "kind": reference_kinds(prov, entry),
@@ -512,8 +513,10 @@ def references_list(app) -> dict:
             "published_url": _text(prov.get("published_url")),
             "authors": authors[:3], "authors_total": len(authors),
             "published": _text(prov.get("published"))[:10],
-            "has_pdf": bool(pdf_name and (folder / pdf_name).is_file()),
+            "has_pdf": has_pdf,
+            "can_fetch_pdf": _can_fetch_pdf(prov, entry, has_pdf=has_pdf),
             "repos": _count(entry.get("repos") or prov.get("repos")),
+            "primary_repo": _primary_repo(app, rid, entry, prov),
             "attempts": _count(entry.get("attempts") or prov.get("attempts")),
             "reproduction": bool(entry.get("reproduction") or prov.get("reproduction")),
             "aliases": string_list(entry.get("aliases") or prov.get("aliases")),
@@ -560,6 +563,17 @@ def _pdf_name(prov: dict, entry: dict) -> str | None:
     return name
 
 
+def _can_fetch_pdf(prov: dict, entry: dict, *, has_pdf: bool) -> bool:
+    """True when the local PDF is missing but provenance still points at a downloadable source."""
+    if has_pdf:
+        return False
+    return bool(
+        _text(prov.get("pdf_url"))
+        or _text(entry.get("arxiv_id"))
+        or _text(prov.get("arxiv_id"))
+    )
+
+
 def reference_pdf(app, rid: str) -> Path:
     valid_id(rid, "reference id")
     registry, _, _ = _registry(app)
@@ -571,6 +585,20 @@ def reference_pdf(app, rid: str) -> Path:
     if not resolved.is_file():
         raise NotFound("this reference has no PDF")
     return resolved
+
+
+def _primary_repo(app, rid: str, entry: dict, prov: dict) -> dict | None:
+    """First recorded repository, for list-row View Repo actions."""
+    repos = _repos(app, rid, entry, prov)
+    if not repos:
+        return None
+    repo = repos[0]
+    return {
+        "name": repo["name"],
+        "exists": repo["exists"],
+        "can_fetch": repo["can_fetch"],
+        "route": repo["route"],
+    }
 
 
 def _repos(app, rid: str, entry: dict, prov: dict) -> list[dict]:
@@ -598,10 +626,15 @@ def _repos(app, rid: str, entry: dict, prov: dict) -> list[dict]:
             browse = f"{base}/tree/{commit}" if commit else base
         folder = app.repo.path(rel)
         exists = rel.startswith(f"references/{rid}/") and folder.is_dir()
-        out.append({"name": name, "path": rel, "exists": exists, "url": url or None, "commit": commit or None,
+        can_fetch = (not exists) and bool(url)
+        # Stay on the reference page Files browser (not the generic /files bounce).
+        inner = path if path.startswith("repos/") else f"repos/{name}"
+        view_route = f"/references/{_quote(rid)}?file={quote(inner, safe='/')}#files"
+        out.append({"name": name, "path": rel, "exists": exists, "can_fetch": can_fetch,
+                    "url": url or None, "commit": commit or None,
                     "retrieved_at": _text(item.get("retrieved_at")) or None,
                     "browse": browse or (url if url.startswith("https://") else None),
-                    "route": f"/files/{_quote(rel)}" if exists else None,
+                    "route": view_route if exists else None,
                     "summary": _repo_summary(folder) if exists else None})
     return out
 
@@ -886,7 +919,9 @@ def reference_detail(app, rid: str) -> dict:
         "pdf_url": _text(prov.get("pdf_url")) or (f"https://arxiv.org/pdf/{arxiv}" if arxiv else ""),
         "published_url": _text(prov.get("published_url")),
         "related": _related(app, prov, registry, warnings),
-        "pdf": pdf, "aliases": string_list(entry.get("aliases") or prov.get("aliases")),
+        "pdf": pdf,
+        "can_fetch_pdf": _can_fetch_pdf(prov, entry, has_pdf=pdf is not None),
+        "aliases": string_list(entry.get("aliases") or prov.get("aliases")),
         "repos": _repos(app, rid, entry, prov), "attempts": _attempts(app, rid, entry, prov),
         "reproduction": _reproduction(app, rid, entry, prov, warnings),
         "legacy_paths": string_list(prov.get("legacy_paths")),

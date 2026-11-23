@@ -1,0 +1,18 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\title{Transformer Primer}
+\author{Lab notes}
+\date{2026-11-23}
+\begin{document}
+\maketitle
+
+\noindent Short primer citing the archived reference \texttt{attention-is-all-you-need}.
+
+\section{Scaled dot-product attention}
+\[
+\mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V
+\]
+Lab check: \texttt{2026-11-23-toy-scaled-dot-product}.
+
+\end{document}

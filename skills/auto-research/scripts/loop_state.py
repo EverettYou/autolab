@@ -475,7 +475,7 @@ def check_blocker(root: Path, reason: str) -> str:
             raise StateError(f"{ref} is closed; it cannot block anything")
     if not refs and RESOURCE_WORDS.search(reason):
         raise StateError("GPU availability, run time, credits, outages and push failures are routed through "
-                         "gpu/time and a live snapshot, not blocked_on (wiki/project/spending-compute.md); "
+                         "gpu/time and a live snapshot, not blocked_on (wiki/system/spending-compute.md); "
                          "block only on a researcher decision (cite its thread) or an external act")
     return reason
 

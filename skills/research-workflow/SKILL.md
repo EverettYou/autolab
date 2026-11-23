@@ -24,7 +24,7 @@ stop rule (for example "does claim C survive size L=… with the same controls a
    boundary or data conditions, system sizes, solver or estimator knobs, metric, seeds).
 3. Write the success criterion and the stop rule into `PLAN.md` before the first sweep.
 4. Budget compute. Prefer paired comparisons that change one axis at a time. Do not kill or pause
-   unrelated running research jobs. See `wiki/project/spending-compute.md` when present.
+   unrelated running research jobs. See `wiki/system/spending-compute.md` when present.
 
 ## Sweep, interpret, ablate, verdict
 

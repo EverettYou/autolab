@@ -5,7 +5,7 @@ import os
 from urllib.parse import quote
 
 import pytest
-from conftest import LAB, SECRETS
+from conftest import LAB, PACKAGE, SECRETS
 
 from dashboard.backend.repo import TEXT_PREVIEW_LIMIT, BadRequest, Forbidden, normalize_rel
 
@@ -120,6 +120,7 @@ def test_host_header_allowlist(client):
 def test_normalize_rel():
     assert normalize_rel("labs//x/./y/") == "labs/x/y"
     assert normalize_rel("") == ""
+    assert normalize_rel(f"lib/src/{PACKAGE}/core.py") == f"lib/src/{PACKAGE}/core.py"
     for raw, error in (
         ("../x", Forbidden), ("/x", Forbidden), (".git", Forbidden), ("a/.b/c", Forbidden),
         ("documents/x", Forbidden), ("a\\b", BadRequest), ("a\x00", BadRequest),
@@ -127,6 +128,19 @@ def test_normalize_rel():
     ):
         with pytest.raises(error):
             normalize_rel(raw)
+
+
+def test_lib_source_is_browsable(client):
+    """API docs deep-link to /files/lib/...; package source must not 403."""
+    for path in (f"lib/src/{PACKAGE}/core.py", f"lib/src/{PACKAGE}/__init__.py"):
+        file_body = client.get_json(f"/api/file?path={path}")
+        assert file_body.get("path") == path
+        assert "content" in file_body
+        resolved = client.get_json(f"/api/resolve?href={path}")["resolved"]
+        assert resolved and resolved["route"] == f"/files/{path}" and resolved["exists"] is True
+    assert client.request(f"/api/fs?path=lib/src/{PACKAGE}").status == 200
+    private = client.request(f"/api/file?path=lib/src/{PACKAGE}/_secret.py")
+    assert private.status == 403
 
 
 def test_directory_symlink_out_of_the_repository(fresh_root, serve_root, tmp_path):

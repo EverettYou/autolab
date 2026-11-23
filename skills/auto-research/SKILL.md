@@ -16,8 +16,7 @@ It does not restate the rules it depends on; follow them where they live:
 
 - orientation order, decisions, never parking, git, secrets, evidence: `AGENTS.md`;
 - GPU eligibility, the training gate, time tiers, and the `gpu`/`time`/`blocked_on` fields:
-  `wiki/project/spending-compute.md`;
-- comparing and reporting numbers: `wiki/project/honest-comparison.md`;
+  `wiki/system/spending-compute.md`;
 - asking the researcher, recording their words, closing threads: `skills/research-threads`
   (one concern per thread; close when done; progress in the lab report, not the threads store).
 
@@ -175,7 +174,7 @@ while it still holds, then the task list, then self-directed work.
    landed in `lib/`; `maintain` keeps the tree honest. Do not cross these in one step.
 
 5. **Run programs within their tier** ([dispatch](references/router.md#dispatch)). Before any
-   training launch, pass the gate in `wiki/project/spending-compute.md`; while a run is live, checking
+   training launch, pass the gate in `wiki/system/spending-compute.md`; while a run is live, checking
    its pace against its ETA is a legitimate step, but a liveness check alone is not.
 6. **Update the state.** A finished item: `$L task done <id>`. A partly finished item: rewrite
    its body to say what remains. New follow-ups: `$L task add` at the rank they deserve. Update the
@@ -228,7 +227,7 @@ instruction thread.
   criteria, and links to the lab, reference, record, or thread it depends on. Edit an existing item
   rather than adding a near-duplicate.
 - **Routing fields.** `for` is one or more of `scout`, `reproducer`, `integrator`, `auditor`,
-  `maintain`, `auto`, `all`. `gpu` and `time` follow `wiki/project/spending-compute.md`; `time` is the
+  `maintain`, `auto`, `all`. `gpu` and `time` follow `wiki/system/spending-compute.md`; `time` is the
   program's wall clock only, never agent time.
 - **`blocked_on` blocks that item only**, and only for a researcher decision (cite its thread) or an
   external act that no retry can replace. GPU availability, runtime, time caps, credits, and outages
@@ -305,7 +304,7 @@ The loop grants no permissions of its own: each step is bound by the skill it in
 `research_threads.py` (threads: questions, replies, and resolutions; researcher messages only as
 their verbatim words), plus whatever the invoked skill writes. It never merges into `main`, creates
 branches outside `land.sh`, runs reference code outside isolation, retries a dead end in
-`wiki/dead-ends/` whose "Revisit if" condition is unmet, or edits `notes/` unless asked.
+`wiki/deadends/` whose "Revisit if" condition is unmet, or edits `notes/` unless asked.
 
 When a tool classifier denies `run_attempt.sh` (or attempt `run.sh`) as “external code”, that is a
 **tool** stop on an already-sanctioned path, not a scientific stop: follow

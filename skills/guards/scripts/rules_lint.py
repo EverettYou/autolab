@@ -155,7 +155,7 @@ def lint_text(root: Path, path: Path) -> list[Finding]:
             if RETIRED_RE.search(line) and not any(token in line for token in RETIRED_ALLOW):
                 add("FAIL", "retired-path", number, "retired layout path or queue file; use the current path", line)
             if in_skills and CLAUDE_MD_RE.search(line):
-                add("FAIL", "claude-md", number, "point to AGENTS.md or a wiki/project page", line)
+                add("FAIL", "claude-md", number, "point to AGENTS.md or a wiki/system page", line)
             elif not in_skills and CLAUDE_MD_SECTION_RE.search(line):
                 add("FAIL", "claude-md", number, "section reference into the retired rules file", line)
             if in_skills and SECTION_RE.search(line):

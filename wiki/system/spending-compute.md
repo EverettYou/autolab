@@ -1,12 +1,12 @@
 ---
 title: Spending compute
-page_type: project
+page_type: system
 status: active
 updated: 2026-11-20
 source_refs:
   - README.md
 idea_ids: []
-project_topics:
+topics:
   - Research Pipeline
   - Lab Practice
 ---
@@ -41,6 +41,5 @@ ETAs on the dashboard and in the task list, and a human gate when the ask grows.
 
 ## Related pages
 
-- [[project/what-autolab-is|Autolab]]
-- [[project/dashboard-and-threads|Dashboard and Threads]]
-- [[project/honest-comparison|Honest comparison]]
+- [[system/what-autolab-is|Autolab]]
+- [[system/dashboard-and-threads|Dashboard and Threads]]

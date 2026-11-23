@@ -1,11 +1,14 @@
 // Notes LaTeX compile, build watch, and SyncTeX position sync.
 import {
-  icon, esc, toast, api, libraryURL, workspaceURL,
+  icon, toast, api, libraryURL, invalidateProjectList, isProjectTeX,
 } from './project-shared.js';
 import {
   projectNotice, updateProjectBuildState, showProjectPDF, showProjectSource,
-  rememberProjectEditor, selectProjectFile,
+  rememberProjectEditor, selectProjectFile, renderMainTeXSelector,
 } from './project-editor.js';
+import {
+  paintProjectSelection, renderProjectTree,
+} from './project-tree.js';
 
 function scheduleProjectCompile(item){
  item.compileQueued=true;clearTimeout(item.autoCompileTimer);

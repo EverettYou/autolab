@@ -1,6 +1,6 @@
 ---
 title: Distillation tower
-page_type: project
+page_type: system
 status: active
 updated: 2026-11-20
 source_refs:
@@ -10,7 +10,7 @@ source_refs:
   - labs/README.md
   - notes/README.md
 idea_ids: []
-project_topics:
+topics:
   - Lab OS Architecture
   - Research Pipeline
   - Knowledge Systems
@@ -54,7 +54,7 @@ raw PDFs, scratch scripts, and defended claims live in the same pile.
 | “This we would defend in a meeting” | `wiki/` (clean) | Knowledge distillation — cited, reusable, searchable. |
 | “This API we will keep calling” | `lib/` (clean, optional) | Code distillation — rewritten + tested, not copied from a lab. |
 | “Write it up for humans” | `notes/` (narrative, optional) | Research notes / manuscript that **cite** the tower; they do not replace it. |
-| “We tried X; it fails under Y” | `wiki/dead-ends/` | Settled “no” so you do not pay for it again. |
+| “We tried X; it fails under Y” | `wiki/deadends/` | Settled “no” so you do not pay for it again. |
 
 Most candidates should **stop early**. That is success: you searched widely and refused to promote
 noise.
@@ -68,7 +68,7 @@ reproduction (or an honest dead-end), a lab explores the twist that is actually 
 of re-deriving from chat history.
 
 **“Can we trust this baseline?”** A hot repo lands in `references/`. Reproduce before you compare
-against it in a lab. If VERIFY fails, file `dead-ends/` and move on — you just saved a week of
+against it in a lab. If VERIFY fails, file `deadends/` and move on — you just saved a week of
 building on a mirage. If it passes, the lab may extend it; only then might code graduate into
 `lib/`.
 
@@ -84,7 +84,7 @@ the narrative face.
 
 **Building tools that accelerate the next lab.** After the third time you need the same constructor,
 `promote-to-lib` re-implements it under `lib/`. Later labs import the package. That feedback loop —
-lab → lib → faster lab — is why code distillation exists. See [[project/shared-package|Shared
+lab → lib → faster lab — is why code distillation exists. See [[system/shared-package|Shared
 package]].
 
 **Handing the project to another agent (or future you).** Chat scrollback is gone. The tower still
@@ -108,12 +108,11 @@ a home; leave blobs where they were made.
 evidence. Never import production code from `labs/` or `references/`.
 
 Same spine as process: discover sparingly → reproduce → lab → ingest / promote. Gates catch weak
-evidence early — see [[project/honest-comparison|Honest comparison]] and
-[[project/spending-compute|Spending compute]].
+evidence early — see [[system/spending-compute|Spending compute]].
 
 ## Related pages
 
-- [[project/what-autolab-is|Autolab]]
-- [[project/shared-package|Shared package]]
-- [[project/dashboard-and-threads|Dashboard and Threads]]
-- [[project/honest-comparison|Honest comparison]]
+- [[system/what-autolab-is|Autolab]]
+- [[system/shared-package|Shared package]]
+- [[system/dashboard-and-threads|Dashboard and Threads]]
+- [[system/spending-compute|Spending compute]]

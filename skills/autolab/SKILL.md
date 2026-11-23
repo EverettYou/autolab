@@ -71,7 +71,7 @@ What it does:
    help; do not replace the whole file with marketing copy).
 2. If they gave only the one-liner, leave `wiki/thesis.md` as the provisional placeholder (or put
    that sentence under **Summary** and keep `status: provisional`).
-3. Tell them the created path and how to `cd` + `./run.sh start`.
+3. Tell them the created path and how to `cd` + `./run.sh`.
 
 ## Sync into a consumer
 
@@ -87,9 +87,9 @@ Consumer-side example workflow: `workflows/lab-os-sync.example.yml` (copy into t
 
 Sync registry is `scripts/sync_apply.py` (`SYNC_TREES` / `SYNC_FILES`):
 
-- **Every sync:** `skills/` (except this skill), `dashboard/`, `run.sh`, `labs/_tools/`, floor READMEs (`labs/`, `references/`, `notes/`, `lib/`, `wiki/`), `wiki/taxonomy.yml`, `wiki/project/`
-- **Bootstrap-once:** `.auto-research/` only if the consumer has no folder yet
-- **Never sync:** project payloads (dated labs, reference bodies, domain wiki, notes manuscripts, lib code, live catalogs, consumer README/config); template-only this skill; **future Autolab-only dashboard demos**
+- **Every sync:** `skills/` (except this skill), `dashboard/`, `run.sh`, `labs/_tools/`, floor READMEs (`labs/`, `references/`, `notes/`, `lib/`, `wiki/`), `wiki/system/`
+- **Bootstrap-once:** `.auto-research/` if missing; `wiki/taxonomy.yml` if missing (consumer owns the living `topics` list thereafter — never overwrite on sync)
+- **Never sync:** project payloads (dated labs, reference bodies, domain wiki ledgers, `wiki/taxonomy.yml` after first copy, notes manuscripts, lib code, live catalogs, consumer README/config); template-only this skill. `create_project` starts consumers with empty science floors.
 
 `--bump-pin` updates the consumer `config.yml` `os_version` from this template's `config.yml` `os_version`.
 

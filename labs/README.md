@@ -86,7 +86,7 @@ Reproduction is **per lab**. Prefer re-running a cited command over inventing a 
 1. Open that lab’s `PLAN.md` and `REPORT.md` → Setting: take the **exact** command, cwd, inputs,
    and acceptance check from the report.
 2. Prefer the repository `.venv`. Record GPU/CPU scope the researcher authorized
-   (`wiki/project/spending-compute.md`). Do not stop unrelated live jobs.
+   (`wiki/system/spending-compute.md`). Do not stop unrelated live jobs.
 3. From the **repository root**:
 
    ```bash

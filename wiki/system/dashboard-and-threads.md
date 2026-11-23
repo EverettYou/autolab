@@ -1,6 +1,6 @@
 ---
 title: Dashboard and Threads
-page_type: project
+page_type: system
 status: active
 updated: 2026-11-20
 source_refs:
@@ -9,7 +9,7 @@ source_refs:
   - skills/research-threads/SKILL.md
   - skills/auto-research/SKILL.md
 idea_ids: []
-project_topics:
+topics:
   - Research Pipeline
   - Lab OS Architecture
   - Lab Practice
@@ -138,6 +138,6 @@ If Monitor says `UNSCHEDULED` or `STALE` while the flag is `running`, ticks are 
 
 ## Related pages
 
-- [[project/what-autolab-is|Autolab]]
-- [[project/distillation-tower|Distillation tower]]
-- [[project/spending-compute|Spending compute]]
+- [[system/what-autolab-is|Autolab]]
+- [[system/distillation-tower|Distillation tower]]
+- [[system/spending-compute|Spending compute]]

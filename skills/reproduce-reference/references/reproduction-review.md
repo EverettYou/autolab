@@ -5,7 +5,7 @@ execute code, rerun benchmarks, or fetch URLs. Apply it from a second agent sess
 when the implementer applies it, work only from the files on disk.
 
 Inputs: `gate-state.yaml` claims, `result.json`, `ARCHITECTURE.md`, `REPRO-PLAN.md`, metrics in
-`output/`, the paper summary or `PAPER-SPEC.md`, and `wiki/dead-ends/` for this reference.
+`output/`, the paper summary or `PAPER-SPEC.md`, and `wiki/deadends/` for this reference.
 
 Procedure:
 

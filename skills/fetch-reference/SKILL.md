@@ -63,6 +63,8 @@ python3 $S/fetch_reference.py register --id some-dataset --kind dataset --title 
 # verify local copies against provenance.json; restore missing PDFs (checksum-verified)
 python3 $S/fetch_reference.py status --all
 python3 $S/fetch_reference.py refetch --all
+# Dashboard Open PDF also calls refetch when paper.pdf is missing locally (same checksum rules).
+# Dashboard View Repo calls `repo` when repos/<name>/ is missing locally.
 
 # discovery search (JSONL; --text for reading)
 python3 $S/fetch_reference.py search "quantum oracle sketching" --max-papers 15

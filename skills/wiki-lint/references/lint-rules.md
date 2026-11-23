@@ -19,7 +19,9 @@ This file lists what the linter reports and how severe each finding is.
 - a compiled page filename that is not lowercase kebab-case;
 - compiled page lacking required frontmatter (`title`, `page_type`, `status`, `updated`, `source_refs`, `idea_ids`) or a unique title;
 - a compiled page outside `questions/` whose title is a question or an instruction: it starts with What, Why, How, When, Where, Which, Who, Does, Do, Is, Are, Can, Should, Did, Will, Must, or You, or it ends with `?` or other punctuation. A `questions/` page may keep a question title. Records are exempt;
-- status outside the controlled list; `topics` or `project_topics` outside `taxonomy.yml`; a missing topic list the page type requires (`topics`, `project_topics`, or either);
+- status outside the controlled list; missing or invalid `topics` on a compiled page (1–3 values
+  from `taxonomy.yml`; extend the list with `skills/wiki-ingest/scripts/ensure_topics.py` when
+  ingest introduces a new subject; records and folder `index.md` guides are exempt);
 - compiled page lacking visible Summary, Sources, or Last updated fields, or a final `## Related pages` section;
 - a relative Markdown link or path-qualified Obsidian wikilink in a compiled or special page whose target does not exist, including targets outside `wiki/` (`labs/`, `references/`, `lib/`, `skills/`);
 - an ambiguous bare wikilink that matches several pages;

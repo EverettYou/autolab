@@ -17,14 +17,17 @@ visibly separate from the project wiki's synthesis.
 ## What to read
 
 - `wiki/index.md` is the classifier (category hubs). Drill into folder `index.md` sub-indexes for leaves; use `wiki/thesis.md` for the standing synthesis, not as a catalog.
-- Synthesized pages (`concepts/`, `methods/`, `comparisons/`, `questions/`, `implementations/`) hold the
-  current cross-source view.
-- Ledger pages (`algorithms/`, `models/`, `techniques/`, `dead-ends/`) hold what was learned about one
+- Synthesized pages (`concepts/`, `methods/`, `comparisons/`, `questions/`, `implementations/`,
+  `literature/`) hold the current cross-source view. `literature/` pages are reviews over a
+  **cluster** of references (lineage, compare, open problems), not one-paper digests.
+- Ledger pages (`algorithms/`, `models/`, `techniques/`, `deadends/`) hold what was learned about one
   algorithm, model/oracle family, or practice. Their Summary line often carries later results than the body, so read it
   first.
-- `dead-ends/` lists settled negatives. Check it before proposing to scout, reproduce, or integrate a
+- `deadends/` lists settled negatives. Check it before proposing to scout, reproduce, or integrate a
   candidate, and say so when an idea was already tried and what would justify revisiting it.
-- `project/` pages hold the project's constraints (compute budget, evaluation discipline, trust zones).
+- `system/` pages hold Lab OS constraints (compute budget, evaluation discipline, trust zones).
+- `project/` pages hold this lab's research-program material (aims, program constraints, routers) —
+  domain content, not the OS manual.
 - `lib/` is the manual of the configured lab package (when `features.lib` is on). The API itself is
   rendered from docstrings in the dashboard API section; source lives under `lib/src/<package>/`.
 - `records/` is dated history. Use it for when and why something was decided or measured; prefer the

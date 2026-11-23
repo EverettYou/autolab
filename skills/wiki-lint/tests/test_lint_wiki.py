@@ -25,13 +25,14 @@ citable_wiki_prefixes:
 record_folders:
   - records
 page_types:
-  concept: {folder: concepts, requires: topics}
-  model: {folder: models, requires: topics}
-  question: {folder: questions, requires: topics}
-  technique: {folder: techniques, requires: either}
-  project: {folder: project, requires: project_topics}
-  package: {folder: package, requires: project_topics}
-  thesis: {folder: ".", requires: none}
+  concept: {folder: concepts}
+  model: {folder: models}
+  question: {folder: questions}
+  technique: {folder: techniques}
+  project: {folder: project}
+  system: {folder: system}
+  package: {folder: package}
+  thesis: {folder: "."}
 statuses:
   - provisional
   - active
@@ -39,25 +40,24 @@ statuses:
 topics:
   - Quantum Error Correction
   - Decoders
-project_topics:
   - Research Pipeline
   - Knowledge Systems
   - Lab OS Architecture
 """
 
 OVERVIEW = """---
-title: Project overview
-page_type: project
+title: System overview
+page_type: system
 status: active
 updated: 2026-09-03
 source_refs:
 - README.md
 idea_ids: []
-project_topics:
+topics:
 - Research Pipeline
 ---
 
-# Project overview
+# System overview
 
 **Summary**: The project wiki compiles reusable knowledge from papers, code, and labs.
 
@@ -93,7 +93,7 @@ idea_ids: []
 
 ## Related pages
 
-- [[project/overview|Project overview]]
+- [[system/overview|System overview]]
 """
 
 
@@ -164,7 +164,7 @@ class StructuralLintTests(unittest.TestCase):
         (wiki / "taxonomy.yml").write_text(TAXONOMY, encoding="utf-8")
         (wiki / "index.md").write_text(
             "# Knowledge map\n\n"
-            "- [Project manual](project/index.md)\n"
+            "- [System manual](system/index.md)\n"
             "- [[thesis|Project thesis]]\n",
             encoding="utf-8",
         )
@@ -177,13 +177,15 @@ class StructuralLintTests(unittest.TestCase):
             "source_refs:\n"
             "- README.md\n"
             "idea_ids: []\n"
+            "topics:\n"
+            "- Knowledge Systems\n"
             "---\n\n"
             "# Project thesis\n\n"
             "**Summary**: Compile knowledge once.\n\n"
             "**Sources**: [README](../README.md)\n\n"
             "**Last updated**: 2026-09-03\n\n"
             "## Related pages\n\n"
-            "- [Project manual](project/index.md)\n",
+            "- [System manual](system/index.md)\n",
             encoding="utf-8",
         )
         (wiki / "records").mkdir()
@@ -192,11 +194,11 @@ class StructuralLintTests(unittest.TestCase):
             encoding="utf-8",
         )
         (wiki / "sources.yml").write_text("version: 1\nsources: []\n", encoding="utf-8")
-        project = wiki / "project"
-        project.mkdir()
-        (project / "overview.md").write_text(OVERVIEW, encoding="utf-8")
-        (project / "index.md").write_text(
-            "# Project manual\n\n- [[project/overview|Project overview]]\n",
+        system = wiki / "system"
+        system.mkdir()
+        (system / "overview.md").write_text(OVERVIEW, encoding="utf-8")
+        (system / "index.md").write_text(
+            "# System manual\n\n- [[system/overview|System overview]]\n",
             encoding="utf-8",
         )
         (root / "README.md").write_text("# Project\n", encoding="utf-8")
@@ -363,18 +365,18 @@ class StructuralLintTests(unittest.TestCase):
             wiki = self.make_wiki(root)
             self.add_page(wiki, "models/wrong-type.md", page("Wrong type", page_type="concept"))
             self.add_page(wiki, "models/no-topics.md", page("No topics", topics=""))
-            self.add_page(wiki, "package/guide.md", page("Package guide", page_type="package"))
+            self.add_page(wiki, "package/guide.md", page("Package guide", page_type="package", topics=""))
             self.add_page(
                 wiki,
                 "techniques/ops.md",
-                page("Ops", page_type="technique", topics="project_topics:\n- Research Pipeline"),
+                page("Ops", page_type="technique", topics="topics:\n- Research Pipeline"),
             )
             self.add_page(wiki, "codecs/orphan-type.md", page("Unknown folder", page_type="model"))
             errors, _ = self.lint(root)
             joined = "\n".join(errors)
             self.assertIn("page_type 'concept' in wiki/models/wrong-type.md does not match", joined)
-            self.assertIn("topic-indexed page needs one to three controlled topics in wiki/models/no-topics.md", joined)
-            self.assertIn("package page needs one to three controlled project_topics in wiki/package/guide.md", joined)
+            self.assertIn("topics must list one to three controlled values in wiki/models/no-topics.md", joined)
+            self.assertIn("topics must list one to three controlled values in wiki/package/guide.md", joined)
             self.assertIn("unknown wiki category folder for wiki/codecs/orphan-type.md", joined)
             self.assertNotIn("techniques/ops.md", joined)
 
@@ -413,7 +415,7 @@ class StructuralLintTests(unittest.TestCase):
                 "````markdown\n```{toctree}\nexample\n```\n````\n"
             )
             self.add_page(wiki, "package/guide.md", page("Guide", page_type="package",
-                                                          topics="project_topics:\n- Lab OS Architecture",
+                                                          topics="topics:\n- Lab OS Architecture",
                                                           body=body))
             errors, _ = self.lint(root)
             myst = [error for error in errors if "MyST" in error]

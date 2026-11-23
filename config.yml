@@ -1,9 +1,10 @@
 # Lab repository config (project zone — not named after any template).
 # Identity: ``name`` is required and stable. Display title lives in dashboard site.json only.
+# create_project resets consumers to notes:false and lib only when --package is passed.
 os_version: "0.1.0"
 name: autolab
 features:
-  notes: false
-  lib: false
-package: null
+  notes: true
+  lib: true
+package: toyattn
 loop_schema: auto-research-1

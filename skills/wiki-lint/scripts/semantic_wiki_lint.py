@@ -127,7 +127,6 @@ def _summary(text: str) -> str:
 def _tokens(page: Path, metadata: dict[str, Any], summary: str) -> frozenset[str]:
     values = [page.stem, str(metadata.get("title", "")), summary]
     values.extend(str(value) for value in metadata.get("topics", []) if isinstance(value, str))
-    values.extend(str(value) for value in metadata.get("project_topics", []) if isinstance(value, str))
     return frozenset(
         word.casefold() for word in WORD_PATTERN.findall(" ".join(values)) if word.casefold() not in STOPWORDS
     )

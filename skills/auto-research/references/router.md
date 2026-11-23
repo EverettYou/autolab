@@ -1,7 +1,7 @@
 # Router: choosing and dispatching a research step
 
 Detail for steps 1 to 5 of a research tick in `skills/auto-research/SKILL.md`. The rules on GPUs,
-training, and time tiers are in `wiki/project/spending-compute.md`; this page only applies them.
+training, and time tiers are in `wiki/system/spending-compute.md`; this page only applies them.
 `$L` is `.venv/bin/python skills/auto-research/scripts/loop_state.py`.
 
 ## Resources
@@ -75,7 +75,7 @@ runnable, do the repository duties of a supervisor tick (`maintain`) and refill 
 | `15min` and above | detached; a tick only launches or harvests it |
 
 The timeout for any tier above `0` is min(2 x tier, cap); `bash skills/guards/scripts/parse_time.sh
-<tier>` prints the tier in seconds, and the caps are in `wiki/project/spending-compute.md`. When a
+<tier>` prints the tier in seconds, and the caps are in `wiki/system/spending-compute.md`. When a
 program exceeds its estimate, raise the item's tier (`$L task set <id> --time <tier>`) or split
 the item, and note the measured runtime in its body.
 

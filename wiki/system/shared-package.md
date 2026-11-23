@@ -1,12 +1,12 @@
 ---
 title: Shared package
-page_type: project
+page_type: system
 status: active
 updated: 2026-11-20
 source_refs:
   - lib/README.md
 idea_ids: []
-project_topics:
+topics:
   - Lab OS Architecture
 ---
 
@@ -37,10 +37,10 @@ start with references + labs + wiki; enable `features.lib` when something has ea
 - Long explanations (write `wiki/package/` pages; the dashboard API view can render live docstrings)
 
 The template ships an empty `lib/src/` until you opt in or the first promotion bootstraps the tree.
-See [[project/distillation-tower|Distillation tower]] for why promotion rewrites instead of
+See [[system/distillation-tower|Distillation tower]] for why promotion rewrites instead of
 copying.
 
 ## Related pages
 
-- [[project/distillation-tower|Distillation tower]]
-- [[project/what-autolab-is|Autolab]]
+- [[system/distillation-tower|Distillation tower]]
+- [[system/what-autolab-is|Autolab]]
