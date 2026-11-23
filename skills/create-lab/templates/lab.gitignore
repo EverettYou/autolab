@@ -1,0 +1,9 @@
+# What git tracks in this lab (skills/organize-lab/references/report-contract.md, Git policy).
+# Track numerical evidence: lab.json, PLAN.md, REPORT.md, notes/, scripts/, configs/, tests/,
+# results/, figures/, data/, logs/, and checkpoint manifests.
+# Lab-local ignore is only for transient files; heavy checkpoints and bulky archives are covered
+# by the repository .gitignore.
+__pycache__/
+.cache/
+*.pid
+*.lock

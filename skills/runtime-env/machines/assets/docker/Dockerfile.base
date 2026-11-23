@@ -1,0 +1,15 @@
+# Base image for reproduction attempts (references/<id>/attempts/<slug>/).
+# CPU-only; a GPU base (nvidia/cuda) changes only with researcher approval.
+FROM python:3.11-slim-bookworm
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+# Pre-install numerical dependencies used for development and smoke tests.
+
+# Reproduction attempts mount their own code under /attempt.
+ENV PYTHONUNBUFFERED=1

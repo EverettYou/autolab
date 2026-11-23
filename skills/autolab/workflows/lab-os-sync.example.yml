@@ -1,0 +1,32 @@
+# Copy into a consumer as .github/workflows/lab-os-sync.yml
+# and set repository variable LAB_OS_REPO to the template git URL
+# (for labs scaffolded from Autolab: e.g. EdenCodeInc/autolab).
+name: Lab OS sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      os_ref:
+        description: "Lab OS git ref (tag or branch)"
+        required: true
+        default: "v0.1.0"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.LAB_OS_REPO }}
+          ref: ${{ inputs.os_ref }}
+          path: .lab-os-src
+      - run: python3 .lab-os-src/skills/autolab/scripts/sync_apply.py --from .lab-os-src --to . --bump-pin
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(lab-os): sync skills and dashboard"
+          title: "chore(lab-os): bump sync from lab OS"
+          branch: chore/lab-os-sync

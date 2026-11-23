@@ -1,0 +1,24 @@
+/* Splitter chrome for the Notes project tree / editor panes. */
+.split-panes { position: relative; }
+.pane-divider {
+  position: absolute; top: 0; bottom: 0; width: 9px; transform: translateX(-50%);
+  z-index: 3; cursor: col-resize; touch-action: none; user-select: none; background: transparent;
+}
+.pane-divider::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 4px; width: 1px; background: var(--border);
+}
+.pane-divider[hidden] { display: none; }
+.pane-divider:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+.pane-dragging,
+.pane-dragging * { cursor: col-resize !important; user-select: none !important; }
+.pane-dragging iframe { pointer-events: none; }
+
+.project-pane-resizer { position: relative; background: transparent; border: 0; z-index: 2; }
+.project-pane-resizer:hover { background: transparent; }
+.project-pane-resizer::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: var(--border);
+}
+.project-pane-resizer::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 9px; transform: translateX(-50%);
+}
+.project-pane-resizer:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }

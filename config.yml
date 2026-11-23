@@ -1,0 +1,9 @@
+# Lab repository config (project zone — not named after any template).
+# Identity: ``name`` is required and stable. Display title lives in dashboard site.json only.
+os_version: "0.1.0"
+name: autolab
+features:
+  notes: false
+  lib: false
+package: null
+loop_schema: auto-research-1

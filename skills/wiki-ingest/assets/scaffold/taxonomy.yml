@@ -1,0 +1,49 @@
+scope: project
+# Non-empty only for a nested wiki whose sources live under its own folder.
+allowed_source_prefixes: []
+# Only dated records may be cited as raw wiki sources. Compiled ledger / package pages are
+# synthesis — cite the lab, reference, or record underneath instead.
+citable_wiki_prefixes:
+  - wiki/records/
+record_folders:
+  - records
+# Paths this lab used to have and should not reappear in compiled prose. Add as you retire trees.
+retired_path_prefixes: []
+# One page type per folder. `requires`: topics | project_topics | either | none.
+# `package` pages live under package/ (manual for code in repo lib/).
+page_types:
+  concept: {folder: concepts, requires: topics}
+  method: {folder: methods, requires: topics}
+  comparison: {folder: comparisons, requires: topics}
+  implementation: {folder: implementations, requires: either}
+  question: {folder: questions, requires: topics}
+  paper: {folder: papers, requires: none}
+  algorithm: {folder: algorithms, requires: topics}
+  model: {folder: models, requires: topics}
+  technique: {folder: techniques, requires: either}
+  dead-end: {folder: dead-ends, requires: topics}
+  project: {folder: project, requires: project_topics}
+  package: {folder: package, requires: project_topics}
+  thesis: {folder: ".", requires: none}
+statuses:
+  - provisional
+  - active
+  - settled
+  - open
+  - closed
+  - superseded
+# Domain vocabulary — replace [] with this lab's science topics before ingesting ledger pages.
+# Do not reuse page_type names as topics.
+topics: []
+# Lab-OS facets for project/ and package/ pages:
+#   Research Pipeline — discover → reproduce → lab → ingest → promote
+#   Knowledge Systems — wiki, records, distillation of claims
+#   Lab OS Architecture — floors, trust, dashboard, Threads, sync zone
+#   Lab Practice — evaluation hygiene, compute budget, day-to-day habits
+#   Manuscripts — optional notes/ long-form writing
+project_topics:
+  - Research Pipeline
+  - Knowledge Systems
+  - Lab OS Architecture
+  - Lab Practice
+  - Manuscripts

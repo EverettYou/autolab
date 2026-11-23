@@ -1,0 +1,15 @@
+# configs/base.yaml — single source of truth for a EM reproduction attempt.
+seed: 0
+data:
+  name: synthetic_gaussian
+  n_samples: 64
+  n_features: 8
+solver:
+  name: ridge
+  lam: 0.01
+quantum:
+  qubit_budget: 10
+  enabled: false
+eval:
+  metric: mse
+  samples: 1000

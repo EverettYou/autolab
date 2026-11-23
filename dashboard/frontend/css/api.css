@@ -1,0 +1,65 @@
+/* -- API ------------------------------------------------------------------------------------ */
+.api-tree, .api-tree ul { list-style: none; margin: 0; padding: 0; }
+.api-tree ul { margin-left: 11px; border-left: 1px solid var(--border); padding-left: 0; }
+.api-tree a { display: inline-block; padding: 4px 6px; border-radius: 5px; color: var(--text-2); font-family: var(--mono); font-size: 12.5px; }
+.api-tree a:hover { background: var(--neutral-bg); text-decoration: none; }
+.api-tree a.current { background: var(--accent-soft); color: var(--accent-strong); font-weight: 600; }
+.api-tree summary { display: flex; align-items: center; min-height: 28px; list-style: none; cursor: pointer; }
+.api-tree summary::-webkit-details-marker { display: none; }
+.api-tree li:not(:has(details)) { display: flex; align-items: center; min-height: 28px; padding-left: 22px; }
+.api-main > h1 { margin: 4px 0 6px; }
+.api-toc code { font-size: 12px; }
+.api-overview { margin: 10px 0; }
+.api-search { margin: 12px 0 18px; }
+.api-results { list-style: none; padding: 0; margin: 8px 0 0; max-height: 360px; overflow: auto; }
+.api-results li { padding: 6px 0; border-top: 1px solid var(--border); }
+.module-doc { margin-top: 16px; }
+.api-section { margin-top: 28px; }
+.api-section > h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 0 0 12px; }
+.api-class { border: 1px solid var(--border); border-radius: var(--radius-small); padding: 14px 18px; margin-bottom: 16px; }
+.api-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; font-size: 15px; font-weight: 500; }
+.api-head .anchor { opacity: 0; color: var(--muted); font-weight: 400; }
+.api-head:hover .anchor { opacity: 1; text-decoration: none; }
+.kw { font-family: var(--mono); color: var(--type); font-size: 13.5px; font-weight: 600; }
+.signature { font-size: 13.5px; overflow-wrap: anywhere; white-space: pre-wrap; background: none; padding: 0; }
+.sig-name { font-weight: 700; color: var(--text); }
+.sig-return { color: var(--muted); }
+.api-badges { display: inline-flex; gap: 4px; }
+.bases, .decorators { font-size: 13px; color: var(--muted); margin-bottom: 6px; display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.decorators code { color: var(--type); }
+.api-sub { margin-top: 14px; }
+.api-sub-title { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 650; color: var(--muted); margin-bottom: 6px; }
+.api-member { border-top: 1px solid var(--border); padding: 10px 0 4px; }
+.api-member.level-3 { border: 1px solid var(--border); border-radius: var(--radius-small); padding: 12px 16px; margin-bottom: 12px; }
+.api-member > summary { list-style: none; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; cursor: pointer; }
+.api-member > summary::-webkit-details-marker { display: none; }
+.api-member-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin: 0; min-width: 0; font-size: 14px; font-weight: 500; }
+.api-member.level-3 > summary .api-member-title { font-size: 15px; }
+.api-member-title .anchor { opacity: 0; color: var(--muted); font-weight: 400; }
+.api-member > summary:hover .anchor { opacity: 1; text-decoration: none; }
+.api-member > summary .api-attr-mark { margin-left: 12px; }
+.api-member-body { padding-top: 8px; }
+.api-attrs { margin: 0; }
+.api-attr { border-top: 1px solid var(--border); }
+.api-attr:first-child { border-top: 0; }
+.api-attr > summary, .api-attr-lead {
+  list-style: none; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 8px 0;
+}
+.api-attr > summary { cursor: pointer; }
+.api-attr > summary::-webkit-details-marker { display: none; }
+.api-attr .signature { white-space: normal; min-width: 0; }
+.api-attr-mark {
+  flex: 0 0 auto; width: 0; height: 0; margin-top: 5px; align-self: center;
+  border-style: solid; border-width: 5px 0 5px 7px;
+  border-color: transparent transparent transparent var(--muted); transition: transform 0.12s;
+}
+.api-attr[open] > summary .api-attr-mark,
+.api-member[open] > summary .api-attr-mark { transform: rotate(90deg); }
+.api-attr-doc { margin: 0 0 8px 18px; }
+.api-attr-doc .markdown p { margin: 0 0 6px; }
+.doc { font-size: 14.5px; }
+.doc h2, .doc h3 { font-size: 15px; border: 0; margin: 16px 0 6px; }
+.export-list { columns: 3 200px; list-style: none; padding: 0; margin: 0; font-size: 13.5px; }
+.export-list li { break-inside: avoid; padding: 2px 0; }
+.overloads { font-size: 13px; margin-bottom: 6px; }
+

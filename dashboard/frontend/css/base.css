@@ -1,0 +1,129 @@
+/* lab dashboard: light theme, system fonts with CJK fallbacks, no external assets. */
+
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f9fafb;
+  --border: #e3e6eb;
+  --border-strong: #cfd4dc;
+  --text: #1c2129;
+  --text-2: #444c57;
+  --muted: #6a737f;
+  --accent: #2f5bd3;
+  --accent-soft: #eaf0fd;
+  --accent-strong: #2448ab;
+  --good: #1f7a45; --good-strong: #186338; --good-bg: #e6f4ec;
+  --good-fill: #1f7a45; --good-fill-hover: #186338;
+  --done: #3f6b58;   --done-bg: #edf3f0;
+  --info: #1d5fc2;   --info-bg: #e8f0fc;
+  --warn: #9a5b00;   --warn-bg: #fdf1dc;
+  --bad: #b3261e;    --bad-bg: #fbe9e7;
+  --bad-fill: #b3261e; --bad-fill-hover: #8e1d17;
+  --held: #c75048;
+  --neutral: #4b5563; --neutral-bg: #eef0f3;
+  --type: #6246b8;   --type-bg: #f1edfb;
+  --radius: 10px;
+  --radius-small: 6px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.04);
+  --pop-shadow: 0 12px 32px rgba(16, 24, 40, 0.14);
+  --topbar: rgba(255, 255, 255, 0.94);
+  --code-bg: #f6f8fa;
+  --text-editor-bg: #ffffff;
+  --code-inline: #f1f3f6;
+  --code-inline-hover: #dbe6fc;
+  --line: #f0f2f5;
+  --stripe: #fbfcfd;
+  --callout-border: #d5e1fb;
+  --link-underline: #c9d6f6;
+  --flash: #fff4c2;
+  --user-bg: #fbfefc;
+  --hljs-keyword: #6246b8;
+  --hljs-string: #1f7a45;
+  --hljs-number: #1d5fc2;
+  --hljs-builtin: #9a5b00;
+  --warn-border: #f2d7a6;
+  --warn-text: #6b4200;
+  --chip-border: #c9d7f8;
+  --meter: #e7ebf1;
+  --on-accent: #fff;
+  --accent-fill: #2f5bd3;
+  --accent-fill-hover: #2448ab;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", "WenQuanYi Micro Hei", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, "Liberation Mono",
+    "Noto Sans Mono CJK SC", monospace;
+  --top: 56px;
+  --rail-hang: 64px;
+  --lab-rows: 4;
+  --lab-title-lines: 2;
+  --graph-height: 460px;
+  --queue-height: 204px;
+  --json-table-height: 304px;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1c2026;
+  --surface: #232830;
+  --surface-2: #292f38;
+  --border: #313844;
+  --border-strong: #3e4858;
+  --text: #e6e9ee;
+  --text-2: #b7bfc9;
+  --muted: #8d96a3;
+  --accent: #7c9aee;
+  --accent-soft: #2a384f;
+  --accent-strong: #a9c0f6;
+  --accent-fill: #3d6adf;
+  --accent-fill-hover: #2f5bd3;
+  --good: #6fbf96; --good-strong: #86d0ab; --good-bg: #1c2b24;
+  --good-fill: #1b8246; --good-fill-hover: #18733e;
+  --done: #8eab9c; --done-bg: #1c2824;
+  --info: #8aa8ef; --info-bg: #1c2838;
+  --warn: #d7b36a; --warn-bg: #2a261c;
+  --bad: #e7a09a; --bad-bg: #2c2222;
+  --bad-fill: #d2372f; --bad-fill-hover: #ba312a;
+  --held: #e7a09a;
+  --neutral: #b7bfc9; --neutral-bg: #2c333c;
+  --type: #b7a6e4; --type-bg: #2a2636;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --pop-shadow: 0 12px 32px rgba(0, 0, 0, 0.32);
+  --topbar: rgba(28, 32, 38, 0.92);
+  --code-bg: #292f38;
+  --text-editor-bg: var(--code-bg);
+  --code-inline: #313844;
+  --code-inline-hover: #2c3a52;
+  --line: #262c34;
+  --stripe: #252b33;
+  --callout-border: #354664;
+  --link-underline: #3a4d72;
+  --flash: #3a3422;
+  --user-bg: #1c2b24;
+  --hljs-keyword: #b7a6e4;
+  --hljs-string: #6fbf96;
+  --hljs-number: #7c9aee;
+  --hljs-builtin: #d7b36a;
+  --warn-border: #4a4332;
+  --warn-text: #e4d3a8;
+  --chip-border: #3a4d72;
+  --meter: #313844;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--top) + 12px); color-scheme: light; }
+body {
+  margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+  background: var(--bg); color: var(--text); font-family: var(--font);
+  font-size: 15px; line-height: 1.6; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-strong); text-decoration: underline; text-underline-offset: 2px; }
+code, pre, kbd { font-family: var(--mono); font-size: 0.9em; }
+h1, h2, h3, h4 { line-height: 1.3; color: var(--text); }
+button, input, select { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--surface); padding: 6px 10px; z-index: 50; }
+.skip:focus { left: 8px; }
+.offscreen { position: fixed; left: -9999px; top: 0; }
+.noscript { max-width: 680px; margin: 40px auto; }
+
