@@ -1,6 +1,7 @@
-'use strict';
 // Persistent Notes search field: park in #workspace-search-bank, move into a
 // [data-workspace-search] slot when a library toolbar asks for it.
+import { runtime as R } from './runtime.js';
+
 let workspaceSearchFocus = null;
 function workspaceContent() {
   const search = document.getElementById('workspace-search');
@@ -27,3 +28,4 @@ function mountWorkspaceSearch() {
   workspaceSearchFocus = null;
 }
 new MutationObserver(mountWorkspaceSearch).observe(document.body, {childList: true, subtree: true});
+R.workspaceContent = workspaceContent;

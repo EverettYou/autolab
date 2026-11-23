@@ -1,5 +1,6 @@
-'use strict';
 // Notes workspace host: project list + LaTeX/PDF workbench, mounted in the main dashboard.
+import { runtime as R } from './runtime.js';
+
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const params = values => new URLSearchParams(values);
@@ -74,7 +75,7 @@ function positionDashboard(layer) {
   const {width, height, top, left} = host.getBoundingClientRect();
   Object.assign(layer.style, {width: width + 'px', height: height + 'px', top: top + 'px', left: left + 'px'});
 }
-function syncDashboardVisibility() { syncProjectLayers(); }
+function syncDashboardVisibility() { R.syncProjectLayers?.(); }
 
 let toastTimer;
 function toast(message) {
@@ -109,10 +110,12 @@ const NotesBrowsing = {
   currentLocation() { return {view: workspace.id, location: state}; },
   checkpoint() {
     const saved = savedPositions();
-    for (const item of ProjectUI.layers.values()) {
+    const layers = R.ProjectUI?.layers;
+    if (!layers) return;
+    for (const item of layers.values()) {
       if (item.project !== state.project || !item.editorReady) continue;
       saved[item.project] = {
-        editor: projectEditorLocation(item),
+        editor: R.projectEditorLocation(item),
         document: item.selected,
         pdfReaders: state.pdfReaders,
       };
@@ -131,7 +134,7 @@ async function renderWorkspace() {
     state.document ||= saved.document;
     state.pdfReaders = saved.pdfReaders || [];
   }
-  await renderProjectWorkspace(workspace, state);
+  await R.renderProjectWorkspace(workspace, state);
   onLocation?.(state.project || '');
 }
 
@@ -167,3 +170,10 @@ window.NotesHost = {
   wire: wireNotesHost,
   checkpoint: () => NotesBrowsing.checkpoint(),
 };
+
+Object.assign(R, {
+  $, esc, params, api, toast, modal, icon, S, W, workspace, state,
+  workspaceURL, workspaceResourceURL, workspaceDate, liveError,
+  renderWorkspace, selectProject, NotesBrowsing, positionDashboard,
+  syncDashboardVisibility,
+});

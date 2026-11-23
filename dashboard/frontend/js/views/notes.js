@@ -1,40 +1,23 @@
 // Notes section view — same role as views/wiki.js or views/labs.js.
-// Shared workbench helpers live under /static/js/; this view owns the host shell.
+// Step 1 ESM: static imports replace loadScript; window.NotesHost bridge kept.
 
 import { h, setTitle } from "../ui.js";
 
-const SCRIPTS = [
-  "/static/vendor/fontawesome/icons.js",
-  "/static/js/table.js",
-  "/static/js/splitpanes.js",
-  "/static/js/search-fields.js",
-  "/static/js/editor-state.js",
-  "/static/js/draft-recovery.js",
-  "/static/js/action-menu.js",
-  "/static/js/views/notes/workspace-toolbar.js",
-  "/static/js/views/notes/projects.js",
-  "/static/js/views/notes/host.js",
-];
+import "../../vendor/fontawesome/icons.js";
+import "../table.js";
+import "../splitpanes.js";
+import "../search-fields.js";
+import "../editor-state.js";
+import "../draft-recovery.js";
+import "../action-menu.js";
+import "./notes/workspace-toolbar.js";
+import "./notes/host.js";
+import "./notes/projects.js";
 
 let ready = null;
 let host = null;
 let booted = false;
 let project = null;
-
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[data-workbench-src="${src}"]`)) {
-      resolve();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = src;
-    script.dataset.workbenchSrc = src;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error(`Failed to load ${src}`));
-    document.head.append(script);
-  });
-}
 
 function createHost() {
   const root = document.createElement("div");
@@ -64,7 +47,7 @@ async function ensureHost({ onLocation } = {}) {
   }
   ready = (async () => {
     host = document.getElementById("workspace") || createHost();
-    for (const src of SCRIPTS) await loadScript(src);
+    // Side-effect imports above already registered NotesHost / DraftRecovery.
     window.NotesHost.wire({ onLocation });
     await window.DraftRecovery.start("lab-notes");
     return host;

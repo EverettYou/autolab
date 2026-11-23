@@ -1,5 +1,25 @@
-'use strict';
 // One project-list/reader contract for configured folder libraries.
+import { runtime as R } from './runtime.js';
+
+// Call-time bridges to host helpers (host module evaluates before this one).
+const esc = v => R.esc(v);
+const api = (...a) => R.api(...a);
+const toast = m => R.toast(m);
+const modal = (...a) => R.modal(...a);
+const icon = n => R.icon(n);
+const $ = id => R.$(id);
+const params = v => R.params(v);
+const workspaceURL = (...a) => R.workspaceURL(...a);
+const workspaceResourceURL = (...a) => R.workspaceResourceURL(...a);
+const workspaceContent = () => R.workspaceContent();
+const renderWorkspace = (...a) => R.renderWorkspace(...a);
+const positionDashboard = (...a) => R.positionDashboard(...a);
+const syncDashboardVisibility = (...a) => R.syncDashboardVisibility(...a);
+const NotesBrowsing = R.NotesBrowsing;
+const S = R.S;
+const W = R.W;
+const {DataTables, SearchFields, ActionMenu, SplitPanes, DraftRecovery} = window;
+
 const isProjectTeX = entry => Boolean(entry?.path && /(?:\.tex|\/main\.txt)$/i.test(entry.path));
 const ProjectUI={layers:new Map(),lists:new Map(),request:0};
 const libraryStatusNames={active:'Active',inactive:'Inactive',finished:'Finished',planning:'Planning',archived:'Archived',unknown:'Unclassified'};
@@ -893,3 +913,11 @@ document.addEventListener('section-settings-changed',e=>{
  if(view===S.view&&['papers','travel'].includes(S.view))renderWorkspace();
 });
 document.addEventListener('paper-types-changed',()=>{const workspace=W.config.workspaces.find(w=>w.id==='papers');if(workspace)invalidateProjectList(workspace);if(S.view==='papers')renderWorkspace();});
+
+Object.assign(R, {
+  ProjectUI,
+  renderProjectWorkspace,
+  syncProjectLayers,
+  invalidateProjectList,
+  projectEditorLocation,
+});
