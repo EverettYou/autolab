@@ -1,6 +1,6 @@
 // Notes project editor shell: open layer, source/PDF panes, save, layout.
 import {
-  icon, renderWorkspace, syncDashboardVisibility, NotesBrowsing, R,
+  icon, renderWorkspace, syncDashboardVisibility, NotesBrowsing,
   esc, toast, modal, api, $, S, W, workspaceURL, workspaceResourceURL, positionDashboard,
   workspaceContent, SplitPanes, DraftRecovery, isProjectTeX, ProjectUI, libraryURL, libraryError,
 } from './project-shared.js';

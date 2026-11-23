@@ -1,5 +1,5 @@
 // Notes projects barrel — re-exports for host.js.
-import { ProjectUI, invalidateProjectList, R } from './project-shared.js';
+import { ProjectUI, invalidateProjectList } from './project-shared.js';
 import { renderProjectWorkspace } from './library.js';
 import { syncProjectLayers, projectEditorLocation } from './project-editor.js';
 import './project-tree.js';
@@ -12,11 +12,3 @@ export {
   invalidateProjectList,
   projectEditorLocation,
 };
-
-Object.assign(R, {
-  ProjectUI,
-  renderProjectWorkspace,
-  syncProjectLayers,
-  invalidateProjectList,
-  projectEditorLocation,
-});

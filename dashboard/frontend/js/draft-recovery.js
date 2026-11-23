@@ -1,5 +1,6 @@
 import { toast } from './workbench-chrome.js';
 import { EditorState } from './editor-state.js';
+import { session } from './views/notes/notes-session.js';
 
 // Per-tab recovery copies survive a reload. They are never canonical saves or
 // browser-history payloads, and stay separate from shared browsing preferences.
@@ -55,7 +56,7 @@ const DraftRecovery=(()=>{
   window.addEventListener('workbench-before-update',event=>{if(!checkpoint()){event.detail?.block?.('recovery-write-failed');event.preventDefault();}});
  }
  function editorKey(node,label='editor'){
-  const position=globalThis.NotesBrowsing?.currentLocation?.() ?? null,identity=position?.location||{};
+  const position=session.NotesBrowsing.currentLocation?.() ?? null,identity=position?.location||{};
   const keys=['space','page','account','sourceAccount','sourceThread','server','detail','selected','selectedEvent','thread','path','source','project','document','talk','slide','letterPath','activeFile','app','section','user','settingsPane','settingsResource','settingsSection','skillsPath','templateAffiliation','signerAffiliation'];
   return JSON.stringify([position?.view||'',Object.fromEntries(keys.filter(key=>identity[key]!==undefined).map(key=>[key,identity[key]])),label]);
  }

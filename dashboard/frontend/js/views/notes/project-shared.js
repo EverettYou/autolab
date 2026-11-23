@@ -10,15 +10,15 @@ import {
   $, params, api, S, W, workspaceURL, workspaceResourceURL, workspaceDate, positionDashboard,
 } from './notes-context.js';
 import { workspaceContent } from './workspace-toolbar.js';
-import { runtime as R } from './runtime.js';
+import { session } from './notes-session.js';
 
 const icon = name => iconHtml(name);
-const renderWorkspace = (...a) => R.renderWorkspace(...a);
-const syncDashboardVisibility = (...a) => R.syncDashboardVisibility(...a);
+const renderWorkspace = (...a) => session.renderWorkspace(...a);
+const syncDashboardVisibility = (...a) => session.syncDashboardVisibility(...a);
 const NotesBrowsing = {
-  clean: (...a) => R.NotesBrowsing.clean(...a),
-  checkpoint: (...a) => R.NotesBrowsing.checkpoint(...a),
-  currentLocation: (...a) => R.NotesBrowsing.currentLocation(...a),
+  clean: (...a) => session.NotesBrowsing.clean(...a),
+  checkpoint: (...a) => session.NotesBrowsing.checkpoint(...a),
+  currentLocation: (...a) => session.NotesBrowsing.currentLocation(...a),
 };
 
 function filesToData(files) {
@@ -64,7 +64,7 @@ function readProjectList(list,source){
 function projectListCurrent(workspace,state,view){return S.view===view&&!state.project&&(!workspace.calendar_view||state.archive===true);}
 
 export {
-  icon, renderWorkspace, syncDashboardVisibility, NotesBrowsing, R,
+  icon, renderWorkspace, syncDashboardVisibility, NotesBrowsing,
   esc, toast, modal, api, $, params, S, W, workspaceURL, workspaceResourceURL, workspaceDate,
   positionDashboard, workspaceContent, DataTables, SearchFields, ActionMenu, SplitPanes, DraftRecovery,
   filesToData, isProjectTeX, ProjectUI, libraryStatusNames, libraryStatusTone, libraryColumnDirection,

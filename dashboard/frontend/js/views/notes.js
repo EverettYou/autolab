@@ -1,5 +1,5 @@
 // Notes section view — same role as views/wiki.js or views/labs.js.
-// Step 4 ESM: platform search-field + library toolbar chrome; window.NotesHost kept.
+// Platform-parity Step C: import NotesHost/DraftRecovery; session replaces runtime bag.
 
 import { h, setTitle } from "../ui.js";
 import { icon } from "../icons.js";
@@ -10,7 +10,7 @@ import "../search-fields.js";
 import "../editor-state.js";
 import "../action-menu.js";
 import "./notes/workspace-toolbar.js";
-import "./notes/host.js"; // pulls notes-context + projects
+import { NotesHost } from "./notes/host.js";
 
 let ready = null;
 let host = null;
@@ -41,12 +41,12 @@ function createHost() {
 async function ensureHost({ onLocation } = {}) {
   if (ready) {
     await ready;
-    window.NotesHost?.wire({ onLocation });
+    NotesHost.wire({ onLocation });
     return host;
   }
   ready = (async () => {
     host = document.getElementById("workspace") || createHost();
-    window.NotesHost.wire({ onLocation });
+    NotesHost.wire({ onLocation });
     await DraftRecovery.start("lab-notes");
     return host;
   })();
@@ -74,7 +74,7 @@ export async function render({ params }) {
   });
   document.body.classList.add("workspace-open");
   if (host) host.hidden = false;
-  if (!booted || next !== project) window.NotesHost?.open(next);
+  if (!booted || next !== project) NotesHost.open(next);
   booted = true;
   project = next;
   return h("div", { class: "workspace-placeholder", hidden: true });

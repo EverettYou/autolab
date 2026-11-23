@@ -1,16 +1,9 @@
 // Notes workspace host: project list + LaTeX/PDF workbench, mounted in the main dashboard.
-import { runtime as R } from './runtime.js';
-import { esc, toast, modal } from '../../workbench-chrome.js';
-import { iconHtml } from '../../icons.js';
-import {
-  $, api, S, W, workspace, state, liveError,
-  workspaceURL, workspaceResourceURL, workspaceDate, positionDashboard, params,
-} from './notes-context.js';
+import { $, S, workspace, state, liveError } from './notes-context.js';
+import { session } from './notes-session.js';
 import {
   ProjectUI, renderProjectWorkspace, projectEditorLocation, syncProjectLayers,
 } from './projects.js';
-
-const icon = name => iconHtml(name);
 
 function syncDashboardVisibility() { syncProjectLayers(); }
 
@@ -36,7 +29,6 @@ const NotesBrowsing = {
     try { localStorage.setItem(projectStorage, JSON.stringify(saved)); } catch {}
   },
 };
-window.NotesBrowsing = NotesBrowsing;
 
 let onLocation = null;
 
@@ -78,16 +70,14 @@ function wireNotesHost(options = {}) {
   }
 }
 
-window.NotesHost = {
+export const NotesHost = {
   open(project = '') { selectProject(project || ''); },
   wire: wireNotesHost,
   checkpoint: () => NotesBrowsing.checkpoint(),
 };
 
-// Remaining bridges for projects.js call-time host helpers.
-Object.assign(R, {
-  $, esc, params, api, toast, modal, icon, S, W, workspace, state,
-  workspaceURL, workspaceResourceURL, workspaceDate, liveError,
-  renderWorkspace, selectProject, NotesBrowsing, positionDashboard,
+Object.assign(session, {
+  renderWorkspace,
   syncDashboardVisibility,
+  NotesBrowsing,
 });
