@@ -2,7 +2,7 @@
 import { esc, toast, modal } from '../../workbench-chrome.js';
 import { iconHtml } from '../../icons.js';
 import {
-  $, params, api, S, W, workspaceURL, workspaceResourceURL, positionDashboard,
+  $, params, api, S, W, workspaceURL, workspaceResourceURL, workspaceDate, positionDashboard,
 } from './notes-context.js';
 import { workspaceContent } from './workspace-toolbar.js';
 import { runtime as R } from './runtime.js';
