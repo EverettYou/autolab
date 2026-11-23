@@ -3,6 +3,7 @@ import {
   icon, renderWorkspace, syncDashboardVisibility, NotesBrowsing,
   esc, toast, modal, api, $, S, W, workspaceURL, workspaceResourceURL, positionDashboard,
   workspaceContent, SplitPanes, DraftRecovery, isProjectTeX, ProjectUI, libraryURL, libraryError,
+  libraryStatusNames, invalidateProjectList,
 } from './project-shared.js';
 import {
   renderProjectTree, bindProjectFiles, chooseProjectFolder, refreshProjectFiles,
