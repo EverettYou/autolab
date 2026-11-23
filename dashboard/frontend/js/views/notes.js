@@ -1,5 +1,5 @@
 // Notes section view — same role as views/wiki.js or views/labs.js.
-// Step 2 ESM: shared toast/modal/icons; static imports; window.NotesHost kept.
+// Step 3 ESM: projects.js is a real module; host imports it; window.NotesHost kept.
 
 import { h, setTitle } from "../ui.js";
 import "../icons.js"; // installs window.WorkbenchIcons from the shared glyph map
@@ -11,8 +11,7 @@ import "../editor-state.js";
 import "../draft-recovery.js";
 import "../action-menu.js";
 import "./notes/workspace-toolbar.js";
-import "./notes/host.js";
-import "./notes/projects.js";
+import "./notes/host.js"; // pulls notes-context + projects
 
 let ready = null;
 let host = null;

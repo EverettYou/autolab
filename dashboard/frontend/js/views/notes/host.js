@@ -2,55 +2,17 @@
 import { runtime as R } from './runtime.js';
 import { esc, toast, modal } from '../../workbench-chrome.js';
 import { iconHtml } from '../../icons.js';
+import {
+  $, api, S, W, workspace, state, liveError,
+  workspaceURL, workspaceResourceURL, workspaceDate, positionDashboard, params,
+} from './notes-context.js';
+import {
+  ProjectUI, renderProjectWorkspace, projectEditorLocation, syncProjectLayers,
+} from './projects.js';
 
-const $ = id => document.getElementById(id);
-const params = values => new URLSearchParams(values);
-const workspace = {
-  id: 'papers',
-  title: 'Notes',
-  editor_layout: 'latex',
-  file_operations: true,
-  sources: [{id: 'lab-notes'}],
-};
-const S = {view: workspace.id, query: ''};
-const W = {config: {workspaces: [workspace]}, states: {}};
-const state = {source: workspace.sources[0].id, project: '', document: null, pdfReaders: []};
-W.states[workspace.id] = state;
-const liveError = error => toast(error.message);
 const icon = name => iconHtml(name);
 
-async function api(url, body, {timeoutMs = 20000} = {}) {
-  const options = {signal: AbortSignal.timeout(timeoutMs), headers: {Accept: 'application/json'}};
-  if (body !== undefined) {
-    options.method = 'POST';
-    options.headers['Content-Type'] = 'application/json';
-    options.body = JSON.stringify(body);
-  }
-  const response = await fetch(url, options);
-  const data = await response.json();
-  if (!response.ok) throw Object.assign(new Error(data.error || 'Request failed'), {status: response.status});
-  return data;
-}
-
-function workspaceURL(route, source, path) {
-  return '/api/workspaces/' + route + '?' + params({source, path});
-}
-function workspaceResourceURL(source, path, href) {
-  const root = new URL('/' + path.split('/').map(encodeURIComponent).join('/'), location.origin);
-  const resource = new URL(href, root);
-  if (resource.origin !== location.origin) return null;
-  return workspaceURL('file', source, decodeURIComponent(resource.pathname.slice(1)));
-}
-function workspaceDate(value) {
-  return new Date(value).toLocaleDateString('en-US', {year: 'numeric', month: '2-digit', day: '2-digit'});
-}
-function positionDashboard(layer) {
-  const host = $('workspace-content');
-  if (!host) return;
-  const {width, height, top, left} = host.getBoundingClientRect();
-  Object.assign(layer.style, {width: width + 'px', height: height + 'px', top: top + 'px', left: left + 'px'});
-}
-function syncDashboardVisibility() { R.syncProjectLayers?.(); }
+function syncDashboardVisibility() { syncProjectLayers(); }
 
 const projectStorage = 'lab.notes.positions';
 function savedPositions() {
@@ -58,17 +20,15 @@ function savedPositions() {
 }
 const NotesBrowsing = {
   clean(_id, current) {
-    return {...current, pdfReaders: (current.pdfReaders || []).slice(-25)};
+    return { ...current, pdfReaders: (current.pdfReaders || []).slice(-25) };
   },
-  currentLocation() { return {view: workspace.id, location: state}; },
+  currentLocation() { return { view: workspace.id, location: state }; },
   checkpoint() {
     const saved = savedPositions();
-    const layers = R.ProjectUI?.layers;
-    if (!layers) return;
-    for (const item of layers.values()) {
+    for (const item of ProjectUI.layers.values()) {
       if (item.project !== state.project || !item.editorReady) continue;
       saved[item.project] = {
-        editor: R.projectEditorLocation(item),
+        editor: projectEditorLocation(item),
         document: item.selected,
         pdfReaders: state.pdfReaders,
       };
@@ -87,7 +47,7 @@ async function renderWorkspace() {
     state.document ||= saved.document;
     state.pdfReaders = saved.pdfReaders || [];
   }
-  await R.renderProjectWorkspace(workspace, state);
+  await renderProjectWorkspace(workspace, state);
   onLocation?.(state.project || '');
 }
 
@@ -124,6 +84,7 @@ window.NotesHost = {
   checkpoint: () => NotesBrowsing.checkpoint(),
 };
 
+// Remaining bridges for projects.js call-time host helpers.
 Object.assign(R, {
   $, esc, params, api, toast, modal, icon, S, W, workspace, state,
   workspaceURL, workspaceResourceURL, workspaceDate, liveError,

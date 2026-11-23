@@ -1,24 +1,36 @@
 // One project-list/reader contract for configured folder libraries.
+import { esc, toast, modal } from '../../workbench-chrome.js';
+import { iconHtml } from '../../icons.js';
+import {
+  $, params, api, S, W, workspaceURL, workspaceResourceURL, positionDashboard,
+} from './notes-context.js';
+import { workspaceContent } from './workspace-toolbar.js';
 import { runtime as R } from './runtime.js';
 
-// Call-time bridges to host helpers (host module evaluates before this one).
-const esc = v => R.esc(v);
-const api = (...a) => R.api(...a);
-const toast = m => R.toast(m);
-const modal = (...a) => R.modal(...a);
-const icon = n => R.icon(n);
-const $ = id => R.$(id);
-const params = v => R.params(v);
-const workspaceURL = (...a) => R.workspaceURL(...a);
-const workspaceResourceURL = (...a) => R.workspaceResourceURL(...a);
-const workspaceContent = () => R.workspaceContent();
+// Host-only helpers still arrive via runtime (host imports this module).
+const icon = name => iconHtml(name);
 const renderWorkspace = (...a) => R.renderWorkspace(...a);
-const positionDashboard = (...a) => R.positionDashboard(...a);
 const syncDashboardVisibility = (...a) => R.syncDashboardVisibility(...a);
-const NotesBrowsing = R.NotesBrowsing;
-const S = R.S;
-const W = R.W;
-const {DataTables, SearchFields, ActionMenu, SplitPanes, DraftRecovery} = window;
+const NotesBrowsing = {
+  clean: (...a) => R.NotesBrowsing.clean(...a),
+  checkpoint: (...a) => R.NotesBrowsing.checkpoint(...a),
+  currentLocation: (...a) => R.NotesBrowsing.currentLocation(...a),
+};
+const { DataTables, SearchFields, ActionMenu, SplitPanes, DraftRecovery } = window;
+
+/** Read dropped File objects as base64 payloads for project/import. */
+function filesToData(files) {
+  return Promise.all([...files].map(file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || '');
+      const comma = text.indexOf(',');
+      resolve({ name: file.name, data: comma >= 0 ? text.slice(comma + 1) : text });
+    };
+    reader.onerror = () => reject(reader.error || new Error('Failed to read ' + file.name));
+    reader.readAsDataURL(file);
+  })));
+}
 
 const isProjectTeX = entry => Boolean(entry?.path && /(?:\.tex|\/main\.txt)$/i.test(entry.path));
 const ProjectUI={layers:new Map(),lists:new Map(),request:0};
@@ -913,6 +925,14 @@ document.addEventListener('section-settings-changed',e=>{
  if(view===S.view&&['papers','travel'].includes(S.view))renderWorkspace();
 });
 document.addEventListener('paper-types-changed',()=>{const workspace=W.config.workspaces.find(w=>w.id==='papers');if(workspace)invalidateProjectList(workspace);if(S.view==='papers')renderWorkspace();});
+
+export {
+  ProjectUI,
+  renderProjectWorkspace,
+  syncProjectLayers,
+  invalidateProjectList,
+  projectEditorLocation,
+};
 
 Object.assign(R, {
   ProjectUI,

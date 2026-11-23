@@ -1,4 +1,4 @@
-// Shared Notes runtime bag for ESM migration step 1.
-// host.js fills helpers; projects.js fills workspace renderers; both read across the bag
-// at call time so import order stays host → projects without rewriting call sites yet.
+// Thin call-time bag for host ↔ projects cycles that ESM import order cannot break yet:
+// projects needs renderWorkspace / NotesBrowsing / syncDashboardVisibility from host;
+// host needs renderProjectWorkspace / ProjectUI from projects.
 export const runtime = {};
