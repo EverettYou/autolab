@@ -1,6 +1,11 @@
 // One project-list/reader contract for configured folder libraries.
 import { esc, toast, modal } from '../../workbench-chrome.js';
 import { iconHtml } from '../../icons.js';
+import { DataTables } from '../../table.js';
+import { SearchFields } from '../../search-fields.js';
+import { ActionMenu } from '../../action-menu.js';
+import { SplitPanes } from '../../splitpanes.js';
+import { DraftRecovery } from '../../draft-recovery.js';
 import {
   $, params, api, S, W, workspaceURL, workspaceResourceURL, workspaceDate, positionDashboard,
 } from './notes-context.js';
@@ -16,7 +21,6 @@ const NotesBrowsing = {
   checkpoint: (...a) => R.NotesBrowsing.checkpoint(...a),
   currentLocation: (...a) => R.NotesBrowsing.currentLocation(...a),
 };
-const { DataTables, SearchFields, ActionMenu, SplitPanes, DraftRecovery } = window;
 
 /** Read dropped File objects as base64 payloads for project/import. */
 function filesToData(files) {

@@ -50,5 +50,6 @@ const EditorState=(()=>{
  }
  return {create,indexedStorage};
 })();
-if(typeof window!=='undefined')window.EditorState=EditorState;
-if(typeof module!=='undefined')module.exports=EditorState;
+
+export { EditorState };
+window.EditorState = EditorState;

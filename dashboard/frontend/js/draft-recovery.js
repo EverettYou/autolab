@@ -1,4 +1,6 @@
-'use strict';
+import { toast } from './workbench-chrome.js';
+import { EditorState } from './editor-state.js';
+
 // Per-tab recovery copies survive a reload. They are never canonical saves or
 // browser-history payloads, and stay separate from shared browsing preferences.
 const DraftRecovery=(()=>{
@@ -31,7 +33,7 @@ const DraftRecovery=(()=>{
   namespace=value;let storage;try{storage=sessionStorage;}catch{}
   store=create({storage,key:'notes.draft-recovery.v1.'+value});
   for(const [section,adapter]of adapters)adapter.restore(store.read(section));
-  if(typeof EditorState!=='undefined'){
+  if (EditorState) {
    editorReady=(async()=>{
     let tab;try{tab=await claimEditorIdentity(storage,value);}catch{tab=null;}
     editors=EditorState.create({storage:EditorState.indexedStorage(!tab||typeof indexedDB==='undefined'?null:indexedDB),notify:receipt=>{document.documentElement.dataset.notesEditorRecovery=receipt.state;document.documentElement.dataset.notesEditorCheckpoint=String(Date.now());document.dispatchEvent(new Event('draft-update-ready'));}});
@@ -43,7 +45,7 @@ const DraftRecovery=(()=>{
  function checkpoint(){
   if(!store)return true;
   try{const sections={};for(const [section,adapter]of adapters){const value=adapter.capture();if(value&&Object.keys(value).length)sections[section]=value;}store.write(sections);failed=false;return true;}
-  catch(error){if(!failed&&typeof toast==='function')toast('Could not keep a reload recovery copy. Save your changes before refreshing.');failed=true;return false;}
+  catch(error){if(!failed)toast('Could not keep a reload recovery copy. Save your changes before refreshing.');failed=true;return false;}
  }
  function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;checkpoint();});}
  if(typeof document!=='undefined'){
@@ -53,11 +55,12 @@ const DraftRecovery=(()=>{
   window.addEventListener('workbench-before-update',event=>{if(!checkpoint()){event.detail?.block?.('recovery-write-failed');event.preventDefault();}});
  }
  function editorKey(node,label='editor'){
-  const position=typeof NotesBrowsing!=='undefined'?NotesBrowsing.currentLocation?.():null,identity=position?.location||{};
+  const position=globalThis.NotesBrowsing?.currentLocation?.() ?? null,identity=position?.location||{};
   const keys=['space','page','account','sourceAccount','sourceThread','server','detail','selected','selectedEvent','thread','path','source','project','document','talk','slide','letterPath','activeFile','app','section','user','settingsPane','settingsResource','settingsSection','skillsPath','templateAffiliation','signerAffiliation'];
   return JSON.stringify([position?.view||'',Object.fromEntries(keys.filter(key=>identity[key]!==undefined).map(key=>[key,identity[key]])),label]);
  }
  return {create,claimEditorIdentity,register,start,checkpoint,editorKey,get editors(){return editors;},checkpointEditors:()=>editors?editors.checkpoint():Promise.resolve(true),hasPending(){try{return [...adapters.values()].some(a=>{const v=a.capture();return v&&Object.keys(v).length;});}catch{return true;}}};
 })();
-if(typeof window!=='undefined')window.DraftRecovery=DraftRecovery;
-if(typeof module!=='undefined')module.exports=DraftRecovery;
+
+export { DraftRecovery };
+window.DraftRecovery = DraftRecovery;

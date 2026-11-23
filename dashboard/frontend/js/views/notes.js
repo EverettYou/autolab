@@ -3,12 +3,11 @@
 
 import { h, setTitle } from "../ui.js";
 import { icon } from "../icons.js";
-
+import { DraftRecovery } from "../draft-recovery.js";
 import "../table.js";
 import "../splitpanes.js";
 import "../search-fields.js";
 import "../editor-state.js";
-import "../draft-recovery.js";
 import "../action-menu.js";
 import "./notes/workspace-toolbar.js";
 import "./notes/host.js"; // pulls notes-context + projects
@@ -47,9 +46,8 @@ async function ensureHost({ onLocation } = {}) {
   }
   ready = (async () => {
     host = document.getElementById("workspace") || createHost();
-    // Side-effect imports above already registered NotesHost / DraftRecovery.
     window.NotesHost.wire({ onLocation });
-    await window.DraftRecovery.start("lab-notes");
+    await DraftRecovery.start("lab-notes");
     return host;
   })();
   return ready;

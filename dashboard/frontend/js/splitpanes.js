@@ -1,6 +1,5 @@
-'use strict';
 // Shared pointer/keyboard resizing. Widths are presentation preferences only.
-(()=>{
+const SplitPanes = (() => {
  const bindings=new Map(),preferences=new Map();
  const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
  function drag(handle,{get,set,start=()=>{},finish=()=>{},axis='x'}){
@@ -185,7 +184,10 @@
  }
  let pending=false;
  const schedule=()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;scan();});};
- window.SplitPanes={drag,workspace,refresh:scan};
  const start=()=>{scan();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','hidden']});};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+ return {drag,workspace,refresh:scan};
 })();
+
+export { SplitPanes };
+window.SplitPanes = SplitPanes;

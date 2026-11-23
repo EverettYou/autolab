@@ -1,7 +1,6 @@
-'use strict';
 // One keyboard navigator for Notes tables and selectable lists. Owners keep
 // selection behavior; arrow navigation invokes the same explicit row/entry action.
-(function(global){
+const ListNavigation = (() => {
  const bindings=new WeakMap(),memories=new Map();
  const editors='input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[role="combobox"],[role="menu"],[role="listbox"],[role="slider"],[role="spinbutton"],[role="tree"],[aria-haspopup],.app-select-trigger,.settings-more-menu,.cm-editor,.monaco-editor';
  function mount(host,options={}){
@@ -73,12 +72,12 @@
   if(Observer){observer=new Observer(()=>{if(host.isConnected)sync();else observer.disconnect();});observer.observe(host,{childList:true,subtree:true});}
   sync();return binding;
  }
- global.ListNavigation={mount};
-})(window);
+ return {mount};
+})();
 
-'use strict';
+
 // Shared table structure, geometry and input; callers own rows and business actions.
-(()=>{
+const DataTables = (() => {
  const mounted=new WeakMap();
  let preferences=null;
  function configure({api,data,namespace,workspaces=[],browsing={}}){
@@ -288,7 +287,7 @@
    }
    binding.layout?.sync();
    if(current.navigation===false){binding.navigation?.destroy();binding.navigation=null;}
-   else binding.navigation=window.ListNavigation?.mount(table,{
+   else binding.navigation=ListNavigation.mount(table,{
     id:current.layout?.id||current.layout?.key,
     items:()=>[...table.querySelectorAll('tbody > tr')].filter(row=>row.querySelector('td')&&!row.querySelector('td[colspan]')),
     ...current.navigation
@@ -310,5 +309,9 @@
  }
  function settings(id,seed){if(seed)void preferences?.importMany({[id]:seed});return {...seed,...preferences?.settings(id)};}
  function remember(id,patch){const work=preferences?.saveSettings(id,patch);return Promise.resolve(work).then(()=>{const error=preferences?.error(id);if(error)throw Error(error);});}
- window.DataTables={settings,remember,importSettings:(id,seed)=>preferences?.importMany({[id]:seed}),configure,mount,resize,adjustable,nextSort,header,allocate,relayout(table){mounted.get(table)?.layout?.sync();},catalogs:{tasks:[['title','Task'],['type','Type'],['due','Due'],['status','Status']]}};
+ return {settings,remember,importSettings:(id,seed)=>preferences?.importMany({[id]:seed}),configure,mount,resize,adjustable,nextSort,header,allocate,relayout(table){mounted.get(table)?.layout?.sync();},catalogs:{tasks:[['title','Task'],['type','Type'],['due','Due'],['status','Status']]}};
 })();
+
+export { ListNavigation, DataTables };
+window.ListNavigation = ListNavigation;
+window.DataTables = DataTables;

@@ -1,5 +1,5 @@
 /* Contextual field grammar shared by page tables, field hints and local surfaces. */
-window.SearchFields=(()=>{
+const SearchFields = (() => {
  const schemas={tasks:['status','type','title','due'],mail:['from','to','subject','type','account','in','is','after','before'],messages:['from','in','is','after','before'],letters:['status','type','person','target','affiliation','date'],papers:['status','type','name'],talks:['title','date'],contacts:['name','email','organization','group'],calendar:['status','title','account','after','before'],travel:['status','name','date'],apps:['status','type','name','email','server'],automations:['status','workflow','outcome'],wiki:['title','topic'],settings:['name','provider'],storage:['module','name'],'ai-models':['model','provider','feature']};
  const fold=v=>String(v??'').normalize('NFC').toLocaleLowerCase();
  const tokens=q=>q.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g)||[];
@@ -28,3 +28,6 @@ window.SearchFields=(()=>{
  }
  return {parse,has,matches,fields,hint,values,filterSurface};
 })();
+
+export { SearchFields };
+window.SearchFields = SearchFields;
