@@ -25,6 +25,7 @@ RETIRED = {
     "sandbox": "reproduction workspaces live in references/<id>/attempts/<slug>/",
     "archive": "measurements stay in labs/; knowledge in wiki/; reproductions in references/<id>/reproduce/",
     "projects": "the package lives in lib/",
+    "platform": "the package lives in lib/",
     "lab": "experiments live in labs/<YYYY-MM-DD-slug>/",
     "knowledge": "compiled knowledge lives in wiki/",
     ".logs": "loop activity is last_action in .auto-research/state.json plus git history",

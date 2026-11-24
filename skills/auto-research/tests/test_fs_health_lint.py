@@ -53,6 +53,7 @@ def test_clean_tree_passes(root, capsys):
     ("STEERING.md", "STEERING.md is retired"),
     ("VERSION", "VERSION is retired"),
     ("discussion/", "discussion/ is retired"),
+    ("platform/", "platform/ is retired"),
     ("archive/old.md", "archive/ is retired"),
     ("lab/2026-01-01-x/README.md", "lab/ is retired"),
     ("projects/qecbench/README.md", "projects/ is retired"),
