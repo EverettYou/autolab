@@ -69,17 +69,23 @@ Classify capacity from `AVAIL_TIER` only (`avail_heavy`, `avail_light`, `avail_n
 Policy is a pure function of facts (plus optional local override). Do **not** look up branded
 machine dossiers. See [references/isolation-boundaries.md](references/isolation-boundaries.md).
 
-| Condition | isolation | untrusted_code | venv.mode |
-|-----------|-----------|----------------|-----------|
-| default / bare host | host-control-plane | forbid | inherit-baseline |
-| in container | this-container | allow-in-attempt-workspace | inherit-baseline |
-| host + docker/podman | docker-attempt | only-in-container | inherit-baseline |
+| Condition | isolation | untrusted_code | venv.mode | repo_venv |
+|-----------|-----------|----------------|-----------|-----------|
+| default / bare host (no docker) | host-control-plane | forbid | inherit-baseline | here |
+| in container | this-container | allow-in-attempt-workspace | inherit-baseline | here |
+| host + docker/podman | docker-attempt | only-in-container | inherit-baseline | require-container |
 
 `RUNTIME_CAPABILITY` examples: `container+H200`, `container+B300`, `container`, `host+docker`,
 `host+Darwin`, `host` — product/OS capability tags only (no vendor brand, no personal hostname).
 
+`repo_venv=require-container` means `setup_venv.sh` **refuses** to build `./.venv` on that host
+control plane (so the host is not polluted). Enter a lab/research container and run setup there.
+Bare hosts without Docker/Podman keep `repo_venv=here` and may install on the host. Escape hatch:
+`SETUP_VENV_ALLOW_HOST=1`.
+
 Optional local override (never commit real machine ids): `$AUTOLAB_RUNTIME_POLICY` or
-`~/.config/autolab/runtime-policy.json` with keys `isolation`, `untrusted_code`, `venv.mode`.
+`~/.config/autolab/runtime-policy.json` with keys `isolation`, `untrusted_code`, `venv.mode`,
+`repo_venv`.
 
 If policy conflicts with a human instruction, record the conflict in a discussion thread
 (`thread-interaction`) and continue with work that does not depend on it.
@@ -100,6 +106,9 @@ package; otherwise it only ensures a working interpreter/venv. Prefer `uv` when 
 otherwise `python3 -m venv` + `pip`. Override interpreter with `SETUP_VENV_PYTHON`.
 Run only when the venv is missing or broken. `./run.sh` invokes this script when `.venv` is
 absent.
+
+If policy resolves to `repo_venv=require-container` (host with Docker/Podman), setup exits with
+a clear refuse message instead of installing on the host — use the container baseline.
 
 ### Prefer the baseline
 

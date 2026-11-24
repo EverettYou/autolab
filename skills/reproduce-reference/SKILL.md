@@ -128,7 +128,7 @@ bash skills/reproduce-reference/scripts/promote_attempt.sh <id> <slug>
 
 The script refuses unless `result.json` is `status: success` with verdict `reproduced` or
 `partial` and `gate-state.yaml` says `rigor_recommendation: Accept`. It copies the workspace
-without virtualenvs, git metadata, or bytecode into `references/<id>/reproduce/`, renames
+without virtual environments, git metadata, or bytecode into `references/<id>/reproduce/`, renames
 `result.json` to `RESULT.json`, refuses files over 100 MB, and updates `provenance.json`
 (`reproduction`, `status`) and `references/references.json`. An existing record is only merged
 with `--update`.

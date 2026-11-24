@@ -4,33 +4,49 @@ set -u
 
 runtime_collect_facts() {
   RT_IN_CONTAINER=0
-  [ -f /.dockerenv ] && RT_IN_CONTAINER=1
+  if [ -f /.dockerenv ]; then
+    RT_IN_CONTAINER=1
+  fi
 
   RT_HAS_DOCKER=0
-  command -v docker >/dev/null 2>&1 && RT_HAS_DOCKER=1
-  command -v podman >/dev/null 2>&1 && RT_HAS_DOCKER=1
+  if command -v docker >/dev/null 2>&1 || command -v podman >/dev/null 2>&1; then
+    RT_HAS_DOCKER=1
+  fi
 
   RT_OS_FAMILY="$(uname -s 2>/dev/null || echo unknown)"
 
   RT_HAS_NVIDIA_DEV=0
-  ls /dev/nvidia[0-9]* >/dev/null 2>&1 && RT_HAS_NVIDIA_DEV=1
+  if ls /dev/nvidia[0-9]* >/dev/null 2>&1; then
+    RT_HAS_NVIDIA_DEV=1
+  fi
 
   RT_GPU_MODEL=""
   if command -v nvidia-smi >/dev/null 2>&1; then
     RT_GPU_MODEL="$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' || true)"
   fi
 
+  # Optional accelerator probes: failure only means the flag stays 0.
+  # Always use if/fi (never leave a failing `cmd && flag=1` as the function's last
+  # command — under `set -e` that makes the whole caller abort with no message).
   RT_HAS_CUDA_TORCH=0
-  python3 - <<'PY' >/dev/null 2>&1 && RT_HAS_CUDA_TORCH=1
+  if python3 - <<'PY' >/dev/null 2>&1
 import torch
 assert torch.cuda.is_available()
 PY
+  then
+    RT_HAS_CUDA_TORCH=1
+  fi
 
   RT_HAS_MPS=0
-  python3 - <<'PY' >/dev/null 2>&1 && RT_HAS_MPS=1
+  if python3 - <<'PY' >/dev/null 2>&1
 import torch
 assert torch.backends.mps.is_available()
 PY
+  then
+    RT_HAS_MPS=1
+  fi
+
+  return 0
 }
 
 # Prints capability tag to stdout (no vendor/person names).

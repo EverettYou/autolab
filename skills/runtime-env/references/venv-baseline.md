@@ -2,6 +2,15 @@
 
 Canonical script: `bash skills/runtime-env/scripts/setup_venv.sh` (rebuilds `./.venv`).
 
+## Where to run setup
+
+Policy `repo_venv` (from `resolve_policy`) gates the script:
+
+- `here` — bare host without Docker/Podman, or already inside a container: build `./.venv` here.
+- `require-container` — host has Docker/Podman: **refuse** and tell the operator to enter a
+  container (curated baseline lives there). Do not pollute the host control plane.
+  Escape hatch: `SETUP_VENV_ALLOW_HOST=1`.
+
 ## Prefer the baseline
 
 Default: create `./.venv` with `--system-site-packages` and install only what the host or

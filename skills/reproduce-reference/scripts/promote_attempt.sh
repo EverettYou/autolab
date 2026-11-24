@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Promote an accepted attempt to the tracked verified record references/<id>/reproduce/.
 # Copies the distilled artifacts (recipe, code, configs, small results), not the workspace: excludes
-# virtualenvs, git metadata and bytecode, freezes the venv deps for restore, renames result.json to
+# virtual environments, git metadata and bytecode, freezes the venv deps for restore, renames result.json to
 # RESULT.json, warns on files over 10 MB and refuses files over 100 MB (they cannot be pushed).
 # Then records the reproduction and status in references/<id>/provenance.json and rebuilds
 # references/references.json.

@@ -199,7 +199,7 @@ ensure_venv() {
     local setup="$ROOT/skills/runtime-env/scripts/setup_venv.sh"
     [ -f "$setup" ] || die "$PY is missing and $setup is not available to recreate it."
     say "Repository .venv is missing; delegating to skills/runtime-env/scripts/setup_venv.sh…"
-    bash "$setup" || die "failed to create the repository virtualenv"
+    bash "$setup" || die "failed to create the repository virtual environment"
     [ -x "$PY" ] || die "$PY is still missing after setup_venv.sh"
 }
 
@@ -246,7 +246,7 @@ check_package() {
     local setup="$ROOT/skills/runtime-env/scripts/setup_venv.sh"
     [ -f "$setup" ] || die "editable package $PACKAGE_NAME is missing or does not resolve to lib/ and $setup is not available to recreate it."
     say "editable package $PACKAGE_NAME is missing or does not resolve to lib/; delegating to skills/runtime-env/scripts/setup_venv.sh…"
-    bash "$setup" || die "failed to repair the repository virtualenv"
+    bash "$setup" || die "failed to repair the repository virtual environment"
     lib_package_ok || die "editable package $PACKAGE_NAME still missing or not resolving to lib/ after setup_venv.sh"
 }
 

@@ -2,7 +2,9 @@
 # Create / refresh the canonical lab venv (./.venv) for core development.
 # Idempotent. Default: inherit host/container site-packages via --system-site-packages
 # and install only what the baseline does not already satisfy (prefer the baseline).
-# Escape hatch: SETUP_VENV_ISOLATED=1 builds a clean isolated venv.
+# Host + Docker/Podman: refuses (POLICY_REPO_VENV=require-container) — enter a container.
+# Escape hatches: SETUP_VENV_ISOLATED=1 (clean isolated venv); SETUP_VENV_ALLOW_HOST=1
+# (force install on a docker-capable host control plane).
 #
 # Installer preference: ``uv`` when on PATH; otherwise standard ``python3 -m venv`` + ``pip``.
 #
@@ -205,12 +207,35 @@ fi
 resolve_policy
 echo "[setup_venv] root=$ROOT"
 echo "[setup_venv] runtime_capability=$RUNTIME_CAPABILITY"
-echo "[setup_venv] policy_isolation=$POLICY_ISOLATION untrusted=$POLICY_UNTRUSTED_CODE"
+echo "[setup_venv] policy_isolation=$POLICY_ISOLATION untrusted=$POLICY_UNTRUSTED_CODE repo_venv=$POLICY_REPO_VENV"
 echo "[setup_venv] features.lib=$FEATURE_LIB package=${PACKAGE_NAME:-(none)}"
 if [ "$HAVE_UV" = 1 ]; then
   echo "[setup_venv] installer=uv ($(command -v uv))"
 else
   echo "[setup_venv] installer=pip (uv not on PATH; using python3 -m venv + pip)"
+fi
+
+# Host + docker/podman: refuse to build the canonical .venv on the control plane.
+# Bare hosts (no container runtime) may still install here; containers install in-place.
+# Escape hatch: SETUP_VENV_ALLOW_HOST=1 (local override / recovery only).
+if [ "${POLICY_REPO_VENV:-here}" = "require-container" ]; then
+  if [ "${SETUP_VENV_ALLOW_HOST:-0}" = "1" ] || [ "${SETUP_VENV_ALLOW_HOST:-}" = "true" ]; then
+    echo "[setup_venv] WARN: POLICY_REPO_VENV=require-container but SETUP_VENV_ALLOW_HOST is set — installing on the host anyway" >&2
+  else
+    cat >&2 <<EOF
+[setup_venv] refused: this shell is on the host, and Docker/Podman is available
+  capability=${RUNTIME_CAPABILITY}
+  isolation=${POLICY_ISOLATION}
+  repo_venv=${POLICY_REPO_VENV}
+Building ./.venv here would pollute the host control plane. Enter a lab/research
+container (where the curated baseline already lives) and re-run:
+  bash skills/runtime-env/scripts/setup_venv.sh
+Override only if you intentionally want a host-side venv:
+  SETUP_VENV_ALLOW_HOST=1 bash skills/runtime-env/scripts/setup_venv.sh
+See skills/runtime-env/references/isolation-boundaries.md
+EOF
+    exit 1
+  fi
 fi
 
 if [ -d "$VENV" ]; then

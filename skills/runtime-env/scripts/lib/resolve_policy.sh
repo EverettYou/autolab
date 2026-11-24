@@ -14,13 +14,19 @@ _resolve_policy_defaults() {
   POLICY_ISOLATION="host-control-plane"
   POLICY_UNTRUSTED_CODE="forbid"
   POLICY_VENV_MODE="inherit-baseline"
+  # Where the canonical repo .venv may be built:
+  #   here              — bare host (no docker) or already inside a container
+  #   require-container — host has docker/podman; do not pollute the host control plane
+  POLICY_REPO_VENV="here"
 
   if [[ $RT_IN_CONTAINER -eq 1 ]]; then
     POLICY_ISOLATION="this-container"
     POLICY_UNTRUSTED_CODE="allow-in-attempt-workspace"
+    POLICY_REPO_VENV="here"
   elif [[ $RT_HAS_DOCKER -eq 1 ]]; then
     POLICY_ISOLATION="docker-attempt"
     POLICY_UNTRUSTED_CODE="only-in-container"
+    POLICY_REPO_VENV="require-container"
   fi
 
   if [[ "${SETUP_VENV_ISOLATED:-0}" = "1" || "${SETUP_VENV_ISOLATED:-}" = "true" ]]; then
@@ -42,6 +48,7 @@ _resolve_policy_apply_local() {
     POLICY_ISOLATION="$POLICY_ISOLATION" \
     POLICY_UNTRUSTED_CODE="$POLICY_UNTRUSTED_CODE" \
     POLICY_VENV_MODE="$POLICY_VENV_MODE" \
+    POLICY_REPO_VENV="$POLICY_REPO_VENV" \
     python3 - "$path" <<'PY'
 import json, os, sys
 path = sys.argv[1]
@@ -55,6 +62,8 @@ allowed = {
     "untrusted_code": "POLICY_UNTRUSTED_CODE",
     "venv.mode": "POLICY_VENV_MODE",
     "venv_mode": "POLICY_VENV_MODE",
+    "repo_venv": "POLICY_REPO_VENV",
+    "venv.repo": "POLICY_REPO_VENV",
 }
 for key, env_name in allowed.items():
     if key in data and isinstance(data[key], str) and data[key].strip():
@@ -68,7 +77,7 @@ resolve_policy() {
   _resolve_policy_defaults
   _resolve_policy_apply_local
   RUNTIME_CAPABILITY="$(runtime_capability_id)"
-  export POLICY_ISOLATION POLICY_UNTRUSTED_CODE POLICY_VENV_MODE RUNTIME_CAPABILITY
+  export POLICY_ISOLATION POLICY_UNTRUSTED_CODE POLICY_VENV_MODE POLICY_REPO_VENV RUNTIME_CAPABILITY
 }
 
 # When executed (not sourced), print kv for probes/snapshot.
@@ -78,6 +87,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   echo "POLICY_ISOLATION=${POLICY_ISOLATION}"
   echo "POLICY_UNTRUSTED_CODE=${POLICY_UNTRUSTED_CODE}"
   echo "POLICY_VENV_MODE=${POLICY_VENV_MODE}"
+  echo "POLICY_REPO_VENV=${POLICY_REPO_VENV}"
   echo "FACT_IN_CONTAINER=${RT_IN_CONTAINER}"
   echo "FACT_HAS_DOCKER=${RT_HAS_DOCKER}"
   echo "FACT_OS_FAMILY=${RT_OS_FAMILY}"

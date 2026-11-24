@@ -15,6 +15,13 @@ hostname or vendor brand.
 | `allow-in-attempt-workspace` | Run untrusted code only under `references/<id>/attempts/<slug>/` (per-attempt venv, smoke cap). |
 | `only-in-container` | Build/run attempt containers; never bind-mount host secrets or the Docker socket into them. |
 
+| `POLICY_REPO_VENV` | Meaning |
+|--------------------|---------|
+| `here` | Build the canonical repo `./.venv` in this shell (bare host without docker, or inside a container). |
+| `require-container` | Host has Docker/Podman; `setup_venv.sh` refuses to install on the host so the control plane stays clean. Enter a lab/research container and run setup there. Override: `SETUP_VENV_ALLOW_HOST=1`. |
+
+Rule of thumb: **if the machine already has a container runtime, use it** — do not layer a second Python stack onto the host. If there is no docker/podman, installing on the host is allowed.
+
 ## Docker attempt assets (host + Docker)
 
 Templates live under `skills/runtime-env/assets/docker/`:
