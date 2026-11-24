@@ -107,6 +107,13 @@ otherwise `python3 -m venv` + `pip`. Override interpreter with `SETUP_VENV_PYTHO
 Run only when the venv is missing or broken. `./run.sh` invokes this script when `.venv` is
 absent.
 
+If `lib/` builds a native extension at editable-install time and the baseline interpreter
+lacks `Python.h`, that is an **interpreter-packaging** gap (not a lab- or GPU-specific
+issue). `setup_venv.sh` branches generically: reuse an existing include path, install OS
+`pythonX.Y-dev` when apt rights allow, else fetch same-minor uv-managed headers, else fail
+clearly. Lab-specific build hooks stay in `lib/`. Doctrine:
+[references/venv-baseline.md](references/venv-baseline.md) (§ Python headers).
+
 If policy resolves to `repo_venv=require-container` (host with Docker/Podman), setup exits with
 a clear refuse message instead of installing on the host — use the container baseline.
 
@@ -128,7 +135,7 @@ Dry-run: `SETUP_VENV_DIR=/tmp/... bash skills/runtime-env/scripts/setup_venv.sh`
 
 | Doc | Topic |
 |-----|-------|
-| [references/venv-baseline.md](references/venv-baseline.md) | Inherit baseline, shadow pins, uv host pin |
+| [references/venv-baseline.md](references/venv-baseline.md) | Inherit baseline, shadow pins, uv host pin, `Python.h` |
 | [references/gpu-reading.md](references/gpu-reading.md) | Snapshot / AVAIL_TIER / mapped≠usable |
 | [references/isolation-boundaries.md](references/isolation-boundaries.md) | Host / container / docker-attempt |
 

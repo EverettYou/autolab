@@ -35,6 +35,8 @@ export function watchSystem(signal, onStatus, onError) {
     }
   }
   load();
-  timer = setInterval(load, 4000);
+  // Backend GPU probe is cached (~15s) with a cooldown after timeouts. Polling
+  // faster than that only multiplies /api hits; it must not hammer nvidia-smi.
+  timer = setInterval(load, 15000);
   signal.addEventListener("abort", () => clearInterval(timer));
 }

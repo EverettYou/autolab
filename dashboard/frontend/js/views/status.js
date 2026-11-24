@@ -196,8 +196,10 @@ function systemView(status) {
     h("thead", null, h("tr", null, h("th", null, "GPU"), h("th", null, "Utilization"), h("th", null, "Memory"))),
     h("tbody", null, gpus.map((gpu) => {
       const util = gpu.util_pct == null ? "—" : `${gpu.util_pct}%`;
-      const memPct = gpu.mem_total_mib ? (100 * gpu.mem_used_mib) / gpu.mem_total_mib : 0;
-      const text = `${gib(gpu.mem_used_mib)} / ${gib(gpu.mem_total_mib)} GB`;
+      const memPct = gpu.mem_total_mib ? (100 * (gpu.mem_used_mib || 0)) / gpu.mem_total_mib : 0;
+      const text = (gpu.mem_used_mib == null || gpu.mem_total_mib == null)
+        ? "—"
+        : `${gib(gpu.mem_used_mib)} / ${gib(gpu.mem_total_mib)} GB`;
       return h("tr", null,
         h("th", null, `GPU ${gpu.index}`),
         h("td", null, usage(gpu.util_pct, util, `GPU ${gpu.index} utilization ${util}`, "util")),

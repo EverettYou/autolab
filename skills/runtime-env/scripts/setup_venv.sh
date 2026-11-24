@@ -11,6 +11,22 @@
 # Single source of truth for *what* is required when features.lib is on: lib/pyproject.toml.
 # Single source of truth for *versions already present*: the host or container baseline.
 #
+# Before the editable install (features.lib on): any native extension built during
+# ``pip install -e lib`` needs Python.h. Cause is *interpreter packaging* (runtime Python
+# without pythonX.Y-dev), not the host GPU and not any particular lab package. Decision tree:
+#   1) interpreter include already has Python.h → done
+#   2) C_INCLUDE_PATH / CPLUS_INCLUDE_PATH already points at Python.h → export/keep
+#   3) same-minor uv-managed CPython headers already on disk → export those
+#   4) may install OS pythonX.Y-dev (apt + root/passwordless sudo) → install, recheck
+#   5) uv on PATH → ``uv python install <minor>`` and export its include dir
+#   6) else fail with the concrete missing piece
+# A shim written *after* the editable install cannot help that build.
+#
+# After install, if the venv interpreter still lacks Python.h but uv-managed headers exist,
+# write a generic ``_venv_python_header_shim`` .pth so later processes (e.g. torch.compile /
+# inductor gcc) see the same include path. Lab-specific bootstraps (CPU guards, package
+# hooks) belong in the lab package, not here.
+#
 # this template default: features.lib false → venv for dashboard/skills only (no editable package).
 # For foreign reproductions with conflicting pins, see references/venv-baseline.md.
 set -euo pipefail
@@ -165,6 +181,251 @@ pip_install() {
   fi
 }
 
+# True when $PY's sysconfig include dir already contains Python.h.
+_python_h_in_interpreter_include() {
+  "$PY" -c 'import os, sysconfig; p = sysconfig.get_path("include"); raise SystemExit(0 if os.path.isfile(os.path.join(p, "Python.h")) else 1)'
+}
+
+# Print a directory that already has Python.h, or empty. Modes: env | uv-existing
+# (search only; never installs).
+_find_python_h_dir() {
+  local mode="$1"
+  "$PY" - "$mode" <<'PY'
+import glob
+import os
+import subprocess
+import sys
+
+mode = sys.argv[1]
+ver = "%d.%d" % sys.version_info[:2]
+
+
+def from_env() -> str:
+    for var in ("C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH"):
+        for part in os.environ.get(var, "").split(os.pathsep):
+            if part and os.path.isfile(os.path.join(part, "Python.h")):
+                return part
+    return ""
+
+
+def from_uv_disk() -> str:
+    roots: list[str] = []
+    env_dir = os.environ.get("UV_PYTHON_INSTALL_DIR", "").strip()
+    if env_dir:
+        roots.append(env_dir)
+    try:
+        out = subprocess.check_output(
+            ["uv", "python", "dir"], text=True, stderr=subprocess.DEVNULL
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        out = ""
+    if out:
+        roots.append(out)
+    data_home = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+    roots.append(os.path.join(data_home, "uv", "python"))
+    seen: set[str] = set()
+    for root in roots:
+        if not root or root in seen:
+            continue
+        seen.add(root)
+        matches = sorted(
+            (
+                d
+                for d in glob.glob(os.path.join(root, f"cpython-{ver}*", "include", f"python{ver}"))
+                if os.path.isfile(os.path.join(d, "Python.h"))
+            ),
+            reverse=True,
+        )
+        if matches:
+            return matches[0]
+    return ""
+
+
+if mode == "env":
+    print(from_env())
+elif mode == "uv-existing":
+    print(from_uv_disk())
+else:
+    raise SystemExit(f"unknown mode {mode!r}")
+PY
+}
+
+# Export dir onto C_INCLUDE_PATH / CPLUS_INCLUDE_PATH for this process + build subprocesses.
+_export_python_h_dir() {
+  local header_dir="$1"
+  local reason="$2"
+  [ -n "$header_dir" ] || return 0
+  echo "[setup_venv] using Python.h via $reason: $header_dir"
+  case ":${C_INCLUDE_PATH:-}:" in
+    *":${header_dir}:"*) ;;
+    *) C_INCLUDE_PATH="${header_dir}${C_INCLUDE_PATH:+:${C_INCLUDE_PATH}}"; export C_INCLUDE_PATH ;;
+  esac
+  case ":${CPLUS_INCLUDE_PATH:-}:" in
+    *":${header_dir}:"*) ;;
+    *) CPLUS_INCLUDE_PATH="${header_dir}${CPLUS_INCLUDE_PATH:+:${CPLUS_INCLUDE_PATH}}"; export CPLUS_INCLUDE_PATH ;;
+  esac
+}
+
+# True when we may non-interactively install Debian/Ubuntu pythonX.Y-dev.
+_can_apt_install_python_dev() {
+  command -v apt-get >/dev/null 2>&1 || return 1
+  if [ "$(id -u)" = 0 ]; then
+    return 0
+  fi
+  if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+
+_apt_install_python_dev() {
+  local ver="$1"
+  local pkg="python${ver}-dev"
+  echo "[setup_venv] cause=missing Python.h; branch=os-dev-package ($pkg)"
+  if [ "$(id -u)" = 0 ]; then
+    apt-get update -qq
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$pkg"
+  else
+    sudo -n apt-get update -qq
+    sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$pkg"
+  fi
+}
+
+# Ensure Python.h is visible for a native-extension editable build. Branches on the real
+# cause (interpreter packaging / env / OS package rights / uv), not on lab or GPU identity.
+ensure_python_headers() {
+  echo "[setup_venv] checking Python.h for the Cython extension build"
+  local ver include header_dir
+  ver="$("$PY" -c 'import sys; print("%d.%d" % sys.version_info[:2])')"
+  include="$("$PY" -c 'import sysconfig; print(sysconfig.get_path("include"))')"
+
+  # Branch 1: the interpreter we build against already ships headers.
+  if _python_h_in_interpreter_include; then
+    echo "[setup_venv] Python.h ok at $include"
+    return 0
+  fi
+  echo "[setup_venv] cause=missing Python.h under $include (needed if lib/ builds a native extension)"
+
+  # Branch 2: caller / prior process already put headers on the include path.
+  header_dir="$(_find_python_h_dir env)"
+  if [ -n "$header_dir" ]; then
+    _export_python_h_dir "$header_dir" "C_INCLUDE_PATH/CPLUS_INCLUDE_PATH"
+    return 0
+  fi
+
+  # Branch 3: same-minor uv-managed headers already on disk (no download).
+  header_dir="$(_find_python_h_dir uv-existing)"
+  if [ -n "$header_dir" ]; then
+    _export_python_h_dir "$header_dir" "existing uv-managed CPython $ver"
+    return 0
+  fi
+
+  # Branch 4: fix the interpreter packaging itself when apt rights allow.
+  if _can_apt_install_python_dev; then
+    if _apt_install_python_dev "$ver"; then
+      if _python_h_in_interpreter_include; then
+        echo "[setup_venv] Python.h restored at $include via python${ver}-dev"
+        return 0
+      fi
+      echo "[setup_venv] WARNING: python${ver}-dev installed but $include still has no Python.h" >&2
+    else
+      echo "[setup_venv] WARNING: python${ver}-dev install failed; trying other branches" >&2
+    fi
+  else
+    echo "[setup_venv] branch=os-dev-package skipped (no apt-get, or not root / passwordless sudo)"
+  fi
+
+  # Branch 5: fetch ABI-compatible headers via uv-managed CPython of the same minor.
+  if [ "$HAVE_UV" = 1 ]; then
+    echo "[setup_venv] branch=uv-managed-headers (uv python install $ver)"
+    if ! uv python install "$ver" >&2; then
+      echo "[setup_venv] ERROR: uv python install $ver failed while $include lacks Python.h." >&2
+      echo "[setup_venv] Install python${ver}-dev, or export C_INCLUDE_PATH to a dir with Python.h." >&2
+      return 1
+    fi
+    header_dir="$(_find_python_h_dir uv-existing)"
+    if [ -n "$header_dir" ]; then
+      _export_python_h_dir "$header_dir" "uv-managed CPython $ver"
+      return 0
+    fi
+    echo "[setup_venv] ERROR: uv python install $ver finished but no Python.h was found." >&2
+    return 1
+  fi
+
+  # Branch 6: nothing left that can supply headers.
+  echo "[setup_venv] ERROR: no Python.h for CPython $ver and no remaining fix:" >&2
+  echo "  - install python${ver}-dev (needs apt + root or passwordless sudo), or" >&2
+  echo "  - install uv and re-run (uv python install $ver), or" >&2
+  echo "  - export C_INCLUDE_PATH to a $ver include directory that contains Python.h" >&2
+  return 1
+}
+
+# If the venv interpreter still lacks Python.h but same-minor uv headers exist, expose them
+# at interpreter startup (generic; not lab-specific). Idempotent on rebuild.
+write_python_header_shim() {
+  local site ver venv_inc uv_py_dir header_glob
+  site="$("$PY" -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
+  ver="$("$PY" -c 'import sys; print("%d.%d" % sys.version_info[:2])')"
+  venv_inc="$("$PY" -c 'import sysconfig; print(sysconfig.get_paths()["include"])')"
+  # Drop legacy lab-named shims and the current generic one before rewriting.
+  rm -f \
+    "$site/_venv_python_header_shim.py" "$site/_venv_python_header_shim.pth" \
+    "$site/_qeclab_header_shim.py" "$site/_qeclab_header_shim.pth" \
+    "$site/qec_cpu_guard_boot.py" "$site/qec-cpu-guard.pth"
+
+  if [ -f "$venv_inc/Python.h" ]; then
+    return 0
+  fi
+
+  uv_py_dir=""
+  if [ "$HAVE_UV" = 1 ]; then
+    uv_py_dir="$(uv python dir 2>/dev/null || true)"
+  fi
+  header_glob="$uv_py_dir/cpython-$ver*/include/python$ver"
+  if [ -n "$uv_py_dir" ] && compgen -G "$header_glob/Python.h" >/dev/null; then
+    echo "[setup_venv] $venv_inc lacks Python.h; writing header shim -> $header_glob"
+    cat >"$site/_venv_python_header_shim.py" <<EOF
+"""Venv shim — expose uv-managed CPython headers on C_INCLUDE_PATH at startup.
+
+Written by skills/runtime-env/scripts/setup_venv.sh when this venv's interpreter lacks Python.h
+(no python$ver-dev) but a same-minor uv-managed build has headers. Later gcc subprocesses
+(native extension rebuilds, torch.compile/inductor helpers, …) can find <Python.h>. Loaded from
+_venv_python_header_shim.pth. Rebuilding the venv regenerates or removes it.
+"""
+import glob
+import os
+
+_UV_GLOB = "$header_glob"
+
+
+def _apply() -> None:
+    inc = next(
+        (
+            d
+            for d in sorted(glob.glob(_UV_GLOB), reverse=True)  # highest concrete version first
+            if os.path.isfile(os.path.join(d, "Python.h"))
+        ),
+        None,
+    )
+    if not inc:
+        return
+    for var in ("C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH"):
+        cur = os.environ.get(var, "")
+        if inc not in cur.split(os.pathsep):
+            os.environ[var] = inc + (os.pathsep + cur if cur else "")
+
+
+try:
+    _apply()
+except Exception:  # never let a startup shim break the interpreter
+    pass
+EOF
+    echo "import _venv_python_header_shim" >"$site/_venv_python_header_shim.pth"
+  else
+    echo "[setup_venv] WARNING: no Python.h for $ver (install python$ver-dev); native C builds in later processes may fail" >&2
+  fi
+}
+
 if [ ! -f "$LIB/pyproject.toml" ]; then
   echo "[setup_venv] missing lib/pyproject.toml under $ROOT" >&2
   exit 1
@@ -264,6 +525,8 @@ if [ "$INSTALL_LIB" != 1 ]; then
   echo "[setup_venv] features.lib off — installing dashboard/skills deps (pytest) only"
   pip_install pytest
 else
+  # Native extensions in lib/ need Python.h visible to this process (and build subprocesses).
+  ensure_python_headers
   echo "[setup_venv] pip install -e lib --no-deps"
   pip_install -e "$LIB" --no-deps
 
@@ -388,6 +651,8 @@ if [ ! -x "$VENV/bin/uv" ]; then
     echo "[setup_venv] skipping uv bootstrap inside venv (host has no uv; pip is enough)"
   fi
 fi
+
+write_python_header_shim
 
 echo "[setup_venv] verifying stack"
 "$PY" - "$ROOT" "$INSTALL_LIB" "${PACKAGE_NAME:-}" <<'PY'

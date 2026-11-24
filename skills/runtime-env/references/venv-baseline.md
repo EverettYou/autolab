@@ -40,6 +40,52 @@ does via `resolve_host_python`). For a hand-built attempt venv:
 uv venv --python /usr/bin/python3 --system-site-packages "$W/.venv"   # adjust path to the baseline python
 ```
 
+## Python headers (`Python.h`) — native builds during editable install
+
+### What fails, and why
+
+When `features.lib` is on, `setup_venv.sh` runs `pip install -e lib`. If that package’s
+build compiles a **native** extension (Cython, C, pybind, …), the C compiler needs
+`Python.h` from the **same minor** as the interpreter that will load the `.so`.
+
+Many curated images ship a usable *runtime* Python (imports work) but omit the matching
+development package (`pythonX.Y-dev` on Debian/Ubuntu). Then
+`sysconfig.get_path("include")` has **no** `Python.h`, and the editable install fails in
+the build backend. That is an **interpreter-packaging** gap: runtime present, headers
+absent. It is not caused by the host GPU, hostname, or any particular lab’s domain logic.
+Lab-specific extensions and bootstraps (which module is Cythonized, CPU-thread guards,
+…) belong in `lib/`; this skill only ensures headers exist when a native build may run.
+
+Remediation: restore headers for that interpreter, or point the build at ABI-compatible
+headers of the same `X.Y`.
+
+### How `setup_venv.sh` branches (before `pip install -e lib`)
+
+The script asks what is true on *this* machine, in order—not which lab or accelerator.
+
+1. **Interpreter already has `Python.h`** — nothing to do.
+2. **`C_INCLUDE_PATH` / `CPLUS_INCLUDE_PATH` already names a dir with `Python.h`** — reuse
+   it (operator or prior process already fixed the path).
+3. **Same-minor uv-managed CPython headers already on disk** — export that include dir
+   (no redundant download).
+4. **OS can install `pythonX.Y-dev` non-interactively** — Debian/Ubuntu `apt-get`, and the
+   process is root or has passwordless `sudo`. Prefer this: fixes packaging on the
+   interpreter we actually build against, so later `sysconfig` lookups also see headers.
+5. **`uv` is on `PATH`** — `uv python install <same-minor>` and export that include dir.
+   Used when step 4 is unavailable. The venv still runs on the baseline interpreter; only
+   the *headers* come from the uv-managed tree (same minor → ABI-compatible).
+6. **Otherwise fail** — name what was missing (`pythonX.Y-dev`, uv, or a manual
+   `C_INCLUDE_PATH`) instead of a generic “build failed”.
+
+### After install: generic header shim
+
+If the build succeeded only via exported/uv headers, the venv interpreter’s own include
+dir may still lack `Python.h`. Later processes that shell out to gcc (rebuilds,
+`torch.compile` / inductor helpers, …) need the same path. When that gap remains,
+`setup_venv.sh` writes `_venv_python_header_shim` (a `.pth` import). The shim **cannot**
+replace the pre-install step: the editable native compile runs inside the install
+process, before any later-session `.pth` can help.
+
 ## Conflicting pins (foreign reproductions)
 
 Still prefer `--system-site-packages`. Shadow only the conflicting packages into a
